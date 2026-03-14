@@ -1,7 +1,7 @@
 #include "Timer.h"
 #include <Arduino.h>
 
-Timer::Timer(double durationSeconds, TimerCallback callbackFunc, bool repeat, int repeatCount)
+Timer::Timer(float durationSeconds, TimerCallback callbackFunc, bool repeat, int repeatCount)
     : duration(durationSeconds * 1000),
       callback(callbackFunc),
       repeating(repeat),

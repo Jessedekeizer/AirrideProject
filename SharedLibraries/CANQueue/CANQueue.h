@@ -3,15 +3,15 @@
 
 #define QUEUE_SIZE 10
 
-#include <Arduino.h>
+#include "CANMessage.h"
 
-struct StringQueue {
-    String messages[QUEUE_SIZE];
+struct CANQueue {
+    CANMessage messages[QUEUE_SIZE];
     uint8_t head = 0;
     uint8_t tail = 0;
     uint8_t count = 0;
 
-    bool enqueue(const String &msg) {
+    bool enqueue(const CANMessage &msg) {
         if (count >= QUEUE_SIZE) return false;
 
         messages[head] = msg;
@@ -20,7 +20,7 @@ struct StringQueue {
         return true;
     }
 
-    bool dequeue(String &out) {
+    bool dequeue(CANMessage &out) {
         if (count == 0) return false;
 
         out = messages[tail];

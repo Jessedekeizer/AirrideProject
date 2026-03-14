@@ -1,7 +1,6 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-
 #include <functional>
 
 typedef std::function<void()> TimerCallback;
@@ -9,7 +8,7 @@ typedef std::function<void()> TimerCallback;
 class Timer
 {
 public:
-    Timer(double durationSeconds, TimerCallback callbackFunc, bool repeat = false, int repeatCount = -1);
+    Timer(float durationSeconds, TimerCallback callbackFunc, bool repeat = false, int repeatCount = -1);
 
     bool Update();
     bool IsFinished() const;

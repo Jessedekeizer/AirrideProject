@@ -1,43 +1,21 @@
 #include "MainScreenCommunication.h"
-
+#include "CANMessages.h"
+#include "CANMessageIDs.h"
 #include "Logger.h"
 
-MainScreenCommunication::MainScreenCommunication(Communication &communication, MainScreenData &mainScreenData, LogStorage &logStorage)
+MainScreenCommunication::MainScreenCommunication(Communication &communication, MainScreenData &mainScreenData,
+                                                 LogStorage &logStorage)
     : communication(communication), mainScreenData(mainScreenData), logStorage(logStorage), communicationId(-1) {
 }
 
 void MainScreenCommunication::Init() {
-    communicationId = communication.Subscribe([this](String message) { ReceiveCallback(message); });
+    communicationId = communication.Subscribe([this](CANMessage &message) { ReceiveCallback(message); });
 }
 
-void MainScreenCommunication::SendMessagePushButton(EMainScreenButtons button) {
-    String message = "";
-    switch (button) {
-        case RIDE: {
-            message = "Ride";
-            break;
-        }
-        case PARK: {
-            message = "Park";
-            break;
-        }
-        default: {
-            return;
-        }
-    }
-    communication.SendMessage(message);
-}
 
-void MainScreenCommunication::ReceiveCallback(String &message) {
-    LOG_DEBUG("Processing message:", message);
-    if (message.startsWith("BAR")) {
-        try {
-            mainScreenData.front = GetValue(message, '/', 1).toDouble();
-            mainScreenData.back = GetValue(message, '/', 2).toDouble();
-        }
-        catch (const std::exception &e) {
-            LOG_DEBUG("Error parsing BAR message");
-        }
+void MainScreenCommunication::ReceiveCallback(CANMessage &message) {
+    if (message.id == static_cast<uint16_t>(CAN_ID::CANAirRidePressure)) {
+        HandlePressureMessage(message);
     }
     if (message.startsWith("LOG")) {
         int semiColonIndex = message.indexOf(";");
@@ -45,53 +23,48 @@ void MainScreenCommunication::ReceiveCallback(String &message) {
     }
 }
 
+void MainScreenCommunication::HandlePressureMessage(CANMessage &message) {
+    CANAirRidePressure pressure = decodeCANMessage<CANAirRidePressure>(message);
+    mainScreenData.front = pressure.front;
+    mainScreenData.back = pressure.back;
+}
+
 void MainScreenCommunication::Leave() {
     communication.Unsubscribe(communicationId);
 }
 
-void MainScreenCommunication::SendToggleButtonPress(EMainScreenButtons button, bool state) {
-    String message = "";
-    switch (button) {
-        case FRONT_UP: {
-            message = "Front Up";
-            break;
-        }
-        case FRONT_DOWN: {
-            message = "Front Down";
-            break;
-        }
-        case BACK_UP: {
-            message = "Back Up";
-            break;
-        }
-        case BACK_DOWN: {
-            message = "Back Down";
-            break;
-        }
-        default: {
-            return;
-        }
-    }
+void MainScreenCommunication::SendMessageButtonPress(EMainScreenButtons button, bool state) {
+    CANAirRideControl canAirRideControl{false, false, false, false, false, false};
     if (state) {
-        message += " On";
-    }
-    else {
-        message += " Off";
-    }
-    communication.SendMessage(message);
-}
-
-String MainScreenCommunication::GetValue(String data, char separator, int index) {
-    int found = 0;
-    int strIndex[] = {0, -1};
-    int maxIndex = data.length() - 1;
-
-    for (int i = 0; i <= maxIndex && found <= index; i++) {
-        if (data.charAt(i) == separator || i == maxIndex) {
-            found++;
-            strIndex[0] = strIndex[1] + 1;
-            strIndex[1] = (i == maxIndex) ? i + 1 : i;
+        switch (button) {
+            case FRONT_UP: {
+                canAirRideControl.frontUp = true;
+                break;
+            }
+            case FRONT_DOWN: {
+                canAirRideControl.frontDown = true;
+                break;
+            }
+            case BACK_UP: {
+                canAirRideControl.backUp = true;
+                break;
+            }
+            case BACK_DOWN: {
+                canAirRideControl.backDown = true;
+                break;
+            }
+            case PARK: {
+                canAirRideControl.park = true;
+                break;
+            }
+            case RIDE: {
+                canAirRideControl.ride = true;
+                break;
+            }
+            default: {
+                return;
+            }
         }
     }
-    return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+    communication.SendCANMessage(static_cast<uint16_t>(CAN_ID::CANAirRideControl), canAirRideControl);
 }

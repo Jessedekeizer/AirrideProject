@@ -9,7 +9,8 @@
 
 #include "SdCardService.h"
 
-class DisplayService {
+class DisplayService
+{
 public:
     explicit DisplayService(SdCardService &sdCardService);
 
@@ -21,7 +22,7 @@ public:
     bool DrawImage(const char *path, int x = 0, int y = 0);
     bool DrawRectangle(int x = 0, int y = 0, int width = 0, int height = 0, uint32_t color = TFT_BLACK);
 
-    void DrawPressure(double front, double back);
+    void DrawPressure(float front, float back);
     void DrawBoolIcon(bool value, int x, int y);
 
     void PngDraw(PNGDRAW *pDraw);

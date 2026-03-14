@@ -1,24 +1,23 @@
 #ifndef SETTINGSDEVICE_H
 #define SETTINGSDEVICE_H
 
-struct SettingsDevice
-{
-    double frontMax = 0.0;
-    double backMax = 0.0;
-    double rideFront = 0.0;
-    double rideBack = 0.0;
-    double frontUpX = 0.0;
-    double frontDownX = 0.0;
-    double backUpX = 0.0;
-    double backDownX = 0.0;
+struct SettingsDevice {
+    float frontMax = 0.0;
+    float backMax = 0.0;
+    float rideFront = 0.0;
+    float rideBack = 0.0;
+    float frontUpX = 0.0;
+    float frontDownX = 0.0;
+    float backUpX = 0.0;
+    float backDownX = 0.0;
     bool autoRide = false;
-    double autoRideSec = 0.0;
+    float autoRideSec = 0.0;
     bool autoPark = false;
-    double autoParkSec = 0.0;
+    float autoParkSec = 0.0;
     bool logging = false;
     bool machineLearning = false;
     bool bluetooth = false;
-    double parkDuration = 0.0;
+    float parkDuration = 0.0;
     int xmin = 0;
     int xmax = 320;
     int ymin = 0;
@@ -26,8 +25,7 @@ struct SettingsDevice
     bool calibrationSet = false;
 
     // Helper method to ensure values don't go below 0
-    void adjustValue(double &value, double delta)
-    {
+    void adjustValue(float &value, float delta) {
         value += delta;
         if (value < 0.0)
             value = 0.0;

@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <XPT2046_Bitbang.h>
 
-#include "SerialOverPins.h"
+#include "CANOverSerial.h"
 #include "Communication.h"
 #include "ScreenManager.h"
 
@@ -50,9 +50,9 @@ ScreenManager screenManager(displayService);
 
 SettingsDevice settings;
 
-StringQueue stringQueue;
+CANQueue stringQueue;
 
-SerialOverPins serialOverPins(Serial2, stringQueue);
+CANOverSerial serialOverPins(Serial2, stringQueue);
 Communication communication(serialOverPins, stringQueue);
 
 MainScreenData mainScreenData;

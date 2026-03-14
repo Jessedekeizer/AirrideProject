@@ -1,9 +1,8 @@
 #include "Communication.h"
-
 #include "Logger.h"
 
-Communication::Communication(ISerial &serial, StringQueue &stringQueue) : nextId(1), serial(serial),
-                                                                          stringQueue(stringQueue) {
+Communication::Communication(ICANBus &canBus, CANQueue &stringQueue) : nextId(1), canBus(canBus),
+                                                                       canQueue(stringQueue) {
 }
 
 Communication::~Communication() {
@@ -30,25 +29,34 @@ void Communication::Unsubscribe(int id) {
     }
 }
 
-void Communication::Notify(String &message) {
+void Communication::Notify(CANMessage message) {
     for (const auto &subscriber: subscribers) {
         subscriber.callback(message);
     }
 }
 
 void Communication::CheckForMessage() {
-    serial.Receive();
-    String message;
+    if (canBus.ReceiveAvailable()) {
+        canBus.Receive();
+    }
+    CANMessage message;
 
-    if (stringQueue.dequeue(message)) {
-        if (message.length() > 0) {
-            LOG_DEBUG(message);
-            Notify(message);
-        }
+    if (canQueue.dequeue(message)) {
+        Notify(message);
     }
 }
 
-void Communication::SendMessage(String &message) {
-    LOG_DEBUG(message);
-    serial.SendMessage(message);
+template<typename T>
+void Communication::SendCANMessage(uint16_t canID, const T &messageStruct) {
+    CANMessage msg;
+    msg.id = canID;
+
+    // Determine number of bytes to send (struct size or 8 max)
+    uint8_t len = sizeof(T);
+    if (len > 8) len = 8; // standard CAN max payload
+
+    msg.dlc = len;
+    memcpy(msg.data, &messageStruct, len);
+
+    canBus.SendMessage(msg);
 }

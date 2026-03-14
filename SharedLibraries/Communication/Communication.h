@@ -1,22 +1,28 @@
 #ifndef COMMUNICATION_H
 #define COMMUNICATION_H
 #include <functional>
-#include <WString.h>
 #include <vector>
-#include "ISerial.h"
-#include "StringQueue.h"
+#include "ICANBus.h"
+#include "CANQueue.h"
 
-using Callback = std::function<void(String &)>;
+using Callback = std::function<void(CANMessage &)>;
 
 class Communication {
 public:
-    Communication(ISerial &serial, StringQueue &stringQueue);
+    Communication(ICANBus &canBus, CANQueue &stringQueue);
+
     ~Communication();
+
     int Subscribe(Callback callback);
+
     void Unsubscribe(int id);
-    void Notify(String &message);
+
+    void Notify(CANMessage message);
+
     void CheckForMessage();
-    void SendMessage(String &message);
+
+    template<typename T>
+    void SendCANMessage(uint16_t canID, const T &messageStruct);
 
 private:
     struct Subscription {
@@ -26,8 +32,8 @@ private:
 
     std::vector<Subscription> subscribers;
     unsigned int nextId;
-    ISerial &serial;
-    StringQueue &stringQueue;
+    ICANBus &canBus;
+    CANQueue &canQueue;
 };
 
 #endif //COMMUNICATIONDISTRIBUTOR_H

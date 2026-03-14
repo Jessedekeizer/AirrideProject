@@ -8,14 +8,18 @@
 class MainScreenCommunication {
 public:
     MainScreenCommunication(Communication &communication, MainScreenData &mainScreenData, LogStorage &logStorage);
+
     void Init();
-    void SendMessagePushButton(EMainScreenButtons button);
+
     void Leave();
-    void SendToggleButtonPress(EMainScreenButtons button, bool state);
+
+    void SendMessageButtonPress(EMainScreenButtons button, bool state);
 
 private:
-    void ReceiveCallback(String &message);
-    String GetValue(String data, char separator, int index);
+    void ReceiveCallback(CANMessage &message);
+
+    void HandlePressureMessage(CANMessage &message);
+
     Communication &communication;
     MainScreenData &mainScreenData;
     LogStorage &logStorage;

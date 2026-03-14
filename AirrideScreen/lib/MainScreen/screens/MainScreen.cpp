@@ -76,7 +76,7 @@ void MainScreen::AutoStartRide() {
     }
     if (frontPressure < 1.5 || backPressure < 1.5) {
         LOG_DEBUG("MainScreen::Timer - Sending ride command");
-        mainScreenCommunication.SendMessagePushButton(RIDE);
+        mainScreenCommunication.SendMessageButtonPress(RIDE, true);
     }
     else {
         LOG_DEBUG("MainScreen::Timer - Not sending ride command");
@@ -91,11 +91,11 @@ void MainScreen::GoToSettings1() {
 
 void MainScreen::HandlePushButton(Button &sender) {
     abortAutoRide = true;
-    mainScreenCommunication.SendMessagePushButton(static_cast<EMainScreenButtons>(sender.GetName()));
+    mainScreenCommunication.SendMessageButtonPress(static_cast<EMainScreenButtons>(sender.GetName()), true);
 }
 
 void MainScreen::HandleToggleButton(Button &sender) {
     abortAutoRide = true;
     auto &toggle = static_cast<ToggleButton &>(sender);
-    mainScreenCommunication.SendToggleButtonPress(static_cast<EMainScreenButtons>(toggle.GetName()), toggle.GetState());
+    mainScreenCommunication.SendMessageButtonPress(static_cast<EMainScreenButtons>(toggle.GetName()), toggle.GetState());
 }
