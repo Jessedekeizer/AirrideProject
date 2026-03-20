@@ -42,6 +42,7 @@ void Communication::CheckForMessage() {
     CANMessage message;
 
     if (canQueue.dequeue(message)) {
+        //TODO handle large messaging here
         Notify(message);
     }
 }
