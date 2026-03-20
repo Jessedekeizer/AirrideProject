@@ -5,10 +5,10 @@
 Settings2Screen::Settings2Screen(ScreenManager &screenManager, SettingsScreenCommunication &settingsScreenCommunication, SettingsDevice &settingsDevice, SettingsStorage &settingsStorage, DisplayService &displayService)
     : SettingsScreenBase(screenManager, settingsScreenCommunication, settingsDevice, settingsStorage, displayService, EScreen::SETTINGS2, "/Settings2.png") {
     buttons.push_back(new PushButton(SETTINGSBTN_MAIN_X, SETTINGSBTN_MAIN_Y, SETTINGSBTN_MAIN_W, SETTINGSBTN_MAIN_H, MAIN_SCREEN,
-                                     [this](Button &button) { SaveSettings(); }));
+                                     [this](Button &button) { GoToMainScreen(); }));
 
     buttons.push_back(new PushButton(SETTINGSBTN_SAVE_X, SETTINGSBTN_SAVE_Y, SETTINGSBTN_SAVE_W, SETTINGSBTN_SAVE_H, SAVE,
-                                     [this](Button &button) { GoToMainScreen(); }));
+                                     [this](Button &button) { SaveSettings(); }));
 
     buttons.push_back(new PushButton(SETTINGSBTN_ADJ_COL1_X, SETTINGSBTN_ADJ_ROW1_Y, SETTINGSBTN_ADJ_W, SETTINGSBTN_ADJ_H, FRONT_UP_FACTOR_SUBTRACT,
                                      [this](Button &button) { HandleFrontUpFactorSub(); }));

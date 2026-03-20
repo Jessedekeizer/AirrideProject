@@ -110,8 +110,8 @@ void CalibrationScreen::HandleBottomRightCalibration() {
 
 void CalibrationScreen::StartBottomRightCalibration() {
     ClearScreen();
-    displayService.DrawImage("Press the bottom right corner", CAL_TEXT_X, CAL_TEXT_Y);
-    displayService.DrawText("/Cross.png", 300, 220);
+    displayService.DrawText("Press the bottom right corner", CAL_TEXT_X, CAL_TEXT_Y);
+    displayService.DrawImage("/Cross.png", 300, 220);
     ChangeCalibrationState(ECalibrationState::TOUCH_BOTTOM_RIGHT);
 }
 

@@ -14,9 +14,9 @@ public:
     ~Communication();
     int Subscribe(Callback callback);
     void Unsubscribe(int id);
-    void Notify(String message);
+    void Notify(String &message);
     void CheckForMessage();
-    void SendMessage(String message);
+    void SendMessage(String &message);
 
 private:
     struct Subscription {

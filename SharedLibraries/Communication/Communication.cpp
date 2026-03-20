@@ -30,8 +30,8 @@ void Communication::Unsubscribe(int id) {
     }
 }
 
-void Communication::Notify(String message) {
-    for (const auto& subscriber: subscribers) {
+void Communication::Notify(String &message) {
+    for (const auto &subscriber: subscribers) {
         subscriber.callback(message);
     }
 }
@@ -48,7 +48,7 @@ void Communication::CheckForMessage() {
     }
 }
 
-void Communication::SendMessage(String message) {
+void Communication::SendMessage(String &message) {
     LOG_DEBUG(message);
     serial.SendMessage(message);
 }

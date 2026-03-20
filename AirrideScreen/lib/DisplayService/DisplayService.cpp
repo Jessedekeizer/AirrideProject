@@ -154,7 +154,11 @@ bool DisplayService::DrawImage(const char *path, int x, int y) {
 }
 
 bool DisplayService::DrawRectangle(int x, int y, int width, int height, uint32_t color) {
+    if (!ready)
+        return false;
+
     tft.fillRect(x, y, width, height, color);
+    return true;
 }
 
 void DisplayService::PngDraw(PNGDRAW *pDraw) {

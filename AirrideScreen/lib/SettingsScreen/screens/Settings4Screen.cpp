@@ -19,7 +19,7 @@ Settings4Screen::Settings4Screen(ScreenManager &screenManager, SettingsScreenCom
                                      [this](Button &button) { HandleParkDurationSub(); }));
 
     buttons.push_back(new PushButton(SETTINGSBTN_ADJ_COL2_X, SETTINGSBTN_ADJ_ROW1_Y, SETTINGSBTN_ADJ_W,
-                                     SETTINGSBTN_ADJ_H, PARK_DURATION_SECONDS_SUBTRACT,
+                                     SETTINGSBTN_ADJ_H, PARK_DURATION_SECONDS_ADD,
                                      [this](Button &button) { HandleParkDurationAdd(); }));
 
     buttons.push_back(new PushButton(SETTINGSBTN_ADJ_COL1_X, SETTINGSBTN_ADJ_ROW2_Y, SETTINGSBTN_ADJ_W,

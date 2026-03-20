@@ -21,7 +21,7 @@ Settings1Screen::Settings1Screen(ScreenManager &screenManager, SettingsScreenCom
 
     buttons.push_back(new PushButton(SETTINGSBTN_ADJ_COL2_X, SETTINGSBTN_ADJ_ROW2_Y, SETTINGSBTN_ADJ_W, SETTINGSBTN_ADJ_H, RIDE_BACK_ADD,
                                      [this](Button &button) { HandleRideBackAdd(); }));
-    buttons.push_back(new PushButton(SETTINGSBTN_ADJ_COL1_X, SETTINGSBTN_ADJ_ROW3_Y, SETTINGSBTN_ADJ_W, SETTINGSBTN_ADJ_H, MAX_FRONT_ADD,
+    buttons.push_back(new PushButton(SETTINGSBTN_ADJ_COL1_X, SETTINGSBTN_ADJ_ROW3_Y, SETTINGSBTN_ADJ_W, SETTINGSBTN_ADJ_H, MAX_FRONT_SUBTRACT,
                                      [this](Button &button) { HandleMaxFrontSub(); }));
 
     buttons.push_back(new PushButton(SETTINGSBTN_ADJ_COL2_X, SETTINGSBTN_ADJ_ROW3_Y, SETTINGSBTN_ADJ_W, SETTINGSBTN_ADJ_H, MAX_FRONT_ADD,

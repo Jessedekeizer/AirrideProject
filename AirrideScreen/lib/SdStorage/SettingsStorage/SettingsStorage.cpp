@@ -12,7 +12,6 @@ void SettingsStorage::WriteSettings(SettingsDevice &settings) {
 
     if (!fs.remove("/settings.bin")) {
         LOG_DEBUG("Cannot remove file");
-        return;
     }
 
     File file = fs.open("/settings.bin", FILE_WRITE);
