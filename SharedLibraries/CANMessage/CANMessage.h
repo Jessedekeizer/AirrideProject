@@ -4,20 +4,18 @@
 
 #pragma pack(push,1)
 struct CANMessage {
-    uint16_t id;
+    uint32_t id;
     uint8_t dlc;
     uint8_t data[8];
 };
 #pragma pack(pop)
 
 template<typename T>
-T decodeCANMessage(const CANMessage &canMsg) {
-    T messageStruct;
-    uint8_t copyLength = sizeof(T) < canMsg.dlc ? sizeof(T) : canMsg.dlc;
-
-    memset(&messageStruct, 0, sizeof(T));
-    memcpy(&messageStruct, canMsg.data, copyLength);
-
+T decodeCANMessage(uint8_t *data, std::size_t length) {
+    T messageStruct{};
+    if (length == sizeof(T)) {
+        memcpy(&messageStruct, data, sizeof(T));
+    }
     return messageStruct;
 }
 
