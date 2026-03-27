@@ -46,6 +46,7 @@ void Communication::CheckForMessage() {
     if (canQueue.dequeue(message)) {
         DecodeCanMessage(message);
     }
+    //TODO add message timeOutFor large messages to be removed when nothing is received
 }
 
 void Communication::DecodeCanMessage(const CanMessage &message) {
@@ -64,6 +65,7 @@ void Communication::DecodeCanMessage(const CanMessage &message) {
         LargeCanMessage *largeMessage = largeCanMessageHandler.HandleLargeCanMessage(message);
         if (largeMessage) {
             Notify(canID, largeMessage->data.data(), largeMessage->length);
+            largeCanMessageHandler.RemoveLargeMessage(canID.src, canID.type);
         }
     }
 }

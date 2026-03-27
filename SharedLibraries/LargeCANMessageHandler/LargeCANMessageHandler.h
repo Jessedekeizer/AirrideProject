@@ -15,6 +15,7 @@ public:
     LargeCanMessage *HandleLargeCanMessage(const CanMessage &message);
 
     void SendLargeMessage(CanId &canId, const uint8_t *data, uint8_t length);
+    void RemoveLargeMessage(CanNode sender, CanMsgType msgType);
 
 private:
     LargeCanMessage *GetLargeCanMessage(CanNode sender, CanMsgType msgType);

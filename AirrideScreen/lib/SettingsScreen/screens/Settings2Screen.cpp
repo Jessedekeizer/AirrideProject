@@ -1,6 +1,7 @@
 #include "Settings2Screen.h"
 
 #include "ESettingsScreenButtons.h"
+#include "Logger.h"
 
 Settings2Screen::Settings2Screen(ScreenManager &screenManager, SettingsScreenCommunication &settingsScreenCommunication, SettingsDevice &settingsDevice, SettingsStorage &settingsStorage, DisplayService &displayService)
     : SettingsScreenBase(screenManager, settingsScreenCommunication, settingsDevice, settingsStorage, displayService, EScreen::SETTINGS2, "/Settings2.png") {
@@ -41,10 +42,10 @@ Settings2Screen::Settings2Screen(ScreenManager &screenManager, SettingsScreenCom
 }
 
 void Settings2Screen::OnSetup() {
-    displayService.DrawText(String(settings.backUpX, 1), SETTINGS_TEXT_X, SETTINGS_TEXT_ROW1_Y);
-    displayService.DrawText(String(settings.backDownX, 1), SETTINGS_TEXT_X, SETTINGS_TEXT_ROW2_Y);
-    displayService.DrawText(String(settings.frontUpX, 1), SETTINGS_TEXT_X, SETTINGS_TEXT_ROW3_Y);
-    displayService.DrawText(String(settings.frontDownX, 1), SETTINGS_TEXT_X, SETTINGS_TEXT_ROW4_Y);
+    displayService.DrawText(String(settings.frontUpX, 1), SETTINGS_TEXT_X, SETTINGS_TEXT_ROW1_Y);
+    displayService.DrawText(String(settings.frontDownX, 1), SETTINGS_TEXT_X, SETTINGS_TEXT_ROW2_Y);
+    displayService.DrawText(String(settings.backUpX, 1), SETTINGS_TEXT_X, SETTINGS_TEXT_ROW3_Y);
+    displayService.DrawText(String(settings.backDownX, 1), SETTINGS_TEXT_X, SETTINGS_TEXT_ROW4_Y);
 }
 
 void Settings2Screen::HandleFrontUpFactorAdd() {

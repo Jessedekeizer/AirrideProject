@@ -67,6 +67,14 @@ void LargeCanMessageHandler::SendLargeMessage(CanId &canId, const uint8_t *data,
     }
 }
 
+void LargeCanMessageHandler::RemoveLargeMessage(CanNode sender, CanMsgType msgType) {
+    auto it = std::find_if(largeCANMessages.begin(), largeCANMessages.end(),
+                           [sender, msgType](const LargeCanMessage &largeCanMessage) {
+                               return largeCanMessage.id.type == msgType && largeCanMessage.id.src == sender;
+                           });
+    largeCANMessages.erase(it);
+}
+
 LargeCanMessage *LargeCanMessageHandler::GetLargeCanMessage(CanNode sender, CanMsgType msgType) {
     auto it = std::find_if(largeCANMessages.begin(), largeCANMessages.end(),
                            [sender, msgType](const LargeCanMessage &largeCanMessage) {

@@ -66,7 +66,7 @@ void DisplayService::DrawText(const String &text, int x, int y, int font, uint32
     tft.drawString(text, x, y, font);
 }
 
-void DisplayService::DrawPressure(double front, double back) {
+void DisplayService::DrawPressure(float front, float back) {
     if (!ready) {
         return;
     }
