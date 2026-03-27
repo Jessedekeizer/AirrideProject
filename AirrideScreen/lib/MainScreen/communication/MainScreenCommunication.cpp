@@ -9,22 +9,23 @@ MainScreenCommunication::MainScreenCommunication(Communication &communication, M
 }
 
 void MainScreenCommunication::Init() {
-    communicationId = communication.Subscribe([this](CANMessage &message) { ReceiveCallback(message); });
+    communicationId = communication.Subscribe([this](const CanId &canId, const uint8_t *data, uint8_t length) { ReceiveCallback(canId, data, length); });
 }
 
+void MainScreenCommunication::ReceiveCallback(const CanId &canId, const uint8_t *data, uint8_t length) {
+    if (canId.type == CanMsgType::CAN_AIRRIDE_PRESSURE) {
+        HandlePressureMessage(data, length);
+    }
+    //TODO add log handling
 
-void MainScreenCommunication::ReceiveCallback(CANMessage &message) {
-    if (message.id == static_cast<uint16_t>(CAN_ID::CANAirRidePressure)) {
-        HandlePressureMessage(message);
-    }
-    if (message.startsWith("LOG")) {
-        int semiColonIndex = message.indexOf(";");
-        logStorage.WriteLog(message.substring(0, semiColonIndex + 1));
-    }
+    // if (message.startsWith("LOG")) {
+    //     int semiColonIndex = message.indexOf(";");
+    //     logStorage.WriteLog(message.substring(0, semiColonIndex + 1));
+    // }
 }
 
-void MainScreenCommunication::HandlePressureMessage(CANMessage &message) {
-    CANAirRidePressure pressure = decodeCANMessage<CANAirRidePressure>(message);
+void MainScreenCommunication::HandlePressureMessage(const uint8_t *data, uint8_t length) {
+    CANAirRidePressure pressure = decodeCANMessage<CANAirRidePressure>(data, length);
     mainScreenData.front = pressure.front;
     mainScreenData.back = pressure.back;
 }
@@ -66,5 +67,5 @@ void MainScreenCommunication::SendMessageButtonPress(EMainScreenButtons button, 
             }
         }
     }
-    communication.SendCANMessage(static_cast<uint16_t>(CAN_ID::CANAirRideControl), canAirRideControl);
+    communication.SendCANMessage(CanNode::NODE_R4, CanMsgType::CAN_AIRRIDE_CONTROL, canAirRideControl);
 }

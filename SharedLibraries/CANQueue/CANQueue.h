@@ -3,15 +3,15 @@
 
 #define QUEUE_SIZE 10
 
-#include "CANMessage.h"
+#include "CanMessage.h"
 
 struct CANQueue {
-    CANMessage messages[QUEUE_SIZE];
+    CanMessage messages[QUEUE_SIZE];
     uint8_t head = 0;
     uint8_t tail = 0;
     uint8_t count = 0;
 
-    bool enqueue(const CANMessage &msg) {
+    bool enqueue(const CanMessage &msg) {
         if (count >= QUEUE_SIZE) return false;
 
         messages[head] = msg;
@@ -20,7 +20,7 @@ struct CANQueue {
         return true;
     }
 
-    bool dequeue(CANMessage &out) {
+    bool dequeue(CanMessage &out) {
         if (count == 0) return false;
 
         out = messages[tail];

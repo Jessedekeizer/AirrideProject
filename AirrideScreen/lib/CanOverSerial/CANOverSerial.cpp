@@ -1,11 +1,10 @@
 #include "CANOverSerial.h"
 #include <HardwareSerial.h>
-
 #include "Logger.h"
 
-void CANOverSerial::SendMessage(CANMessage &message) {
+void CANOverSerial::SendMessage(CanMessage &message) {
     serial.write(START_BYTE);
-    serial.write((uint8_t *) &message, sizeof(message));
+    serial.write((uint8_t *)&message, sizeof(message));
     serial.write('\n');
 }
 
@@ -15,10 +14,10 @@ bool CANOverSerial::ReceiveAvailable() {
 
 void CANOverSerial::Receive() {
     while (serial.available()) {
-        if (Serial2.read() == START_BYTE) {
-            Serial2.readBytes((char *) &message, sizeof(message));
+        if (serial.read() == START_BYTE) {
+            serial.readBytes((char *)&message, sizeof(message));
 
-            char endByte = Serial2.read();
+            char endByte = serial.read();
 
             if (endByte == '\n') {
                 if (!canQueue.enqueue(message)) {

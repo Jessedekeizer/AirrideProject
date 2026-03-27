@@ -9,7 +9,7 @@ public:
     CANOverSerial(HardwareSerial &serial, CANQueue &canQueue) : serial(serial), canQueue(canQueue), message({0}) {
     };
 
-    void SendMessage(CANMessage &message) override;
+    void SendMessage(CanMessage &message) override;
 
     bool ReceiveAvailable() override;
 
@@ -18,7 +18,7 @@ public:
 private:
     HardwareSerial &serial;
     CANQueue &canQueue;
-    CANMessage message;
+    CanMessage message;
 };
 
 #endif //SERIALOVERPINS_H

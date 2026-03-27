@@ -52,8 +52,9 @@ SettingsDevice settings;
 
 CANQueue stringQueue;
 
-CANOverSerial serialOverPins(Serial2, stringQueue);
-Communication communication(serialOverPins, stringQueue);
+CANOverSerial serialOverPins(Serial, stringQueue);
+LargeCanMessageHandler largeCanMessageHandler(serialOverPins);
+Communication communication(serialOverPins, stringQueue, largeCanMessageHandler, CanNode::NODE_ESP32);
 
 MainScreenData mainScreenData;
 MainScreenCommunication mainScreenCommunication(communication, mainScreenData, logStorage);

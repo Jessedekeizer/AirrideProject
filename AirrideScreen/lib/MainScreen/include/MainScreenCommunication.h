@@ -16,9 +16,9 @@ public:
     void SendMessageButtonPress(EMainScreenButtons button, bool state);
 
 private:
-    void ReceiveCallback(CANMessage &message);
+    void ReceiveCallback(const CanId &canId, const uint8_t *data, uint8_t length);
 
-    void HandlePressureMessage(CANMessage &message);
+    void HandlePressureMessage(const uint8_t *data, uint8_t length);
 
     Communication &communication;
     MainScreenData &mainScreenData;

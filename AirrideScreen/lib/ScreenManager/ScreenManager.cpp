@@ -41,5 +41,6 @@ void ScreenManager::TransitionToScreen(IScreen *newScreen) {
     }
     activeScreen = newScreen;
     displayService.DrawImage(activeScreen->GetPath());
+    LOG_DEBUG("Image drawn");
     activeScreen->OnSetup();
 }

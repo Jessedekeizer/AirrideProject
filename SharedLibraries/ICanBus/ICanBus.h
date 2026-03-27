@@ -1,13 +1,13 @@
 #ifndef ICANBUS_H
 #define ICANBUS_H
 
-#include "CANMessage.h"
+#include "CanMessage.h"
 
 class ICANBus {
 public:
     virtual ~ICANBus() = default;
 
-    virtual void SendMessage(CANMessage &message) = 0;
+    virtual void SendMessage(CanMessage &message) = 0;
 
     virtual bool ReceiveAvailable() = 0;
 
