@@ -1,9 +1,16 @@
 #include "LogHandlerCommunication.h"
+#include "CANMessages.h"
 
 LogHandlerCommunication::LogHandlerCommunication(Communication &communication) : communication(communication) {
 }
 
-void LogHandlerCommunication::SendLog(String &message) {
-    //communication.SendMessage(message);
+void LogHandlerCommunication::SendLog(bool front, float startPressure, float endPressure, float startTankPressure,
+                                      unsigned long time, bool direction, bool togetherMove) {
+    CANLogAirRide canLogAirRide{
+        front, startPressure, endPressure, startTankPressure, static_cast<uint16_t>(time), direction, togetherMove
+    };
+    communication.SendCANMessage(CanNode::NODE_ESP32, CanMsgType::CAN_AIRRIDE_LOG, canLogAirRide);
 }
+
+
 

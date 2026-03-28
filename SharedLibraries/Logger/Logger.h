@@ -30,9 +30,6 @@ void logPrintValue(const T &first, const Args &... rest) {
     logPrintValue(rest...);
 }
 
-
-// ---------- log core ----------
-
 template<typename... Args>
 void logMessage(
     const char *level,
@@ -57,26 +54,31 @@ void logMessage(
 
 // ---------- macros ----------
 
+#ifndef __FILENAME__
+#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : \
+(strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__))
+#endif
+
 #if LOG_LEVEL >= LOG_LEVEL_ERROR
-#define LOG_ERROR(...) logMessage("ERROR", __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_ERROR(...) logMessage("ERROR", __FILENAME__, __LINE__, __VA_ARGS__)
 #else
 #define LOG_ERROR(...)
 #endif
 
 #if LOG_LEVEL >= LOG_LEVEL_WARN
-#define LOG_WARN(...) logMessage("WARN ", __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_WARN(...) logMessage("WARN ", __FILENAME__, __LINE__, __VA_ARGS__)
 #else
 #define LOG_WARN(...)
 #endif
 
 #if LOG_LEVEL >= LOG_LEVEL_INFO
-#define LOG_INFO(...) logMessage("INFO ", __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_INFO(...) logMessage("INFO ", __FILENAME__, __LINE__, __VA_ARGS__)
 #else
 #define LOG_INFO(...)
 #endif
 
 #if LOG_LEVEL >= LOG_LEVEL_DEBUG
-#define LOG_DEBUG(...) logMessage("DEBUG", __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_DEBUG(...) logMessage("DEBUG", __FILENAME__, __LINE__, __VA_ARGS__)
 #else
 #define LOG_DEBUG(...)
 #endif

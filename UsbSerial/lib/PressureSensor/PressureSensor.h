@@ -6,8 +6,8 @@
 
 class PressureSensor {
 public:
-    PressureSensor(EPressureSensor pressureSensor, int pin, int filterSize, double analogMin, double analogMax,
-                   double barMax)
+    PressureSensor(EPressureSensor pressureSensor, int pin, int filterSize, float analogMin, float analogMax,
+                   float barMax)
         : pressureSensor(pressureSensor), pin(pin), filterSize(filterSize), analogMin(analogMin), analogMax(analogMax),
           barMax(barMax) {
     }
@@ -16,9 +16,9 @@ public:
 
     EPressureSensor GetPressureSensor() { return pressureSensor; }
 
-    double GetAveragePressure() { return bufferAverage; }
+    float GetAveragePressure() { return bufferAverage; }
 
-    double GetRawPressure();
+    float GetRawPressure();
 
     void UpdateBuffer();
 
@@ -29,17 +29,18 @@ private:
     const EPressureSensor pressureSensor;
     const int filterSize;
 
-    std::vector<double> buffer;
+    std::vector<float> buffer;
     int bufferIndex = 0;
-    double bufferTotal = 0;
-    double bufferAverage = 0;
-    double analogMin;
-    double analogMax;
-    double barMax;
+    float bufferTotal = 0;
+    float bufferAverage = 0;
+    float analogMin;
+    float analogMax;
+    float barMax;
 
-    double ReadPressure();
+    float ReadPressure();
+
+    float FloatMap(float x, float in_min, float in_max, float out_min, float out_max);
 };
 
-double DMap(double x, double in_min, double in_max, double out_min, double out_max);
 
 #endif //PRESSURESENSOR_H

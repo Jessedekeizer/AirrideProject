@@ -63,6 +63,7 @@ void LargeCanMessageHandler::SendLargeMessage(CanId &canId, const uint8_t *data,
         memcpy(canMessage.data, data + i * 8, dlc);
 
         canBus.SendMessage(canMessage);
+        delay(5);
     }
 }
 
@@ -71,7 +72,8 @@ void LargeCanMessageHandler::RemoveLargeMessage(CanNode sender, CanMsgType msgTy
                            [sender, msgType](const LargeCanMessage &largeCanMessage) {
                                return largeCanMessage.id.type == msgType && largeCanMessage.id.src == sender;
                            });
-    LOG_DEBUG("Removing large message src:", static_cast<uint8_t>(it->id.src),"type", static_cast<uint16_t>(it->id.type));
+    LOG_DEBUG("Removing large message src:", static_cast<uint8_t>(it->id.src), "type",
+              static_cast<uint16_t>(it->id.type));
     largeCANMessages.erase(it);
 }
 

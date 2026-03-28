@@ -39,26 +39,18 @@ void LogHandler::EndBackLog() {
 
 void LogHandler::SendLog() {
     if (sendLogFront && millis() - frontLogPreviousTime > timeInterval) {
-        double endPressure = frontPressureSensor.GetRawPressure();
+        float endPressure = frontPressureSensor.GetRawPressure();
         bool directionFront = startPressureFront - endPressure < 0;
-        String message = CreateLogMessage("LOGF/", startPressureFront, endPressure, startTankPressureFront,
-                                          (millis() - startTimeFront - timeInterval), directionFront,
-                                          togetherMoveFront);
-        communication.SendLog(message);
+        communication.SendLog(true, startPressureFront, endPressure, startTankPressureFront,
+                              (millis() - startTimeFront - timeInterval), directionFront,
+                              togetherMoveFront);
         sendLogFront = false;
     }
     if (sendLogBack && millis() - backLogPreviousTime > timeInterval) {
-        double endPressure = backPressureSensor.GetRawPressure();
+        float endPressure = backPressureSensor.GetRawPressure();
         bool directionBack = startPressureFront - endPressure < 0;
-        String message = CreateLogMessage("LOGB/", startPressureBack, endPressure, startTankPressureBack,
-                                          (millis() - startTimeBack - timeInterval), directionBack, togetherMoveBack);
-        communication.SendLog(message);
+        communication.SendLog(false, startPressureBack, endPressure, startTankPressureBack,
+                              (millis() - startTimeBack - timeInterval), directionBack, togetherMoveBack);
         sendLogBack = false;
     }
-}
-
-String LogHandler::CreateLogMessage(String message, double startPressure, double endPressure, double startTankPressure,
-                                    long time, bool direction, bool togetherMove) {
-    return message + startPressure + "/" + endPressure + "/" + startTankPressure + "/" + time + "/" + direction + "/" +
-           togetherMove + ";";
 }

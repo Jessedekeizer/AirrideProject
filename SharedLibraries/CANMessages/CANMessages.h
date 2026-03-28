@@ -36,6 +36,18 @@ struct CANSettingsAirRide {
 };
 #pragma pack(pop)
 
+#pragma pack(push,1)
+struct CANLogAirRide {
+    bool front;
+    float startPressure;
+    float endPressure;
+    float startTankPressure;
+    uint16_t time;
+    bool direction;
+    bool togetherMove;
+};
+#pragma pack(pop)
+
 template<typename T>
 bool decodeCANMessage(const uint8_t *data, std::size_t length, T &messageStruct) {
     if (length == sizeof(T)) {

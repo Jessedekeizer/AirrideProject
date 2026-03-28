@@ -23,14 +23,14 @@ PressureSensor::~PressureSensor() {
     buffer.clear();
 }
 
-double PressureSensor::GetRawPressure() {
+float PressureSensor::GetRawPressure() {
     return ReadPressure();
 }
 
-double PressureSensor::ReadPressure() {
-    return DMap(analogRead(pin), analogMin, analogMax, 0, barMax);
+float PressureSensor::ReadPressure() {
+    return FloatMap(analogRead(pin), analogMin, analogMax, 0, barMax);
 }
 
-double DMap(double x, double in_min, double in_max, double out_min, double out_max) {
+float PressureSensor::FloatMap(float x, float in_min, float in_max, float out_min, float out_max) {
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }

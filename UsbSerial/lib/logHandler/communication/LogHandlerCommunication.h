@@ -7,7 +7,8 @@ class LogHandlerCommunication {
 public:
     LogHandlerCommunication(Communication &communication);
 
-    void SendLog(String &message);
+    void SendLog(bool front, float startPressure, float endPressure, float startTankPressure,
+                 unsigned long time, bool direction, bool togetherMove);
 
 private:
     Communication &communication;

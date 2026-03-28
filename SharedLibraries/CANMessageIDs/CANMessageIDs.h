@@ -17,7 +17,10 @@ enum class CanMsgType : uint16_t {
     CAN_AIRRIDE_PRESSURE = 0x101,
 
     //Settings for airride start from 0x6
-    CAN_AIRRIDE_SETTINGS = 0x601
+    CAN_AIRRIDE_SETTINGS = 0x601,
+
+    //Logs from 0x7
+    CAN_AIRRIDE_LOG = 0x701
     //MAX 0x7FFF
 };
 
