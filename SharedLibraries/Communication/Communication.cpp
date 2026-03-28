@@ -3,8 +3,10 @@
 #include "CANID.h"
 #include "LargeCanMessage.h"
 
-Communication::Communication(ICANBus &canBus, CANQueue &stringQueue, LargeCanMessageHandler &largeCanMessageHandler, CanNode me) : nextId(1), canBus(canBus),
-                                                                                                                                   canQueue(stringQueue), largeCanMessageHandler(largeCanMessageHandler), me(me) {
+Communication::Communication(ICANBus &canBus, CANQueue &stringQueue, LargeCanMessageHandler &largeCanMessageHandler,
+                             CanNode me) : nextId(1), canBus(canBus),
+                                           canQueue(stringQueue), largeCanMessageHandler(largeCanMessageHandler),
+                                           me(me) {
 }
 
 Communication::~Communication() {
@@ -38,6 +40,7 @@ void Communication::Notify(const CanId &canId, const uint8_t *data, uint8_t leng
 }
 
 void Communication::CheckForMessage() {
+    //LOG_DEBUG("CheckForMessage");
     if (canBus.ReceiveAvailable()) {
         canBus.Receive();
     }
@@ -51,8 +54,10 @@ void Communication::CheckForMessage() {
 
 void Communication::DecodeCanMessage(const CanMessage &message) {
     CanId canID;
-    if (canID.fromRaw(message.id)) {
-        LOG_ERROR("CANID parse failed SENDER: src:", static_cast<int8_t>(canID.src), "dst:", static_cast<int8_t>(canID.dst), "type:", static_cast<int16_t>(canID.type), "flags:", static_cast<int8_t>(canID.flags));
+    if (!canID.fromRaw(message.id)) {
+        LOG_ERROR("CANID parse failed SENDER: src:", static_cast<int8_t>(canID.src), "dst:",
+                  static_cast<int8_t>(canID.dst), "type:", static_cast<int16_t>(canID.type), "flags:",
+                  static_cast<int8_t>(canID.flags));
         return;
     }
     if (!canID.isForNode(me)) {

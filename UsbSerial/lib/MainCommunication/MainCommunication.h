@@ -8,18 +8,16 @@ class MainCommunication {
 public:
     MainCommunication(Communication &communication, Settings &settings);
 
-    void SendPressure(double front, double back);
+    void SendPressure(float front, float back);
 
     void Init();
 
     void Leave();
 
 private:
-    void SaveSettings(String &settings);
+    void SaveSettings(const uint8_t *data, uint8_t length);
 
-    String GetValue(String data, char separator, int index);
-
-    void ReceiveCallback(String &message);
+    void ReceiveCallback(const CanId &canId, const uint8_t *data, uint8_t length);
 
     Communication &communication;
     Settings &settings;

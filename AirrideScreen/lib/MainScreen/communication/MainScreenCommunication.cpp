@@ -9,7 +9,9 @@ MainScreenCommunication::MainScreenCommunication(Communication &communication, M
 }
 
 void MainScreenCommunication::Init() {
-    communicationId = communication.Subscribe([this](const CanId &canId, const uint8_t *data, uint8_t length) { ReceiveCallback(canId, data, length); });
+    communicationId = communication.Subscribe([this](const CanId &canId, const uint8_t *data, uint8_t length) {
+        ReceiveCallback(canId, data, length);
+    });
 }
 
 void MainScreenCommunication::ReceiveCallback(const CanId &canId, const uint8_t *data, uint8_t length) {
@@ -25,9 +27,11 @@ void MainScreenCommunication::ReceiveCallback(const CanId &canId, const uint8_t 
 }
 
 void MainScreenCommunication::HandlePressureMessage(const uint8_t *data, uint8_t length) {
-    CANAirRidePressure pressure = decodeCANMessage<CANAirRidePressure>(data, length);
-    mainScreenData.front = pressure.front;
-    mainScreenData.back = pressure.back;
+    CANAirRidePressure pressure{};
+    if (decodeCANMessage(data, length, pressure)) {
+        mainScreenData.front = pressure.front;
+        mainScreenData.back = pressure.back;
+    }
 }
 
 void MainScreenCommunication::Leave() {

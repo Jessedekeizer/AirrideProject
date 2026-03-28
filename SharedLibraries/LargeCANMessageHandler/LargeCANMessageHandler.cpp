@@ -4,6 +4,8 @@
 #include <cmath>
 #include <cstring>
 
+#include "../Logger/Logger.h"
+
 LargeCanMessage *LargeCanMessageHandler::HandleLargeCanMessage(const CanMessage &message) {
     CanId canId{};
     canId.fromRaw(message.id);
@@ -46,21 +48,18 @@ void LargeCanMessageHandler::SendLargeMessage(CanId &canId, const uint8_t *data,
 
         if (i == 0) {
             canId.flags = CanFlags::FLAG_FIRST;
-        }
-        else if (i == amountOfMessages - 1) {
+        } else if (i == amountOfMessages - 1) {
             canId.flags = CanFlags::FLAG_LAST;
 
             int remaining = length % 8;
             dlc = (remaining == 0) ? 8 : remaining;
-        }
-        else {
+        } else {
             canId.flags = CanFlags::FLAG_LARGE_MESSAGE;
         }
 
         CanMessage canMessage{};
         canMessage.id = canId.toRaw();
         canMessage.dlc = dlc;
-
         memcpy(canMessage.data, data + i * 8, dlc);
 
         canBus.SendMessage(canMessage);
@@ -72,6 +71,7 @@ void LargeCanMessageHandler::RemoveLargeMessage(CanNode sender, CanMsgType msgTy
                            [sender, msgType](const LargeCanMessage &largeCanMessage) {
                                return largeCanMessage.id.type == msgType && largeCanMessage.id.src == sender;
                            });
+    LOG_DEBUG("Removing large message src:", static_cast<uint8_t>(it->id.src),"type", static_cast<uint16_t>(it->id.type));
     largeCANMessages.erase(it);
 }
 
@@ -82,8 +82,10 @@ LargeCanMessage *LargeCanMessageHandler::GetLargeCanMessage(CanNode sender, CanM
                            });
 
     if (it != largeCANMessages.end()) {
+        LOG_DEBUG("Found large message at:", static_cast<uint8_t>(it->id.src), static_cast<uint16_t>(it->id.type));
         return &(*it);
     }
+    LOG_DEBUG("No large message found");
     return nullptr;
 }
 

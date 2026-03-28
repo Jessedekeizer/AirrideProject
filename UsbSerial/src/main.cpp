@@ -7,7 +7,8 @@
 #include "PressureSensor.h"
 #include "Solenoid.h"
 #include "MainCommunication.h"
-#include "SerialOverPins.h"
+#include "CanBus.h"
+#include "Logger.h"
 
 Settings settings;
 
@@ -29,9 +30,11 @@ PressureSensor backPressureSensor(EPressureSensor::BACK, A1, backFilterSize,anal
 PressureSensor tankPressureSensor(EPressureSensor::TANK, A2, backFilterSize,analogMin,analogMax,barTankMax);
 PressureSensorManager pressureSensorManager(frontUpSolenoid, backUpSolenoid, settings);
 
-StringQueue stringQueue;
-SerialOverPins serial(Serial1, stringQueue);
-Communication communication(serial, stringQueue);
+CANQueue canQueue;
+
+CanBus canBus(canQueue);
+LargeCanMessageHandler largeCanMessageHandler(canBus);
+Communication communication(canBus, canQueue, largeCanMessageHandler, CanNode::NODE_R4);
 
 LogHandlerCommunication logHandlerCommunication(communication);
 LogHandler logHandler(logHandlerCommunication, frontPressureSensor, backPressureSensor, tankPressureSensor);
@@ -47,8 +50,12 @@ unsigned long timePrevious = 0;
 int timeInterval = 200;
 
 void setup() {
+  Serial.begin(9600);
+  while (!Serial);
+  LOG_DEBUG("start");
   analogReadResolution(14);
-  Serial1.begin(9600, SERIAL_8N1);
+  //Serial1.begin(9600, SERIAL_8N1);
+
   solenoidManager.AddSolenoid(frontDownSolenoid);
   solenoidManager.AddSolenoid(frontUpSolenoid);
   solenoidManager.AddSolenoid(backDownSolenoid);
@@ -59,6 +66,7 @@ void setup() {
 
   solenoidManager.Begin();
   pressureSensorManager.Begin();
+  canBus.Setup(0, 0, ECanBitRate::B500k);
   mainStateMachine.Begin();
   mainCommunication.Init();
 }

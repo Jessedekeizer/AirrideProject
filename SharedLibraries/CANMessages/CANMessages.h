@@ -2,11 +2,16 @@
 #define CANMESSAGES_H
 #include <cstdint>
 
+#include "Logger.h"
+
+#pragma pack(push,1)
 struct CANAirRidePressure {
     float front;
     float back;
 };
+#pragma pack(pop)
 
+#pragma pack(push,1)
 struct CANAirRideControl {
     bool frontUp;
     bool frontDown;
@@ -15,7 +20,9 @@ struct CANAirRideControl {
     bool ride;
     bool park;
 };
+#pragma pack(pop)
 
+#pragma pack(push,1)
 struct CANSettingsAirRide {
     float frontMax;
     float backMax;
@@ -27,38 +34,16 @@ struct CANSettingsAirRide {
     float backDownX;
     float parkDuration;
 };
-
-struct CANSettingsMax {
-    float frontMax;
-    float backMax;
-};
-
-struct CANSettingsRide {
-    float rideFront;
-    float rideBack;
-};
-
-struct CANSettingsFrontFactor {
-    float frontUpX;
-    float frontDownX;
-};
-
-struct CANSettingsBackFactor {
-    float backUpX;
-    float backDownX;
-};
-
-struct CANSettingsPark {
-    float parkDuration;
-};
+#pragma pack(pop)
 
 template<typename T>
-T decodeCANMessage(const uint8_t *data, std::size_t length) {
-    T messageStruct{};
+bool decodeCANMessage(const uint8_t *data, std::size_t length, T &messageStruct) {
     if (length == sizeof(T)) {
         memcpy(&messageStruct, data, sizeof(T));
+        return true;
     }
-    return messageStruct;
+    LOG_DEBUG("copy failed length: ", length, " struct size: ", sizeof(T));
+    return false;
 }
 
 #endif // CANMESSAGES_H

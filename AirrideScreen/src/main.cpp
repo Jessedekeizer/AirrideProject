@@ -22,7 +22,7 @@
 #include "DisplayService.h"
 #include "LogStorage.h"
 #include "SettingsStorage.h"
-#include "../lib/CanBus/CanBus.h"
+#include "CanBus.h"
 
 #define MOSI_PIN 32
 #define MISO_PIN 39
@@ -70,11 +70,12 @@ Settings4Screen settings4Screen(screenManager, settingsScreenCommunication, sett
 
 CalibrationScreen calibrationScreen(screenManager, settings, settingsStorage, displayService, touchScreen);
 
-void setup() {
+void setup()
+{
   sdCardService.Begin();
   displayService.Begin();
   Serial.begin(SERIAL_BAUD_RATE, SERIAL_8N1);
-  //Serial2.begin(SERIAL_BAUD_RATE, SERIAL_8N1, SERIAL2_RX_PIN, SERIAL2_TX_PIN);
+  // Serial2.begin(SERIAL_BAUD_RATE, SERIAL_8N1, SERIAL2_RX_PIN, SERIAL2_TX_PIN);
   canBus.Setup(SERIAL2_TX_PIN, SERIAL2_RX_PIN, ECanBitRate::B500k);
 
   settingsStorage.ReadSettings(settings);
@@ -91,35 +92,45 @@ void setup() {
   touchScreen.begin();
   timerManager.GetInstance();
 
-  if (!settings.calibrationSet) {
+  if (!settings.calibrationSet)
+  {
     screenManager.RequestScreen(EScreen::CALIBRATION);
-  } else {
+  }
+  else
+  {
     touchScreen.setCalibration(settings.xmin, settings.xmax, settings.ymin, settings.ymax);
     screenManager.RequestScreen(EScreen::MAIN);
   }
-  tickTimer = new Timer(0.1, []() { UpdateTouchScreen(); }, true);
+  tickTimer = new Timer(0.1, []()
+                        { UpdateTouchScreen(); }, true);
   timerManager.addTimer(tickTimer);
 }
 
 //====================================================================================
 //                                    Loop
 //====================================================================================
-void loop() {
+void loop()
+{
   timerManager.update();
   communication.CheckForMessage();
 }
 
-void UpdateTouchScreen() {
+void UpdateTouchScreen()
+{
   TouchPoint touch = touchScreen.getTouch();
-  if (touch.zRaw != 0) {
+  if (touch.zRaw != 0)
+  {
     // printTouchToSerial(touch);
     screenManager.GetActiveScreen()->HandleTouch(touch.x, touch.y);
-  } else {
+  }
+  else
+  {
     screenManager.GetActiveScreen()->ReleaseButtons();
   }
   screenManager.GetActiveScreen()->OnLoop();
 }
 
-void printTouchToSerial(TouchPoint p) {
+void printTouchToSerial(TouchPoint p)
+{
   LOG_DEBUG("Touch: X=", p.x, ", Y=", p.y, ", ZRaw=", p.zRaw);
 }

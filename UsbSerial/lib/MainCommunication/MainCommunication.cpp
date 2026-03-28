@@ -1,65 +1,58 @@
 #include "MainCommunication.h"
-
+#include "CanMessages.h"
 #include "Logger.h"
 
 MainCommunication::MainCommunication(Communication &communication, Settings &settings)
-    : communication(communication), settings(settings), communicationId(-1)
-{
+    : communication(communication), settings(settings), communicationId(-1) {
 }
 
-void MainCommunication::SendPressure(double front, double back)
-{
-    communication.SendMessage("BAR/" + String(front) + "/" + String(back) + "/");
+void MainCommunication::SendPressure(float front, float back) {
+    CANAirRidePressure canAirRidePressure{front, back};
+    communication.SendCANMessage(CanNode::NODE_ESP32, CanMsgType::CAN_AIRRIDE_PRESSURE, canAirRidePressure);
 }
 
-void MainCommunication::Init()
-{
-    communicationId = communication.Subscribe([this](String &message)
-                                              { ReceiveCallback(message); });
+void MainCommunication::Init() {
+    communicationId = communication.Subscribe([this](const CanId &canId, const uint8_t *data, uint8_t length) {
+        ReceiveCallback(canId, data, length);
+    });
 }
 
-void MainCommunication::Leave()
-{
+void MainCommunication::Leave() {
     communication.Unsubscribe(communicationId);
 }
 
-void MainCommunication::ReceiveCallback(String &message)
-{
-    if (message.startsWith("settings"))
-    {
-        LOG_DEBUG(message);
-        SaveSettings(message);
+void MainCommunication::ReceiveCallback(const CanId &canId, const uint8_t *data, uint8_t length) {
+    LOG_DEBUG("Received data", static_cast<int>(canId.type));
+    if (canId.type == CanMsgType::CAN_AIRRIDE_SETTINGS) {
+        SaveSettings(data, length);
     }
 }
 
-void MainCommunication::SaveSettings(String &settingString)
-{
-    LOG_DEBUG("saving settings to", settingString);
-    settings.frontMax = GetValue(settingString, '/', 1).toDouble();
-    settings.backMax = GetValue(settingString, '/', 2).toDouble();
-    settings.rideFront = GetValue(settingString, '/', 3).toDouble();
-    settings.rideBack = GetValue(settingString, '/', 4).toDouble();
-    settings.frontUpX = GetValue(settingString, '/', 5).toDouble();
-    settings.frontDownX = GetValue(settingString, '/', 6).toDouble();
-    settings.backUpX = GetValue(settingString, '/', 7).toDouble();
-    settings.backDownX = GetValue(settingString, '/', 8).toDouble();
-    settings.parkDuration = GetValue(settingString, '/', 9).toDouble();
-}
-
-String MainCommunication::GetValue(String data, char separator, int index)
-{
-    int found = 0;
-    int strIndex[] = {0, -1};
-    int maxIndex = data.length() - 1;
-
-    for (int i = 0; i <= maxIndex && found <= index; i++)
-    {
-        if (data.charAt(i) == separator || i == maxIndex)
-        {
-            found++;
-            strIndex[0] = strIndex[1] + 1;
-            strIndex[1] = (i == maxIndex) ? i + 1 : i;
-        }
+void MainCommunication::SaveSettings(const uint8_t *data, uint8_t length) {
+    CANSettingsAirRide settingsAirRide{};
+    if (!decodeCANMessage(data, length, settingsAirRide)) {
+        LOG_ERROR("Failed to decode settings message");
+        return;
     }
-    return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+    settings.backDownX = settingsAirRide.backDownX;
+    settings.backUpX = settingsAirRide.backUpX;
+    settings.frontDownX = settingsAirRide.frontDownX;
+    settings.frontUpX = settingsAirRide.frontUpX;
+    settings.frontMax = settingsAirRide.frontMax;
+    settings.backMax = settingsAirRide.backMax;
+    settings.rideBack = settingsAirRide.rideBack;
+    settings.rideFront = settingsAirRide.rideFront;
+    settings.parkDuration = settingsAirRide.parkDuration;
+
+    LOG_INFO("backDownX: ", settings.backDownX);
+    LOG_INFO("backUpX: ", settings.backUpX);
+    LOG_INFO("frontDownX: ", settings.frontDownX);
+    LOG_INFO("frontUpX: ", settings.frontUpX);
+    LOG_INFO("frontMax: ", settings.frontMax);
+    LOG_INFO("backMax: ", settings.backMax);
+    LOG_INFO("rideBack: ", settings.rideBack);
+    LOG_INFO("rideFront: ", settings.rideFront);
+    LOG_INFO("parkDuration: ", settings.parkDuration);
+
+    LOG_INFO("Settings saved");
 }

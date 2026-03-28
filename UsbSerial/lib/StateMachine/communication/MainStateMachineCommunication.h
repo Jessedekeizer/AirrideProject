@@ -12,9 +12,10 @@ public:
     void Leave();
 
 private:
-    void RequestChangeState(String &requestedStateMessage);
+    void RequestChangeState(const uint8_t *data, uint8_t length);
 
-    void ReceiveCallback(String &message);
+
+    void ReceiveCallback(const CanId &canId, const uint8_t *data, uint8_t length);
 
     Communication &communication;
     MainStateMachineData &mainStateMachineData;

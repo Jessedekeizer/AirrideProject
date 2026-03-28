@@ -4,6 +4,6 @@ LogHandlerCommunication::LogHandlerCommunication(Communication &communication) :
 }
 
 void LogHandlerCommunication::SendLog(String &message) {
-    communication.SendMessage(message);
+    //communication.SendMessage(message);
 }
 

@@ -1,63 +1,50 @@
 #include "MainStateMachineCommunication.h"
-
+#include "CANMessages.h"
 #include "EState.h"
-
 #include "Logger.h"
 
 MainStateMachineCommunication::MainStateMachineCommunication(Communication &communication,
                                                              MainStateMachineData &
-                                                                 mainStateMachineData)
-    : communication(communication), mainStateMachineData(mainStateMachineData), communicationId(-1)
-{
+                                                             mainStateMachineData)
+    : communication(communication), mainStateMachineData(mainStateMachineData), communicationId(-1) {
 }
 
-void MainStateMachineCommunication::Init()
-{
-    communicationId = communication.Subscribe([this](String &message)
-                                              { ReceiveCallback(message); });
+void MainStateMachineCommunication::Init() {
+    communicationId = communication.Subscribe([this](const CanId &canId, const uint8_t *data, uint8_t length) {
+        ReceiveCallback(canId, data, length);
+    });
 }
 
-void MainStateMachineCommunication::Leave()
-{
+void MainStateMachineCommunication::Leave() {
     communication.Unsubscribe(communicationId);
 }
 
-void MainStateMachineCommunication::ReceiveCallback(String &message)
-{
-    LOG_DEBUG(message);
-    RequestChangeState(message);
+void MainStateMachineCommunication::ReceiveCallback(const CanId &canId, const uint8_t *data, uint8_t length) {
+    if (canId.type == CanMsgType::CAN_AIRRIDE_CONTROL) {
+        RequestChangeState(data, length);
+    }
 }
 
-void MainStateMachineCommunication::RequestChangeState(String &requestedStateMessage)
-{
-    LOG_DEBUG("newState", requestedStateMessage);
-    if (requestedStateMessage.equals("Front Up On"))
-    {
+void MainStateMachineCommunication::RequestChangeState(const uint8_t *data, uint8_t length) {
+    CANAirRideControl canAirRideControl{};
+    if (!decodeCANMessage(data, length, canAirRideControl)) {
+        LOG_ERROR("Failed to decode settings message");
+        return;
+    }
+    if (canAirRideControl.frontUp) {
         mainStateMachineData.newRequestedState = EState::FRONT_UP;
-    }
-    else if (requestedStateMessage.equals("Front Down On"))
-    {
-        mainStateMachineData.newRequestedState = EState::FRONT_DOWN;
-    }
-    else if (requestedStateMessage.equals("Back Up On"))
-    {
+    } else if (canAirRideControl.backUp) {
         mainStateMachineData.newRequestedState = EState::BACK_UP;
-    }
-    else if (requestedStateMessage.equals("Back Down On"))
-    {
+    } else if (canAirRideControl.frontDown) {
+        mainStateMachineData.newRequestedState = EState::FRONT_DOWN;
+    } else if (canAirRideControl.backDown) {
         mainStateMachineData.newRequestedState = EState::BACK_DOWN;
-    }
-    else if (requestedStateMessage.endsWith("Off"))
-    {
-        mainStateMachineData.newRequestedState = EState::IDLE;
-    }
-    else if (requestedStateMessage.equals("Ride"))
-    {
+    } else if (canAirRideControl.ride) {
         mainStateMachineData.newRequestedState = EState::RIDE;
-    }
-    else if (requestedStateMessage.equals("Park"))
-    {
+    } else if (canAirRideControl.park) {
         mainStateMachineData.newRequestedState = EState::PARK;
+    } else {
+        mainStateMachineData.newRequestedState = EState::IDLE;
     }
     LOG_DEBUG("newState", static_cast<int>(mainStateMachineData.newRequestedState));
 }

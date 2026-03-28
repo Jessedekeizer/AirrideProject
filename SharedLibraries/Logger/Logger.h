@@ -9,25 +9,22 @@
 #define LOG_LEVEL_DEBUG 3
 
 #ifndef LOG_LEVEL
-#define LOG_LEVEL LOG_LEVEL_WARN
+#define LOG_LEVEL LOG_LEVEL_DEBUG
 #endif
 
 // ---------- value printing ----------
 
-inline void logPrintValue(const bool &v)
-{
+inline void logPrintValue(const bool &v) {
     Serial.print(v ? "true" : "false");
 }
 
 template<typename T>
-inline void logPrintValue(const T &v)
-{
+inline void logPrintValue(const T &v) {
     Serial.print(v);
 }
 
 template<typename T, typename... Args>
-void logPrintValue(const T &first, const Args&... rest)
-{
+void logPrintValue(const T &first, const Args &... rest) {
     logPrintValue(first);
     Serial.print(" ");
     logPrintValue(rest...);
@@ -38,12 +35,10 @@ void logPrintValue(const T &first, const Args&... rest)
 
 template<typename... Args>
 void logMessage(
-        const char* level,
-        const char* file,
-        int line,
-        const Args&... args)
-{
-
+    const char *level,
+    const char *file,
+    int line,
+    const Args &... args) {
     Serial.print("[");
     Serial.print(level);
     Serial.print("] ");
@@ -63,25 +58,25 @@ void logMessage(
 // ---------- macros ----------
 
 #if LOG_LEVEL >= LOG_LEVEL_ERROR
-#define LOG_ERROR(...) logMessage("ERROR", __FILENAME__, __LINE__, __VA_ARGS__)
+#define LOG_ERROR(...) logMessage("ERROR", __FILE__, __LINE__, __VA_ARGS__)
 #else
 #define LOG_ERROR(...)
 #endif
 
 #if LOG_LEVEL >= LOG_LEVEL_WARN
-#define LOG_WARN(...) logMessage("WARN ", __FILENAME__, __LINE__, __VA_ARGS__)
+#define LOG_WARN(...) logMessage("WARN ", __FILE__, __LINE__, __VA_ARGS__)
 #else
 #define LOG_WARN(...)
 #endif
 
 #if LOG_LEVEL >= LOG_LEVEL_INFO
-#define LOG_INFO(...) logMessage("INFO ", __FILENAME__, __LINE__, __VA_ARGS__)
+#define LOG_INFO(...) logMessage("INFO ", __FILE__, __LINE__, __VA_ARGS__)
 #else
 #define LOG_INFO(...)
 #endif
 
 #if LOG_LEVEL >= LOG_LEVEL_DEBUG
-#define LOG_DEBUG(...) logMessage("DEBUG", __FILENAME__, __LINE__, __VA_ARGS__)
+#define LOG_DEBUG(...) logMessage("DEBUG", __FILE__, __LINE__, __VA_ARGS__)
 #else
 #define LOG_DEBUG(...)
 #endif
