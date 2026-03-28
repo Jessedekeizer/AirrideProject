@@ -20,7 +20,7 @@ void MainStateMachineCommunication::Leave() {
 }
 
 void MainStateMachineCommunication::ReceiveCallback(const CanId &canId, const uint8_t *data, uint8_t length) {
-    if (canId.type == CanMsgType::CAN_AIRRIDE_CONTROL) {
+    if (canId.type == ECanMsgType::CAN_AIRRIDE_CONTROL) {
         RequestChangeState(data, length);
     }
 }

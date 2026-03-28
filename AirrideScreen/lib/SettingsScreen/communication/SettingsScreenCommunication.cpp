@@ -1,6 +1,6 @@
 #include "SettingsScreenCommunication.h"
 #include "CANMessages.h"
-#include "CANMessageIDs.h"
+#include "CanMessageIDs.h"
 #include "Logger.h"
 
 void SettingsScreenCommunication::SendSettings(SettingsDevice &settings) {
@@ -14,5 +14,5 @@ void SettingsScreenCommunication::SendSettings(SettingsDevice &settings) {
         settings.backDownX,
         settings.parkDuration
     };
-    communication.SendCANMessage(CanNode::NODE_R4, CanMsgType::CAN_AIRRIDE_SETTINGS, canSettingsAirRide);
+    communication.SendCANMessage(ECanNode::NODE_AIRRIDE_CONTROLLER, ECanMsgType::CAN_AIRRIDE_SETTINGS, canSettingsAirRide);
 }

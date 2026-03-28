@@ -8,7 +8,7 @@ MainCommunication::MainCommunication(Communication &communication, Settings &set
 
 void MainCommunication::SendPressure(float front, float back) {
     CANAirRidePressure canAirRidePressure{front, back};
-    communication.SendCANMessage(CanNode::NODE_ESP32, CanMsgType::CAN_AIRRIDE_PRESSURE, canAirRidePressure);
+    communication.SendCANMessage(ECanNode::NODE_BROADCAST, ECanMsgType::CAN_AIRRIDE_PRESSURE, canAirRidePressure);
 }
 
 void MainCommunication::Init() {
@@ -23,7 +23,7 @@ void MainCommunication::Leave() {
 
 void MainCommunication::ReceiveCallback(const CanId &canId, const uint8_t *data, uint8_t length) {
     LOG_DEBUG("Received data", static_cast<int>(canId.type));
-    if (canId.type == CanMsgType::CAN_AIRRIDE_SETTINGS) {
+    if (canId.type == ECanMsgType::CAN_AIRRIDE_SETTINGS) {
         SaveSettings(data, length);
     }
 }

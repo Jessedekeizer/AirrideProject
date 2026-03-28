@@ -53,7 +53,6 @@ bool CanBus::ReceiveAvailable()
 
 void CanBus::Setup(int canTx, int canRx, ECanBitRate bitRate)
 {
-    // --- General configuration ---
     twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(
         static_cast<gpio_num_t>(canTx),
         static_cast<gpio_num_t>(canRx),

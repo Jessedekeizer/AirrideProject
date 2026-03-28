@@ -1,7 +1,7 @@
 #ifndef LARGECANMESSAGEHANDLER_H
 #define LARGECANMESSAGEHANDLER_H
 #include <vector>
-#include "LargeCANMessage.h"
+#include "LargeCanMessage.h"
 #include "CanMessage.h"
 #include "ICANBus.h"
 
@@ -12,14 +12,18 @@ public:
 
     ~LargeCanMessageHandler() {
     };
+
     LargeCanMessage *HandleLargeCanMessage(const CanMessage &message);
 
     void SendLargeMessage(CanId &canId, const uint8_t *data, uint8_t length);
-    void RemoveLargeMessage(CanNode sender, CanMsgType msgType);
+
+    void RemoveLargeMessage(ECanNode sender, ECanMsgType msgType);
 
 private:
-    LargeCanMessage *GetLargeCanMessage(CanNode sender, CanMsgType msgType);
+    LargeCanMessage *GetLargeCanMessage(ECanNode sender, ECanMsgType msgType);
+
     void AppendMessageToLargeMessage(LargeCanMessage &largeCanMessage, const CanMessage &message);
+
     std::vector<LargeCanMessage> largeCANMessages{};
     ICANBus &canBus;
 };

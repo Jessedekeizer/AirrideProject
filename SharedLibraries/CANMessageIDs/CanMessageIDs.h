@@ -2,13 +2,13 @@
 #define CANMESSAGEIDS_H
 #include <cstdint>
 
-enum class CanNode : uint8_t {
+enum class ECanNode : uint8_t {
     NODE_BROADCAST = 0,
-    NODE_R4 = 1,
-    NODE_ESP32 = 2,
+    NODE_AIRRIDE_CONTROLLER = 1,
+    NODE_AIRRIDE_GUI = 2,
 };
 
-enum class CanMsgType : uint16_t {
+enum class ECanMsgType : uint16_t {
     CAN_NAN = 0,
     //Control start from 0x0
     CAN_AIRRIDE_CONTROL = 0x001,
@@ -24,7 +24,7 @@ enum class CanMsgType : uint16_t {
     //MAX 0x7FFF
 };
 
-enum class CanFlags : uint8_t {
+enum class ECanFlags : uint8_t {
     FLAG_NONE = 0,
     FLAG_LARGE_MESSAGE = 1,
     FLAG_FIRST = 2,

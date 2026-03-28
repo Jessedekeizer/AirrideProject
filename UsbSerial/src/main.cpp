@@ -30,11 +30,10 @@ PressureSensor backPressureSensor(EPressureSensor::BACK, A1, backFilterSize,anal
 PressureSensor tankPressureSensor(EPressureSensor::TANK, A2, backFilterSize,analogMin,analogMax,barTankMax);
 PressureSensorManager pressureSensorManager(frontUpSolenoid, backUpSolenoid, settings);
 
-CANQueue canQueue;
-
+CanQueue canQueue;
 CanBus canBus(canQueue);
 LargeCanMessageHandler largeCanMessageHandler(canBus);
-Communication communication(canBus, canQueue, largeCanMessageHandler, CanNode::NODE_R4);
+Communication communication(canBus, canQueue, largeCanMessageHandler, ECanNode::NODE_AIRRIDE_CONTROLLER);
 
 LogHandlerCommunication logHandlerCommunication(communication);
 LogHandler logHandler(logHandlerCommunication, frontPressureSensor, backPressureSensor, tankPressureSensor);

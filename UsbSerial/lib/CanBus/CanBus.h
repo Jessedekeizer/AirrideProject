@@ -6,7 +6,7 @@
 
 class CanBus : public ICANBus {
 public:
-    CanBus(CANQueue &canQueue) : canQueue(canQueue), canReady(false) {
+    CanBus(CanQueue &canQueue) : canQueue(canQueue), canReady(false) {
     };
 
     void Setup(int canTx, int canRx, ECanBitRate bitRate) override;
@@ -18,7 +18,7 @@ public:
     void Receive() override;
 
 private:
-    CANQueue &canQueue;
+    CanQueue &canQueue;
     bool canReady;
 };
 

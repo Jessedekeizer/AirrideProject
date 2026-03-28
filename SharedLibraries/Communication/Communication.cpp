@@ -3,10 +3,10 @@
 #include "CANID.h"
 #include "LargeCanMessage.h"
 
-Communication::Communication(ICANBus &canBus, CANQueue &stringQueue, LargeCanMessageHandler &largeCanMessageHandler,
-                             CanNode me) : nextId(1), canBus(canBus),
-                                           canQueue(stringQueue), largeCanMessageHandler(largeCanMessageHandler),
-                                           me(me) {
+Communication::Communication(ICANBus &canBus, CanQueue &stringQueue, LargeCanMessageHandler &largeCanMessageHandler,
+                             ECanNode me) : nextId(1), canBus(canBus),
+                                            canQueue(stringQueue), largeCanMessageHandler(largeCanMessageHandler),
+                                            me(me) {
 }
 
 Communication::~Communication() {
@@ -54,19 +54,19 @@ void Communication::CheckForMessage() {
 
 void Communication::DecodeCanMessage(const CanMessage &message) {
     CanId canID;
-    if (!canID.fromRaw(message.id)) {
-        LOG_ERROR("CANID parse failed SENDER: src:", static_cast<int8_t>(canID.src), "dst:",
+    if (!canID.FromRaw(message.id)) {
+        LOG_ERROR("CanID parse failed SENDER: src:", static_cast<int8_t>(canID.src), "dst:",
                   static_cast<int8_t>(canID.dst), "type:", static_cast<int16_t>(canID.type), "flags:",
                   static_cast<int8_t>(canID.flags));
         return;
     }
-    if (!canID.isForNode(me)) {
+    if (!canID.IsForNode(me)) {
         return;
     }
-    if (canID.flags == CanFlags::FLAG_NONE) {
+    if (canID.flags == ECanFlags::FLAG_NONE) {
         Notify(canID, message.data, message.dlc);
     }
-    if (canID.flags >= CanFlags::FLAG_LARGE_MESSAGE) {
+    if (canID.flags >= ECanFlags::FLAG_LARGE_MESSAGE) {
         LargeCanMessage *largeMessage = largeCanMessageHandler.HandleLargeCanMessage(message);
         if (largeMessage) {
             Notify(canID, largeMessage->data.data(), largeMessage->length);
@@ -75,12 +75,12 @@ void Communication::DecodeCanMessage(const CanMessage &message) {
     }
 }
 
-void Communication::SendCANMessage(CanNode target, CanMsgType type, const uint8_t *data, uint8_t length) {
+void Communication::SendCANMessage(ECanNode target, ECanMsgType type, const uint8_t *data, uint8_t length) {
     CanId canId;
     canId.src = me;
     canId.dst = target;
     canId.type = type;
-    canId.flags = CanFlags::FLAG_NONE;
+    canId.flags = ECanFlags::FLAG_NONE;
 
     if (length > 8) {
         largeCanMessageHandler.SendLargeMessage(canId, data, length);
@@ -88,7 +88,7 @@ void Communication::SendCANMessage(CanNode target, CanMsgType type, const uint8_
     }
 
     CanMessage msg{};
-    msg.id = canId.toRaw();
+    msg.id = canId.ToRaw();
     msg.dlc = length;
     memcpy(msg.data, data, length);
 

@@ -5,7 +5,7 @@
 
 #include "CanMessage.h"
 
-struct CANQueue {
+struct CanQueue {
     CanMessage messages[QUEUE_SIZE];
     uint8_t head = 0;
     uint8_t tail = 0;

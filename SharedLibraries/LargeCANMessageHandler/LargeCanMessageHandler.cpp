@@ -1,4 +1,4 @@
-#include "LargeCANMessageHandler.h"
+#include "LargeCanMessageHandler.h"
 
 #include <algorithm>
 #include <cmath>
@@ -8,16 +8,16 @@
 
 LargeCanMessage *LargeCanMessageHandler::HandleLargeCanMessage(const CanMessage &message) {
     CanId canId{};
-    canId.fromRaw(message.id);
+    canId.FromRaw(message.id);
     switch (canId.flags) {
-        case CanFlags::FLAG_FIRST: {
+        case ECanFlags::FLAG_FIRST: {
             LargeCanMessage largeCanMessage{};
             largeCanMessage.id = canId;
             AppendMessageToLargeMessage(largeCanMessage, message);
             largeCANMessages.push_back(largeCanMessage);
             break;
         }
-        case CanFlags::FLAG_LARGE_MESSAGE: {
+        case ECanFlags::FLAG_LARGE_MESSAGE: {
             LargeCanMessage *largeCanMessage = GetLargeCanMessage(canId.src, canId.type);
             if (largeCanMessage == nullptr) {
                 break;
@@ -25,7 +25,7 @@ LargeCanMessage *LargeCanMessageHandler::HandleLargeCanMessage(const CanMessage 
             AppendMessageToLargeMessage(*largeCanMessage, message);
             break;
         }
-        case CanFlags::FLAG_LAST: {
+        case ECanFlags::FLAG_LAST: {
             LargeCanMessage *largeCanMessage = GetLargeCanMessage(canId.src, canId.type);
             if (largeCanMessage == nullptr) {
                 break;
@@ -47,18 +47,18 @@ void LargeCanMessageHandler::SendLargeMessage(CanId &canId, const uint8_t *data,
         int dlc = 8;
 
         if (i == 0) {
-            canId.flags = CanFlags::FLAG_FIRST;
+            canId.flags = ECanFlags::FLAG_FIRST;
         } else if (i == amountOfMessages - 1) {
-            canId.flags = CanFlags::FLAG_LAST;
+            canId.flags = ECanFlags::FLAG_LAST;
 
             int remaining = length % 8;
             dlc = (remaining == 0) ? 8 : remaining;
         } else {
-            canId.flags = CanFlags::FLAG_LARGE_MESSAGE;
+            canId.flags = ECanFlags::FLAG_LARGE_MESSAGE;
         }
 
         CanMessage canMessage{};
-        canMessage.id = canId.toRaw();
+        canMessage.id = canId.ToRaw();
         canMessage.dlc = dlc;
         memcpy(canMessage.data, data + i * 8, dlc);
 
@@ -67,7 +67,7 @@ void LargeCanMessageHandler::SendLargeMessage(CanId &canId, const uint8_t *data,
     }
 }
 
-void LargeCanMessageHandler::RemoveLargeMessage(CanNode sender, CanMsgType msgType) {
+void LargeCanMessageHandler::RemoveLargeMessage(ECanNode sender, ECanMsgType msgType) {
     auto it = std::find_if(largeCANMessages.begin(), largeCANMessages.end(),
                            [sender, msgType](const LargeCanMessage &largeCanMessage) {
                                return largeCanMessage.id.type == msgType && largeCanMessage.id.src == sender;
@@ -77,7 +77,7 @@ void LargeCanMessageHandler::RemoveLargeMessage(CanNode sender, CanMsgType msgTy
     largeCANMessages.erase(it);
 }
 
-LargeCanMessage *LargeCanMessageHandler::GetLargeCanMessage(CanNode sender, CanMsgType msgType) {
+LargeCanMessage *LargeCanMessageHandler::GetLargeCanMessage(ECanNode sender, ECanMsgType msgType) {
     auto it = std::find_if(largeCANMessages.begin(), largeCANMessages.end(),
                            [sender, msgType](const LargeCanMessage &largeCanMessage) {
                                return largeCanMessage.id.type == msgType && largeCanMessage.id.src == sender;
