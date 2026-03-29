@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <XPT2046_Bitbang.h>
 
-#include "CANOverSerial.h"
 #include "Communication.h"
 #include "ScreenManager.h"
 
@@ -74,7 +73,6 @@ void setup() {
   sdCardService.Begin();
   displayService.Begin();
   Serial.begin(SERIAL_BAUD_RATE, SERIAL_8N1);
-  // Serial2.begin(SERIAL_BAUD_RATE, SERIAL_8N1, SERIAL2_RX_PIN, SERIAL2_TX_PIN);
   canBus.Setup(SERIAL2_TX_PIN, SERIAL2_RX_PIN, ECanBitRate::B500k);
 
   settingsStorage.ReadSettings(settings);

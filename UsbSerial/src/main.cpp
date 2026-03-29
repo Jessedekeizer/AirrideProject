@@ -18,16 +18,16 @@ Solenoid backUpSolenoid(ESolenoid::BACK_UP, PIN_D6);
 Solenoid backDownSolenoid(ESolenoid::BACK_DOWN, PIN_D7);
 SolenoidManager solenoidManager;
 
-#define analogMin  1638.4
-#define analogMax  14745.6
-#define barMax  14.82
+#define analogMin 1638.4
+#define analogMax 14745.6
+#define barMax 14.82
 #define barTankMax 15.2
 #define frontFilterSize 16
 #define backFilterSize 10
 
 PressureSensor frontPressureSensor(EPressureSensor::FRONT, A0, frontFilterSize, analogMin, analogMax, barMax);
-PressureSensor backPressureSensor(EPressureSensor::BACK, A1, backFilterSize,analogMin,analogMax,barMax);
-PressureSensor tankPressureSensor(EPressureSensor::TANK, A2, backFilterSize,analogMin,analogMax,barTankMax);
+PressureSensor backPressureSensor(EPressureSensor::BACK, A1, backFilterSize, analogMin, analogMax, barMax);
+PressureSensor tankPressureSensor(EPressureSensor::TANK, A2, backFilterSize, analogMin, analogMax, barTankMax);
 PressureSensorManager pressureSensorManager(frontUpSolenoid, backUpSolenoid, settings);
 
 CanQueue canQueue;
@@ -48,12 +48,10 @@ MainCommunication mainCommunication(communication, settings);
 unsigned long timePrevious = 0;
 int timeInterval = 200;
 
-void setup() {
+void setup()
+{
   Serial.begin(9600);
-  while (!Serial);
-  LOG_DEBUG("start");
   analogReadResolution(14);
-  //Serial1.begin(9600, SERIAL_8N1);
 
   solenoidManager.AddSolenoid(frontDownSolenoid);
   solenoidManager.AddSolenoid(frontUpSolenoid);
@@ -70,8 +68,10 @@ void setup() {
   mainCommunication.Init();
 }
 
-void loop() {
-  if (millis() - timePrevious > timeInterval) {
+void loop()
+{
+  if (millis() - timePrevious > timeInterval)
+  {
     pressureSensorManager.Update();
     mainCommunication.SendPressure(frontPressureSensor.GetRawPressure(), backPressureSensor.GetRawPressure());
     timePrevious = millis();
@@ -80,4 +80,3 @@ void loop() {
   mainStateMachine.Loop();
   logHandler.SendLog();
 }
-
