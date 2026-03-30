@@ -3,7 +3,6 @@
 #include "CANQueue.h"
 #include "ICANBus.h"
 
-
 class CanBus : public ICANBus {
 public:
     CanBus(CanQueue &canQueue) : canQueue(canQueue), canReady(false) {
@@ -20,7 +19,7 @@ public:
 private:
     CanQueue &canQueue;
     bool canReady;
+    void SetDifferentPins();
 };
-
 
 #endif //CANBUS_H
