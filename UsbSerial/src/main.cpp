@@ -48,8 +48,7 @@ MainCommunication mainCommunication(communication, settings);
 unsigned long timePrevious = 0;
 int timeInterval = 200;
 
-void setup()
-{
+void setup() {
   Serial.begin(9600);
   analogReadResolution(14);
 
@@ -63,15 +62,13 @@ void setup()
 
   solenoidManager.Begin();
   pressureSensorManager.Begin();
-  canBus.Setup(0, 0, ECanBitRate::B500k);
+  canBus.Setup(CAN1TX, CAN1RX, ECanBitRate::B500k);
   mainStateMachine.Begin();
   mainCommunication.Init();
 }
 
-void loop()
-{
-  if (millis() - timePrevious > timeInterval)
-  {
+void loop() {
+  if (millis() - timePrevious > timeInterval) {
     pressureSensorManager.Update();
     mainCommunication.SendPressure(frontPressureSensor.GetRawPressure(), backPressureSensor.GetRawPressure());
     timePrevious = millis();

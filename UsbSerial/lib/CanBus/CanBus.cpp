@@ -1,6 +1,5 @@
 #include "CanBus.h"
 #include <Arduino_CAN.h>
-
 #include "Logger.h"
 
 void CanBus::Setup(int canTx, int canRx, ECanBitRate bitRate) {
@@ -23,7 +22,9 @@ void CanBus::Setup(int canTx, int canRx, ECanBitRate bitRate) {
         LOG_ERROR("CAN.begin(...) failed.");
         canReady = false;
     }
-    SetDifferentPins();
+    if (canTx == CAN1TX && canRx == CAN1RX) {
+        SetCan1Pins();
+    }
 
     LOG_DEBUG("CAN initialized");
     canReady = true;
@@ -63,20 +64,25 @@ void CanBus::Receive() {
     }
 }
 
-void CanBus::SetDifferentPins() {
+
+void CanBus::SetCan1Pins() {
+    //Clear BOWI
     R_PMISC->PWPR = 0x00;
+    //Unlock PSFWE for write
     R_PMISC->PWPR = 0x40;
 
-    // Release D4/D5 (P103/P102) back to GPIO
+    //Release D4/D5 (P103/P102) back to GPIO
     R_PFS->PORT[1].PIN[2].PmnPFS = 0;
     R_PFS->PORT[1].PIN[3].PmnPFS = 0;
 
-    // P109 = D12 = CRXD0 (CAN RX) — input, PSEL=0x10, PMR=1
-    R_PFS->PORT[1].PIN[9].PmnPFS = (0x10UL << 24) | (1UL << 16);
+    //P109 = D11 = CAN TX — output, PDR=1
+    R_PFS->PORT[1].PIN[9].PmnPFS = (0x10UL << 24) | (1UL << 16) | (1UL << 2);
 
-    // P110 = D13 = CTXD0 (CAN TX) — output, PSEL=0x10, PMR=1, PDR=1
-    R_PFS->PORT[1].PIN[10].PmnPFS = (0x10UL << 24) | (1UL << 16) | (1UL << 2);
+    //P110 = D12 = CAN RX — input, no PDR
+    R_PFS->PORT[1].PIN[10].PmnPFS = (0x10UL << 24) | (1UL << 16);
 
+    //Clear BOWI
     R_PMISC->PWPR = 0x00;
+    //lock PSFWE
     R_PMISC->PWPR = 0x80;
 }
