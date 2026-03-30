@@ -67,9 +67,9 @@ void CanBus::SetDifferentPins() {
     R_PMISC->PWPR = 0x00;
     R_PMISC->PWPR = 0x40;
 
-    // Release D4/D5 (P206/P205) back to GPIO
-    R_PFS->PORT[2].PIN[6].PmnPFS = 0;
-    R_PFS->PORT[2].PIN[5].PmnPFS = 0;
+    // Release D4/D5 (P103/P102) back to GPIO
+    R_PFS->PORT[1].PIN[2].PmnPFS = 0;
+    R_PFS->PORT[1].PIN[3].PmnPFS = 0;
 
     // P109 = D12 = CRXD0 (CAN RX) — input, PSEL=0x10, PMR=1
     R_PFS->PORT[1].PIN[9].PmnPFS = (0x10UL << 24) | (1UL << 16);
