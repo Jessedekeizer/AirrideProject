@@ -1,5 +1,6 @@
 #ifndef COMMUNICATION_H
 #define COMMUNICATION_H
+
 #include <functional>
 #include <vector>
 #include "CanID.h"

@@ -1,6 +1,6 @@
 #include "SettingsScreenCommunication.h"
 #include "CANMessages.h"
-#include "CanMessageIDs.h"
+#include "CanMessageIds.h"
 #include "Logger.h"
 
 void SettingsScreenCommunication::SendSettings(SettingsDevice &settings) {

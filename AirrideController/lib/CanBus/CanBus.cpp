@@ -3,7 +3,7 @@
 #include "Logger.h"
 
 void CanBus::Setup(int canTx, int canRx, ECanBitRate bitRate) {
-    CanBitRate canBitRate;
+    CanBitRate canBitRate = CanBitRate::BR_125k;
     switch (bitRate) {
         case ECanBitRate::B125K: {
             canBitRate = CanBitRate::BR_125k;

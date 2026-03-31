@@ -22,7 +22,9 @@ public:
 private:
     LargeCanMessage *GetLargeCanMessage(ECanNode sender, ECanMsgType msgType);
 
-    void AppendMessageToLargeMessage(LargeCanMessage &largeCanMessage, const CanMessage &message);
+    void AppendMessageToLargeMessage(LargeCanMessage *largeCanMessage, const CanMessage &message);
+
+    void CreateNewLargeMessage(CanId &canId, const CanMessage &message);
 
     std::vector<LargeCanMessage> largeCANMessages{};
     ICANBus &canBus;

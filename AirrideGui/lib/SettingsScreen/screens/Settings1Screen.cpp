@@ -1,5 +1,4 @@
 #include "Settings1Screen.h"
-
 #include "ESettingsScreenButtons.h"
 
 Settings1Screen::Settings1Screen(ScreenManager &screenManager, SettingsScreenCommunication &settingsScreenCommunication, SettingsDevice &settingsDevice, SettingsStorage &settingsStorage, DisplayService &displayService)

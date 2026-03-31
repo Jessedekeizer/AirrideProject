@@ -1,6 +1,6 @@
 #include "MainScreenCommunication.h"
 #include "CanMessages.h"
-#include "CanMessageIDs.h"
+#include "CanMessageIds.h"
 #include "Logger.h"
 
 MainScreenCommunication::MainScreenCommunication(Communication &communication, MainScreenData &mainScreenData,
