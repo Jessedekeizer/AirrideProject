@@ -9,14 +9,12 @@ MainScreen::MainScreen(MainScreenData &mainScreenData,
                        MainScreenCommunication &mainScreenCommunication,
                        ScreenManager &screenManager,
                        SettingsDevice &settings,
-                       DisplayService &displayService,
-                       LogStorage &logStorage)
+                       DisplayService &displayService)
     : mainScreenData(mainScreenData),
       mainScreenCommunication(mainScreenCommunication),
       screenManager(screenManager),
       settings(settings),
       displayService(displayService),
-      logStorage(logStorage),
       frontPressure(0.0),
       backPressure(0.0),
       BaseScreen(EScreen::MAIN, "/MainScreen.png") {
@@ -44,7 +42,7 @@ void MainScreen::OnSetup() {
 }
 
 MainScreen::~MainScreen() {
-    timerManager.removeTimer(autoRideTimer);
+    timerManager.RemoveTimer(autoRideTimer);
     delete autoRideTimer;
 }
 
@@ -58,7 +56,7 @@ void MainScreen::AddRideTimer() {
         return;
     }
     autoRideTimer = new Timer(settings.autoRideSec, [this]() { AutoStartRide(); });
-    timerManager.addTimer(autoRideTimer);
+    timerManager.AddTimer(autoRideTimer);
     LOG_DEBUG("MainScreen::addRideTimer - Timer added");
 }
 

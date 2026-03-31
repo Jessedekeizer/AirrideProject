@@ -9,7 +9,7 @@ void LogHandlerCommunication::SendLog(bool front, float startPressure, float end
     CANLogAirRide canLogAirRide{
         front, startPressure, endPressure, startTankPressure, static_cast<uint16_t>(time), direction, togetherMove
     };
-    communication.SendCANMessage(ECanNode::NODE_AIRRIDE_GUI, ECanMsgType::CAN_AIRRIDE_LOG, canLogAirRide);
+    communication.SendCanMessage(ECanNode::NODE_AIRRIDE_GUI, ECanMsgType::CAN_AIRRIDE_LOG, canLogAirRide);
 }
 
 

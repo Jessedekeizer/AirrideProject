@@ -38,19 +38,20 @@ void LogHandler::EndBackLog() {
 }
 
 void LogHandler::SendLog() {
-    if (sendLogFront && millis() - frontLogPreviousTime > timeInterval) {
+    unsigned long now = millis();
+    if (sendLogFront && now - frontLogPreviousTime > timeInterval) {
         float endPressure = frontPressureSensor.GetRawPressure();
         bool directionFront = startPressureFront - endPressure < 0;
         communication.SendLog(true, startPressureFront, endPressure, startTankPressureFront,
-                              (millis() - startTimeFront - timeInterval), directionFront,
+                              (now - startTimeFront - timeInterval), directionFront,
                               togetherMoveFront);
         sendLogFront = false;
     }
-    if (sendLogBack && millis() - backLogPreviousTime > timeInterval) {
+    if (sendLogBack && now - backLogPreviousTime > timeInterval) {
         float endPressure = backPressureSensor.GetRawPressure();
         bool directionBack = startPressureFront - endPressure < 0;
         communication.SendLog(false, startPressureBack, endPressure, startTankPressureBack,
-                              (millis() - startTimeBack - timeInterval), directionBack, togetherMoveBack);
+                              (now - startTimeBack - timeInterval), directionBack, togetherMoveBack);
         sendLogBack = false;
     }
 }

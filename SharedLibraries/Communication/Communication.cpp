@@ -70,7 +70,7 @@ void Communication::DecodeCanMessage(const CanMessage &message) {
     Notify(canID, message.data, message.dlc);
 }
 
-void Communication::SendCANMessage(ECanNode target, ECanMsgType type, const uint8_t *data, uint8_t length) {
+void Communication::SendCanMessage(ECanNode target, ECanMsgType type, const uint8_t *data, uint8_t length) {
     CanId canId;
     canId.src = me;
     canId.dst = target;

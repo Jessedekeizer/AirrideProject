@@ -22,9 +22,6 @@ public:
     void SendLog();
 
 private:
-    String CreateLogMessage(String message, float startPressure, float endPressure, float startTankPressure, long time,
-                            bool direction, bool togetherMove);
-
     unsigned long startTimeFront = 0;
     float startPressureFront = 0;
     float startTankPressureFront = 0;

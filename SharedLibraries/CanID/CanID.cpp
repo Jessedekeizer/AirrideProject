@@ -29,7 +29,7 @@ bool CanId::IsForNode(ECanNode me) const {
 }
 
 bool CanId::HasFlag() const {
-    return flags != ECanFlags::FLAG_NONE;
+    return flags != ECanFlags::FLAG_NONE && flags != ECanFlags::UNKNOWN;
 }
 
 bool CanId::FromRawValid() {

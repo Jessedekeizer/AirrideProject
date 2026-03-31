@@ -14,5 +14,5 @@ void SettingsScreenCommunication::SendSettings(SettingsDevice &settings) {
         settings.backDownX,
         settings.parkDuration
     };
-    communication.SendCANMessage(ECanNode::NODE_AIRRIDE_CONTROLLER, ECanMsgType::CAN_AIRRIDE_SETTINGS, canSettingsAirRide);
+    communication.SendCanMessage(ECanNode::NODE_AIRRIDE_CONTROLLER, ECanMsgType::CAN_AIRRIDE_SETTINGS, canSettingsAirRide);
 }

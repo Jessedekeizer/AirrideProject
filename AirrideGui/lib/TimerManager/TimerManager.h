@@ -5,14 +5,12 @@
 
 #define MAX_TIMERS 10
 
-class TimerManager
-{
+class TimerManager {
 private:
     TimerManager();
 
 public:
-    static TimerManager &GetInstance()
-    {
+    static TimerManager &GetInstance() {
         static TimerManager instance;
         return instance;
     }
@@ -20,9 +18,9 @@ public:
     TimerManager(const TimerManager &) = delete;
     TimerManager &operator=(const TimerManager &) = delete;
 
-    bool addTimer(Timer *timer);
-    void update();
-    bool removeTimer(Timer *timer);
+    bool AddTimer(Timer *timer);
+    void Update();
+    bool RemoveTimer(Timer *timer);
 
 private:
     Timer *timers[MAX_TIMERS];

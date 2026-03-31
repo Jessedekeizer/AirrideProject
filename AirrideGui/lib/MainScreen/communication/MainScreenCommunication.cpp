@@ -77,7 +77,7 @@ void MainScreenCommunication::SendMessageButtonPress(EMainScreenButtons button, 
             }
         }
     }
-    communication.SendCANMessage(ECanNode::NODE_AIRRIDE_CONTROLLER, ECanMsgType::CAN_AIRRIDE_CONTROL, canAirRideControl);
+    communication.SendCanMessage(ECanNode::NODE_AIRRIDE_CONTROLLER, ECanMsgType::CAN_AIRRIDE_CONTROL, canAirRideControl);
 }
 
 String MainScreenCommunication::CreateLogMessage(bool front, float startPressure, float endPressure,

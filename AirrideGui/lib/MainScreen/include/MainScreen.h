@@ -9,10 +9,9 @@
 #include "LogStorage.h"
 #include "Timer.h"
 
-class MainScreen : public BaseScreen
-{
+class MainScreen : public BaseScreen {
 public:
-    MainScreen(MainScreenData &mainScreenData, MainScreenCommunication &mainScreenCommunication, ScreenManager &screenManager, SettingsDevice &settings, DisplayService &displayService, LogStorage &logStorage);
+    MainScreen(MainScreenData &mainScreenData, MainScreenCommunication &mainScreenCommunication, ScreenManager &screenManager, SettingsDevice &settings, DisplayService &displayService);
     void OnLoop() override;
     void OnSetup() override;
     ~MainScreen() override;
@@ -28,7 +27,6 @@ private:
     ScreenManager &screenManager;
     SettingsDevice &settings;
     DisplayService &displayService;
-    LogStorage &logStorage;
     float frontPressure;
     float backPressure;
     bool abortAutoRide = false;

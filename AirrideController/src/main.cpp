@@ -8,7 +8,6 @@
 #include "Solenoid.h"
 #include "MainCommunication.h"
 #include "CanBus.h"
-#include "Logger.h"
 
 Settings settings;
 
@@ -18,12 +17,12 @@ Solenoid backUpSolenoid(ESolenoid::BACK_UP, PIN_D6);
 Solenoid backDownSolenoid(ESolenoid::BACK_DOWN, PIN_D7);
 SolenoidManager solenoidManager;
 
-#define analogMin 1638.4
-#define analogMax 14745.6
-#define barMax 14.82
-#define barTankMax 15.2
-#define frontFilterSize 16
-#define backFilterSize 10
+constexpr float analogMin = 1638.4f;
+constexpr float analogMax = 14745.6f;
+constexpr float barMax = 14.82f;
+constexpr float barTankMax = 15.2f;
+constexpr int frontFilterSize = 16;
+constexpr int backFilterSize = 10;
 
 PressureSensor frontPressureSensor(EPressureSensor::FRONT, A0, frontFilterSize, analogMin, analogMax, barMax);
 PressureSensor backPressureSensor(EPressureSensor::BACK, A1, backFilterSize, analogMin, analogMax, barMax);
@@ -46,10 +45,11 @@ MainStateMachine mainStateMachine(mainStateMachineData, mainStateMachineCommunic
 MainCommunication mainCommunication(communication, settings);
 
 unsigned long timePrevious = 0;
-int timeInterval = 200;
+constexpr int sendSensorInterval = 200;
 
 void setup() {
   Serial.begin(9600);
+  canBus.Setup(CAN1TX, CAN1RX, ECanBitRate::B500k);
   analogReadResolution(14);
 
   solenoidManager.AddSolenoid(frontDownSolenoid);
@@ -62,13 +62,13 @@ void setup() {
 
   solenoidManager.Begin();
   pressureSensorManager.Begin();
-  canBus.Setup(CAN1TX, CAN1RX, ECanBitRate::B500k);
+
   mainStateMachine.Begin();
   mainCommunication.Init();
 }
 
 void loop() {
-  if (millis() - timePrevious > timeInterval) {
+  if (millis() - timePrevious > sendSensorInterval) {
     pressureSensorManager.Update();
     mainCommunication.SendPressure(frontPressureSensor.GetRawPressure(), backPressureSensor.GetRawPressure());
     timePrevious = millis();

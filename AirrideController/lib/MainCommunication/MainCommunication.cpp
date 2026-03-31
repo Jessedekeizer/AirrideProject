@@ -8,7 +8,7 @@ MainCommunication::MainCommunication(Communication &communication, Settings &set
 
 void MainCommunication::SendPressure(float front, float back) {
     CANAirRidePressure canAirRidePressure{front, back};
-    communication.SendCANMessage(ECanNode::NODE_BROADCAST, ECanMsgType::CAN_AIRRIDE_PRESSURE, canAirRidePressure);
+    communication.SendCanMessage(ECanNode::NODE_BROADCAST, ECanMsgType::CAN_AIRRIDE_PRESSURE, canAirRidePressure);
 }
 
 void MainCommunication::Init() {
