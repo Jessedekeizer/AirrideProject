@@ -1,22 +1,35 @@
 #ifndef COMMUNICATION_H
 #define COMMUNICATION_H
-#include <functional>
-#include <WString.h>
-#include <vector>
-#include "ISerial.h"
-#include "StringQueue.h"
 
-using Callback = std::function<void(String &)>;
+#include <functional>
+#include <vector>
+#include "CanID.h"
+#include "ICanBus.h"
+#include "CanQueue.h"
+#include "LargeCanMessageHandler.h"
+
+using Callback = std::function<void(const CanId &, const uint8_t *, uint8_t)>;
 
 class Communication {
 public:
-    Communication(ISerial &serial, StringQueue &stringQueue);
+    Communication(ICANBus &canBus, CanQueue &stringQueue, LargeCanMessageHandler &largeCanMessageHandler, ECanNode me);
+
     ~Communication();
+
     int Subscribe(Callback callback);
+
     void Unsubscribe(int id);
-    void Notify(String &message);
+
+    void Notify(const CanId &canId, const uint8_t *data, uint8_t length);
+
     void CheckForMessage();
-    void SendMessage(String &message);
+
+    template<typename T>
+    void SendCANMessage(ECanNode target, ECanMsgType type, const T &messageStruct) {
+        SendCANMessage(target, type,
+                       reinterpret_cast<const uint8_t *>(&messageStruct),
+                       static_cast<uint8_t>(sizeof(T)));
+    }
 
 private:
     struct Subscription {
@@ -24,10 +37,16 @@ private:
         Callback callback;
     };
 
+    void SendCANMessage(ECanNode target, ECanMsgType type, const uint8_t *data, uint8_t length);
+
+    void DecodeCanMessage(const CanMessage &message);
+
     std::vector<Subscription> subscribers;
     unsigned int nextId;
-    ISerial &serial;
-    StringQueue &stringQueue;
+    ICANBus &canBus;
+    CanQueue &canQueue;
+    LargeCanMessageHandler &largeCanMessageHandler;
+    const ECanNode me;
 };
 
-#endif //COMMUNICATIONDISTRIBUTOR_H
+#endif // COMMUNICATION_H
