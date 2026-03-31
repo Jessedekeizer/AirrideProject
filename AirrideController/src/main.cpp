@@ -9,6 +9,11 @@
 #include "MainCommunication.h"
 #include "CanBus.h"
 
+void SetupHardware();
+void RegisterSensors();
+void RegisterSolenoids();
+void InitializeServices();
+
 Settings settings;
 
 Solenoid frontDownSolenoid(ESolenoid::FRONT_DOWN, PIN_D4);
@@ -48,23 +53,10 @@ unsigned long timePrevious = 0;
 constexpr int sendSensorInterval = 200;
 
 void setup() {
-  Serial.begin(9600);
-  canBus.Setup(CAN1TX, CAN1RX, ECanBitRate::B500k);
-  analogReadResolution(14);
-
-  solenoidManager.AddSolenoid(frontDownSolenoid);
-  solenoidManager.AddSolenoid(frontUpSolenoid);
-  solenoidManager.AddSolenoid(backDownSolenoid);
-  solenoidManager.AddSolenoid(backUpSolenoid);
-  pressureSensorManager.AddPressureSensor(frontPressureSensor);
-  pressureSensorManager.AddPressureSensor(backPressureSensor);
-  pressureSensorManager.AddPressureSensor(tankPressureSensor);
-
-  solenoidManager.Begin();
-  pressureSensorManager.Begin();
-
-  mainStateMachine.Begin();
-  mainCommunication.Init();
+  SetupHardware();
+  RegisterSensors();
+  RegisterSolenoids();
+  InitializeServices();
 }
 
 void loop() {
@@ -77,3 +69,30 @@ void loop() {
   mainStateMachine.Loop();
   logHandler.SendLog();
 }
+
+void SetupHardware() {
+  Serial.begin(9600);
+  analogReadResolution(14);
+  canBus.Setup(CAN1TX, CAN1RX, ECanBitRate::B500k);
+}
+
+void RegisterSensors() {
+  pressureSensorManager.AddPressureSensor(frontPressureSensor);
+  pressureSensorManager.AddPressureSensor(backPressureSensor);
+  pressureSensorManager.AddPressureSensor(tankPressureSensor);
+}
+
+void RegisterSolenoids() {
+  solenoidManager.AddSolenoid(frontDownSolenoid);
+  solenoidManager.AddSolenoid(frontUpSolenoid);
+  solenoidManager.AddSolenoid(backDownSolenoid);
+  solenoidManager.AddSolenoid(backUpSolenoid);
+}
+
+void InitializeServices() {
+  solenoidManager.Begin();
+  pressureSensorManager.Begin();
+  mainStateMachine.Begin();
+  mainCommunication.Init();
+}
+
