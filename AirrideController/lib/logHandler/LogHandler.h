@@ -34,7 +34,6 @@ private:
     bool togetherMoveBack = false;
     bool sendLogBack = false;
 
-    int timeInterval = 100;
     unsigned long frontLogPreviousTime = 0;
     unsigned long backLogPreviousTime = 0;
 

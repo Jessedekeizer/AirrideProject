@@ -1,105 +1,99 @@
 # Airride Control System
 
-A complete hardware and software solution for controlling air suspension systems in vehicles using a 4-way solenoid valve configuration.
+A complete hardware and software suite for controlling vehicle air suspension with a 4-way solenoid valve.
 
 ## Project Overview
 
-This project provides an integrated control system for car air suspension management, featuring:
-- **Touchscreen UI** with intuitive settings and real-time monitoring
-- **Dedicated controller** managing solenoid valves and pressure sensors
-- **Real-time communication** between UI and controller via serial protocol
+This repository contains two embedded projects plus shared utilities:
+- `AirrideGui`  — ESP32-based touchscreen UI (TFT display)
+- `AirrideController` — Arduino R4 Minima-based control firmware (solenoid + sensor management)
+- `SharedLibraries` — common communication, CAN/serial, and utility libraries
 
-## Project Structure
+Main capabilities:
+- touchscreen control and visualization of suspension state
+- pressure sensing and safety limit handling
+- 4-way solenoid lift/lower control
+- serial/CAN communication between GUI and controller
 
-```
-AirrideScreen/          - ESP32-based touchscreen UI with TFT display
-├── lib/                - UI components and screen implementations
-│   ├── MainScreen/     - Primary operation interface
-│   ├── SettingsScreen/ - Configuration screens (4 pages)
-│   ├── CalibrationScreen/ - Screen calibration
-│   └── ScreenManager/  - Screen navigation and management
-└── src/
-    └── main.cpp        - UI application entry point
+## Repository Structure
 
-UsbSerial/              - Arduino R4 Minima-based controller
-├── lib/                - Core control logic
-│   ├── StateMachine/   - Vehicle state management
-│   ├── SolenoidManager/ - Solenoid valve control
-│   ├── PressureSensorManager/ - Sensor input handling
-│   └── LogHandler/     - Data logging via serial
-└── src/
-    └── main.cpp        - Controller application entry point
+- `AirrideGui/`
+  - `include/` and `lib/` UI modules
+  - `src/main.cpp` application entry
+  - `platformio.ini` ESP32 environment definitions
 
-SharedLibraries/        - Common utilities shared between projects
-├── Communication/      - Serial protocol implementation
-└── ISerial/           - Serial interface abstraction
-```
+- `AirrideController/`
+  - `include/` and `lib/` controller modules
+  - `src/main.cpp` controller entry
+  - `platformio.ini` Arduino R4 environments
+
+- `SharedLibraries/`
+  - reusable libs for `CanBus`, `CanMessage`, `Communication`, `ICanBus`, logging, etc.
 
 ## Hardware Architecture
 
-**UI Controller (AirrideScreen)**
-- ESP32-2432S028R
+UI Controller (`AirrideGui`)
+- Board: ESP32-2432S028R (CYD)
 
-**System Controller (UsbSerial)**
-- Microcontroller: Arduino R4 Minima
-- Solenoid Valves: 4x relay-controlled valves
-- Pressure Sensors: Multiple input channels for suspension monitoring
-
-See `images/Fritzing/` for detailed wiring diagrams. (Diagrams are for the new implementation with canbus)
+System Controller (`AirrideController`)
+- MCU: Arduino R4 Minima (AVR32)
+- Shield: 4-Relay shield
+- Solenoid drivers: 4 regulators/relays for 4-way control
+- Pressure sensors: analog/digital input monitoring
 
 ## Features
 
-### Main Screen
-- Real-time vehicle status display with suspension visualization
-- Visual feedback for suspension pressure
+- Touch-enabled runtime UI
+- Real-time pressure and state monitoring
+- Front/rear lift control
+- Height presets, calibration, and safety limits
+- Persistent settings via storage
+- Log and debug output over serial
 
-### Ride Settings
-- Independent front and rear suspension height adjustment
-- Configurable max pressure limits
-- Auto-level functionality based on pressure (Machine Learning to be added)
+## Build & Upload (PlatformIO)
 
-## Installation & Setup
+Requirements:
+- VS Code with PlatformIO extension (recommended)
+- PlatformIO CLI (`pip install platformio` optional)
 
-This project uses **PlatformIO** for build and dependency management.
-
-### Prerequisites
-- PlatformIO IDE or VS Code with PlatformIO extension
-- Arduino IDE (optional, for uploads)
-
-### Building
+Build:
 
 ```bash
-# AirrideScreen (ESP32)
-cd AirrideScreen
-pio run -e esp32doit-devkit-v1
+cd AirrideGui
+pio run
 
-# UsbSerial (Arduino R4 Minima)  
-cd UsbSerial
-pio run -e uno_r4_minima
+cd ../AirrideController
+pio run
 ```
 
-### Uploading
+Upload:
 
 ```bash
-# Upload to device
+cd AirrideGui
+pio run -t upload
+
+cd ../AirrideController
 pio run -t upload
 ```
 
+If specific board environments are needed, inspect `platformio.ini` for environment names.
+
 ## Communication Protocol
 
-The UI and controller communicate via a custom serial protocol. See `SharedLibraries/Communication/` for protocol implementation details.
+- GUI ↔ controller over CAN-Bus
+- Shared protocol code in `SharedLibraries/Communication/`
+- For message IDs and formats, review `SharedLibraries/CanMessage*/`
 
-## Contributing
-
-This project is actively maintained and open to improvements. Areas for improvements include:
-- Canbus
-- Machine Learning
-- Bluetooth
 
 ## Status
 
-Core functionality is complete and stable. Ongoing feature additions and refinements are in progress.
+Basic functionality implemented and operational; ongoing work for:
+- complete CAN integration
+- auto-leveling and learning behavior
+- tuning and hardware testing
+- create custom hardware
 
 ---
 
 **Built with:** PlatformIO, C++, TFT_eSPI, Arduino Framework
+

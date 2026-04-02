@@ -2,6 +2,8 @@
 #include "Arduino.h"
 #include "PressureSensorManager.h"
 
+constexpr int timeInterval = 100;
+
 LogHandler::LogHandler(LogHandlerCommunication &communication, PressureSensor &frontPressureSensor,
                        PressureSensor &backPressureSensor, PressureSensor &tankPressureSensor)
     : communication(communication), frontPressureSensor(frontPressureSensor), backPressureSensor(backPressureSensor),
