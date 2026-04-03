@@ -34,11 +34,11 @@ bool CanId::HasFlag() const {
 
 bool CanId::FromRawValid() {
     if (src != ECanNode::UNKNOWN && dst != ECanNode::UNKNOWN && type != ECanMsgType::UNKNOWN && flags != ECanFlags::UNKNOWN) {
-        LOG_ERROR("CanID parse failed: src:", static_cast<int8_t>(src), "dst:",
-                  static_cast<int8_t>(dst), "type:", static_cast<int16_t>(type), "flags:",
-                  static_cast<int8_t>(flags));
         return true;
     }
+    LOG_ERROR("CanID parse failed: src:", static_cast<int8_t>(src), "dst:",
+                  static_cast<int8_t>(dst), "type:", static_cast<int16_t>(type), "flags:",
+                  static_cast<int8_t>(flags));
     return false;
 }
 

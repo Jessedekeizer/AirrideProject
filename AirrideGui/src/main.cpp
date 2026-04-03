@@ -77,8 +77,8 @@ void setup() {
   InitializeHardware();
   InitializeServices();
   RegisterScreens();
-  InitializeScreen();
   SendSettings();
+  InitializeScreen();
   tickTimer = new Timer(0.1, []() { UpdateTouchScreen(); }, true);
   timerManager.AddTimer(tickTimer);
 }
