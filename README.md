@@ -2,6 +2,8 @@
 
 A complete hardware and software suite for controlling vehicle air suspension with a 4-way solenoid valve.
 
+![Air Suspension BMW E36 M3](https://i.makeagif.com/media/3-18-2016/nYbASy.gif)
+
 ## Project Overview
 
 This repository contains two embedded projects plus shared utilities:
@@ -13,7 +15,7 @@ Main capabilities:
 - touchscreen control and visualization of suspension state
 - pressure sensing and safety limit handling
 - 4-way solenoid lift/lower control
-- serial/CAN communication between GUI and controller
+- CAN communication between GUI and controller
 
 ## Repository Structure
 
@@ -40,6 +42,12 @@ System Controller (`AirrideController`)
 - Shield: 4-Relay shield
 - Solenoid drivers: 4 regulators/relays for 4-way control
 - Pressure sensors: analog/digital input monitoring
+
+## System Schematic
+
+![Airride System Schematic](airride_scematic.avif)
+
+This schematic illustrates the complete wiring and component connections for the airride control system. It shows the integration of the ESP32-based touchscreen GUI controller(black device next to ecu) with the Arduino R4 Minima(ECU in picture). The diagram provides a visual overview of how all hardware components interconnect to enable real-time suspension control and monitoring.
 
 ## Features
 
