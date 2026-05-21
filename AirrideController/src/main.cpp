@@ -8,11 +8,13 @@
 #include "Solenoid.h"
 #include "MainCommunication.h"
 #include "CanBus.h"
+#include <Arduino_FreeRTOS.h>
 
 void SetupHardware();
 void RegisterSensors();
 void RegisterSolenoids();
 void InitializeServices();
+void MainTask(void *arg);
 
 Settings settings;
 
@@ -34,10 +36,9 @@ PressureSensor backPressureSensor(EPressureSensor::BACK, A1, backFilterSize, ana
 PressureSensor tankPressureSensor(EPressureSensor::TANK, A2, backFilterSize, analogMin, analogMax, barTankMax);
 PressureSensorManager pressureSensorManager(frontUpSolenoid, backUpSolenoid, settings);
 
-CanQueue canQueue;
-CanBus canBus(canQueue);
-LargeCanMessageHandler largeCanMessageHandler(canBus);
-Communication communication(canBus, canQueue, largeCanMessageHandler, ECanNode::NODE_AIRRIDE_CONTROLLER);
+CanBus canBus;
+LargeCanMessageHandler largeCanMessageHandler;
+Communication communication(largeCanMessageHandler, ECanNode::NODE_AIRRIDE_CONTROLLER);
 
 LogHandlerCommunication logHandlerCommunication(communication);
 LogHandler logHandler(logHandlerCommunication, frontPressureSensor, backPressureSensor, tankPressureSensor);
@@ -49,50 +50,62 @@ MainStateMachine mainStateMachine(mainStateMachineData, mainStateMachineCommunic
 
 MainCommunication mainCommunication(communication, settings);
 
-unsigned long timePrevious = 0;
-constexpr int sendSensorInterval = 200;
-
 void setup() {
-  SetupHardware();
-  RegisterSensors();
-  RegisterSolenoids();
-  InitializeServices();
+    SetupHardware();
+    RegisterSensors();
+    RegisterSolenoids();
+    InitializeServices();
+
+    xTaskCreate(MainTask, "Main", 512, nullptr, 1, nullptr);
+
+    vTaskStartScheduler();
 }
 
-void loop() {
-  if (millis() - timePrevious > sendSensorInterval) {
-    pressureSensorManager.Update();
-    mainCommunication.SendPressure(frontPressureSensor.GetRawPressure(), backPressureSensor.GetRawPressure());
-    timePrevious = millis();
-  }
-  communication.CheckForMessage();
-  mainStateMachine.Loop();
-  logHandler.SendLog();
+void loop() {}
+
+void MainTask(void *arg) {
+    (void) arg;
+    unsigned long timePrevious = 0;
+    constexpr int sendSensorInterval = 200;
+
+    for (;;) {
+        communication.CheckForMessage();
+        mainStateMachine.Loop();
+        logHandler.SendLog();
+
+        if (millis() - timePrevious > sendSensorInterval) {
+            pressureSensorManager.Update();
+            mainCommunication.SendPressure(frontPressureSensor.GetRawPressure(), backPressureSensor.GetRawPressure());
+            timePrevious = millis();
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(1));
+    }
 }
 
 void SetupHardware() {
-  Serial.begin(9600);
-  analogReadResolution(14);
-  canBus.Setup(CAN1TX, CAN1RX, ECanBitRate::B500k);
+    Serial.begin(9600);
+    analogReadResolution(14);
+    canBus.Setup(CAN1TX, CAN1RX, ECanBitRate::B500k);
+    communication.SetQueues(canBus.GetRxQueue(), canBus.GetTxQueue());
 }
 
 void RegisterSensors() {
-  pressureSensorManager.AddPressureSensor(frontPressureSensor);
-  pressureSensorManager.AddPressureSensor(backPressureSensor);
-  pressureSensorManager.AddPressureSensor(tankPressureSensor);
+    pressureSensorManager.AddPressureSensor(frontPressureSensor);
+    pressureSensorManager.AddPressureSensor(backPressureSensor);
+    pressureSensorManager.AddPressureSensor(tankPressureSensor);
 }
 
 void RegisterSolenoids() {
-  solenoidManager.AddSolenoid(frontDownSolenoid);
-  solenoidManager.AddSolenoid(frontUpSolenoid);
-  solenoidManager.AddSolenoid(backDownSolenoid);
-  solenoidManager.AddSolenoid(backUpSolenoid);
+    solenoidManager.AddSolenoid(frontDownSolenoid);
+    solenoidManager.AddSolenoid(frontUpSolenoid);
+    solenoidManager.AddSolenoid(backDownSolenoid);
+    solenoidManager.AddSolenoid(backUpSolenoid);
 }
 
 void InitializeServices() {
-  solenoidManager.Begin();
-  pressureSensorManager.Begin();
-  mainStateMachine.Begin();
-  mainCommunication.Init();
+    solenoidManager.Begin();
+    pressureSensorManager.Begin();
+    mainStateMachine.Begin();
+    mainCommunication.Init();
 }
-
