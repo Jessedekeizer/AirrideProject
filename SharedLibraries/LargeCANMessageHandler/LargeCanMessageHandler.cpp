@@ -5,9 +5,10 @@
 #include "Logger.h"
 
 #define MAX_CAN_DATA_LENGTH 8
-#define DELAY_BETWEEN_SENDING_MS 5
 
 void LargeCanMessageHandler::SendLargeMessage(CanId &canId, const uint8_t *data, uint8_t length) {
+    if (txQueue == nullptr) return;
+
     int amountOfMessages = (length + MAX_CAN_DATA_LENGTH - 1) / MAX_CAN_DATA_LENGTH;
 
     for (int i = 0; i < amountOfMessages; i++) {
@@ -31,8 +32,9 @@ void LargeCanMessageHandler::SendLargeMessage(CanId &canId, const uint8_t *data,
         canMessage.dlc = dlc;
         memcpy(canMessage.data, data + i * MAX_CAN_DATA_LENGTH, dlc);
 
-        canBus.SendMessage(canMessage);
-        delay(DELAY_BETWEEN_SENDING_MS);
+        if (xQueueSend(txQueue, &canMessage, pdMS_TO_TICKS(10)) != pdTRUE) {
+            LOG_ERROR("TX: Large message queue full");
+        }
     }
 }
 
@@ -104,5 +106,3 @@ void LargeCanMessageHandler::AppendMessageToLargeMessage(LargeCanMessage *largeC
     }
     largeCanMessage->length = static_cast<uint8_t>(largeCanMessage->data.size());
 }
-
-

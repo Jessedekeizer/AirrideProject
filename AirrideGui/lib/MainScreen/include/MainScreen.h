@@ -7,7 +7,8 @@
 #include "ScreenManager.h"
 #include "SettingsDevice.h"
 #include "LogStorage.h"
-#include "Timer.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/timers.h"
 
 class MainScreen : public BaseScreen {
 public:
@@ -30,7 +31,9 @@ private:
     float frontPressure;
     float backPressure;
     bool abortAutoRide = false;
-    Timer *autoRideTimer = nullptr;
+    TimerHandle_t autoRideTimer = nullptr;
+
+    static void AutoRideTimerCallback(TimerHandle_t xTimer);
 };
 
 #endif

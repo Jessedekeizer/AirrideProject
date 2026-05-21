@@ -4,14 +4,19 @@
 #include "LargeCanMessage.h"
 #define MAX_CAN_DATA_LENGTH 8
 
-Communication::Communication(ICANBus &canBus, CanQueue &stringQueue, LargeCanMessageHandler &largeCanMessageHandler,
-                             ECanNode me) : nextId(0), canBus(canBus),
-                                            canQueue(stringQueue), largeCanMessageHandler(largeCanMessageHandler),
-                                            me(me) {
+Communication::Communication(LargeCanMessageHandler &largeCanMessageHandler, ECanNode me)
+    : nextId(0), rxQueue(nullptr), txQueue(nullptr),
+      largeCanMessageHandler(largeCanMessageHandler), me(me) {
 }
 
 Communication::~Communication() {
     subscribers.clear();
+}
+
+void Communication::SetQueues(QueueHandle_t rx, QueueHandle_t tx) {
+    rxQueue = rx;
+    txQueue = tx;
+    largeCanMessageHandler.SetTxQueue(tx);
 }
 
 int Communication::Subscribe(Callback callback) {
@@ -41,12 +46,9 @@ void Communication::Notify(const CanId &canId, const uint8_t *data, uint8_t leng
 }
 
 void Communication::CheckForMessage() {
-    if (canBus.ReceiveAvailable()) {
-        canBus.Receive();
-    }
+    if (rxQueue == nullptr) return;
     CanMessage message{};
-
-    if (canQueue.dequeue(message)) {
+    while (xQueueReceive(rxQueue, &message, 0) == pdTRUE) {
         DecodeCanMessage(message);
     }
 }
@@ -64,13 +66,15 @@ void Communication::DecodeCanMessage(const CanMessage &message) {
         if (largeMessage) {
             Notify(canID, largeMessage->data.data(), largeMessage->length);
             largeCanMessageHandler.RemoveLargeMessage(canID.src, canID.type);
-            return;
         }
+        return;
     }
     Notify(canID, message.data, message.dlc);
 }
 
 void Communication::SendCanMessage(ECanNode target, ECanMsgType type, const uint8_t *data, uint8_t length) {
+    if (txQueue == nullptr) return;
+
     CanId canId;
     canId.src = me;
     canId.dst = target;
@@ -87,5 +91,7 @@ void Communication::SendCanMessage(ECanNode target, ECanMsgType type, const uint
     msg.dlc = length;
     memcpy(msg.data, data, length);
 
-    canBus.SendMessage(msg);
+    if (xQueueSend(txQueue, &msg, pdMS_TO_TICKS(10)) != pdTRUE) {
+        LOG_ERROR("TX: Queue full");
+    }
 }

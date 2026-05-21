@@ -1,25 +1,31 @@
 #ifndef CANBUS_H
 #define CANBUS_H
-#include "CanQueue.h"
-#include "ICANBus.h"
+#include "CanMessage.h"
+#include "ECanBitRate.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
+#include "freertos/task.h"
+#include "driver/twai.h"
 
+#define CAN_RX_QUEUE_SIZE 20
+#define CAN_TX_QUEUE_SIZE 20
 
-class CanBus : public ICANBus {
+class CanBus {
 public:
-    CanBus(CanQueue &canQueue) : canQueue(canQueue), canReady(false) {
-    };
+    CanBus() : canReady(false), rxQueue(nullptr), txQueue(nullptr) {};
 
-    void Setup(int canTx, int canRx, ECanBitRate bitRate) override;
+    void Setup(int canTx, int canRx, ECanBitRate bitRate);
 
-    void SendMessage(CanMessage &message) override;
-
-    bool ReceiveAvailable() override;
-
-    void Receive() override;
+    QueueHandle_t GetRxQueue() const { return rxQueue; }
+    QueueHandle_t GetTxQueue() const { return txQueue; }
 
 private:
-    CanQueue &canQueue;
     bool canReady;
+    QueueHandle_t rxQueue;
+    QueueHandle_t txQueue;
+
+    static void RxTask(void *arg);
+    static void TxTask(void *arg);
 };
 
 

@@ -3,15 +3,16 @@
 #include <vector>
 #include "LargeCanMessage.h"
 #include "CanMessage.h"
-#include "ICANBus.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
 
 class LargeCanMessageHandler {
 public:
-    LargeCanMessageHandler(ICANBus &canBus) : canBus(canBus) {
-    };
+    LargeCanMessageHandler() : txQueue(nullptr) {};
 
-    ~LargeCanMessageHandler() {
-    };
+    ~LargeCanMessageHandler() {};
+
+    void SetTxQueue(QueueHandle_t queue) { txQueue = queue; }
 
     LargeCanMessage *HandleLargeCanMessage(const CanMessage &message);
 
@@ -27,7 +28,7 @@ private:
     void CreateNewLargeMessage(CanId &canId, const CanMessage &message);
 
     std::vector<LargeCanMessage> largeCANMessages{};
-    ICANBus &canBus;
+    QueueHandle_t txQueue;
 };
 
 #endif // LARGECANMESSAGEHANDLER_H
