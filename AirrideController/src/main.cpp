@@ -65,18 +65,21 @@ void loop() {}
 
 void MainTask(void *arg) {
     (void) arg;
-    unsigned long timePrevious = 0;
-    constexpr int sendSensorInterval = 200;
+    TickType_t lastSensorWake = xTaskGetTickCount();
+    constexpr TickType_t sensorInterval = pdMS_TO_TICKS(200);
 
     for (;;) {
         communication.CheckForMessage();
         mainStateMachine.Loop();
         logHandler.SendLog();
 
-        if (millis() - timePrevious > sendSensorInterval) {
+        if (xTaskGetTickCount() - lastSensorWake >= sensorInterval) {
             pressureSensorManager.Update();
-            mainCommunication.SendPressure(frontPressureSensor.GetRawPressure(), backPressureSensor.GetRawPressure());
-            timePrevious = millis();
+            mainCommunication.SendPressure(
+                frontPressureSensor.GetRawPressure(),
+                backPressureSensor.GetRawPressure()
+            );
+            lastSensorWake = xTaskGetTickCount();
         }
 
         vTaskDelay(pdMS_TO_TICKS(1));

@@ -3,8 +3,7 @@
 #include <vector>
 #include "LargeCanMessage.h"
 #include "CanMessage.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/queue.h"
+#include "freertos_include.h"
 
 class LargeCanMessageHandler {
 public:

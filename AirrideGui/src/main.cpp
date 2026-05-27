@@ -87,9 +87,10 @@ void loop() {
 
 void UpdateTouchScreen() {
     const TouchPoint touch = touchScreen.getTouch();
-    const auto activeScreen = screenManager.GetActiveScreen();
+    IScreen *activeScreen = screenManager.GetActiveScreen();
     if (touch.zRaw != 0) {
         activeScreen->HandleTouch(touch.x, touch.y);
+        activeScreen = screenManager.GetActiveScreen(); // re-fetch: HandleTouch may have changed screen
     }
     else {
         activeScreen->ReleaseButtons();

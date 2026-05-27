@@ -90,7 +90,7 @@ void CanBus::TxTask(void *arg)
             {
                 LOG_ERROR("TX: Failed");
             }
-            vTaskDelay(pdMS_TO_TICKS(TIME_BETWEEN_TX_MESSAGES));
+            vTaskDelay(pdMS_TO_TICKS(TIME_BETWEEN_TX_MESSAGES_IN_MS));
         }
     }
 }

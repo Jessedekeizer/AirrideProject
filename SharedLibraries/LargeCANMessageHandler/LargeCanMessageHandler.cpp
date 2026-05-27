@@ -47,6 +47,7 @@ LargeCanMessage *LargeCanMessageHandler::HandleLargeCanMessage(const CanMessage 
             if (largeCanMessage) {
                 RemoveLargeMessage(canId.src, canId.type);
             }
+            LOG_DEBUG("New large message");
             CreateNewLargeMessage(canId, message);
             break;
         }
@@ -79,7 +80,6 @@ LargeCanMessage *LargeCanMessageHandler::GetLargeCanMessage(ECanNode sender, ECa
         LOG_DEBUG("Found large message at:", static_cast<uint8_t>(it->id.src), static_cast<uint16_t>(it->id.type));
         return &(*it);
     }
-    LOG_DEBUG("No large message found");
     return nullptr;
 }
 

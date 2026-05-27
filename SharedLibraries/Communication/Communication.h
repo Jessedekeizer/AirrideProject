@@ -4,10 +4,8 @@
 #include <functional>
 #include <vector>
 #include "CanID.h"
-#include "ICanBus.h"
 #include "LargeCanMessageHandler.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/queue.h"
+#include "freertos_include.h"
 
 using Callback = std::function<void(const CanId &, const uint8_t *, uint8_t)>;
 
