@@ -2,7 +2,6 @@
 #include "MainScreenGeometry.h"
 #include "MainScreenCommunication.h"
 #include "ScreenManager.h"
-#include "TimerManager.h"
 #include "Logger.h"
 
 MainScreen::MainScreen(MainScreenData &mainScreenData,
@@ -42,8 +41,11 @@ void MainScreen::OnSetup() {
 }
 
 MainScreen::~MainScreen() {
-    timerManager.RemoveTimer(autoRideTimer);
-    delete autoRideTimer;
+    if (autoRideTimer != nullptr) {
+        xTimerStop(autoRideTimer, 0);
+        xTimerDelete(autoRideTimer, 0);
+        autoRideTimer = nullptr;
+    }
 }
 
 void MainScreen::AddRideTimer() {
@@ -55,9 +57,22 @@ void MainScreen::AddRideTimer() {
         LOG_DEBUG("MainScreen::addRideTimer - Timer already exists, not adding again");
         return;
     }
-    autoRideTimer = new Timer(settings.autoRideSec, [this]() { AutoStartRide(); });
-    timerManager.AddTimer(autoRideTimer);
-    LOG_DEBUG("MainScreen::addRideTimer - Timer added");
+    autoRideTimer = xTimerCreate(
+        "AutoRide",
+        pdMS_TO_TICKS(static_cast<uint32_t>(settings.autoRideSec * 1000)),
+        pdFALSE,
+        this,
+        AutoRideTimerCallback
+    );
+    if (autoRideTimer != nullptr) {
+        xTimerStart(autoRideTimer, 0);
+        LOG_DEBUG("MainScreen::addRideTimer - Timer added");
+    }
+}
+
+void MainScreen::AutoRideTimerCallback(TimerHandle_t xTimer) {
+    MainScreen *self = static_cast<MainScreen *>(pvTimerGetTimerID(xTimer));
+    self->AutoStartRide();
 }
 
 void MainScreen::OnLoop() {

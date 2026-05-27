@@ -22,6 +22,10 @@ public:
     void SendLog();
 
 private:
+    void SendAxisLog(bool front, PressureSensor &sensor, float startPressure, float startTankPressure,
+                     unsigned long startTime, unsigned long previousTime, bool togetherMove, bool &sendFlag,
+                     unsigned long now);
+
     unsigned long startTimeFront = 0;
     float startPressureFront = 0;
     float startTankPressureFront = 0;

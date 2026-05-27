@@ -1,6 +1,5 @@
 #include "LogHandler.h"
 #include "Arduino.h"
-#include "PressureSensorManager.h"
 
 constexpr int timeInterval = 100;
 
@@ -39,21 +38,21 @@ void LogHandler::EndBackLog() {
     backLogPreviousTime = millis();
 }
 
+void LogHandler::SendAxisLog(bool front, PressureSensor &sensor, float startPressure, float startTankPressure,
+                              unsigned long startTime, unsigned long previousTime, bool togetherMove, bool &sendFlag,
+                              unsigned long now) {
+    if (!sendFlag || now - previousTime <= timeInterval) return;
+    float endPressure = sensor.GetRawPressure();
+    bool direction = startPressure - endPressure < 0;
+    communication.SendLog(front, startPressure, endPressure, startTankPressure,
+                          (now - startTime - timeInterval), direction, togetherMove);
+    sendFlag = false;
+}
+
 void LogHandler::SendLog() {
     unsigned long now = millis();
-    if (sendLogFront && now - frontLogPreviousTime > timeInterval) {
-        float endPressure = frontPressureSensor.GetRawPressure();
-        bool directionFront = startPressureFront - endPressure < 0;
-        communication.SendLog(true, startPressureFront, endPressure, startTankPressureFront,
-                              (now - startTimeFront - timeInterval), directionFront,
-                              togetherMoveFront);
-        sendLogFront = false;
-    }
-    if (sendLogBack && now - backLogPreviousTime > timeInterval) {
-        float endPressure = backPressureSensor.GetRawPressure();
-        bool directionBack = startPressureFront - endPressure < 0;
-        communication.SendLog(false, startPressureBack, endPressure, startTankPressureBack,
-                              (now - startTimeBack - timeInterval), directionBack, togetherMoveBack);
-        sendLogBack = false;
-    }
+    SendAxisLog(true,  frontPressureSensor, startPressureFront, startTankPressureFront,
+                startTimeFront, frontLogPreviousTime, togetherMoveFront, sendLogFront, now);
+    SendAxisLog(false, backPressureSensor,  startPressureBack,  startTankPressureBack,
+                startTimeBack,  backLogPreviousTime,  togetherMoveBack,  sendLogBack,  now);
 }

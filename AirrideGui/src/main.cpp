@@ -16,7 +16,6 @@
 #include "CalibrationScreen.h"
 
 #include "Logger.h"
-#include "TimerManager.h"
 #include "SdCardService.h"
 #include "DisplayService.h"
 #include "LogStorage.h"
@@ -34,15 +33,13 @@
 
 XPT2046_Bitbang touchScreen(MOSI_PIN, MISO_PIN, CLK_PIN, CS_PIN);
 
-void printTouchToSerial(TouchPoint);
+void printTouchToSerial(const TouchPoint &);
 void UpdateTouchScreen();
 void InitializeHardware();
 void InitializeServices();
 void RegisterScreens();
 void InitializeScreen();
 void SendSettings();
-
-Timer *tickTimer = nullptr;
 
 SPIClass spiSD = SPIClass(VSPI);
 
@@ -55,11 +52,9 @@ ScreenManager screenManager(displayService);
 
 SettingsDevice settings;
 
-CanQueue stringQueue;
-
-CanBus canBus(stringQueue);
-LargeCanMessageHandler largeCanMessageHandler(canBus);
-Communication communication(canBus, stringQueue, largeCanMessageHandler, ECanNode::NODE_AIRRIDE_GUI);
+CanBus canBus;
+LargeCanMessageHandler largeCanMessageHandler;
+Communication communication(largeCanMessageHandler, ECanNode::NODE_AIRRIDE_GUI);
 
 MainScreenData mainScreenData;
 MainScreenCommunication mainScreenCommunication(communication, mainScreenData, logStorage);
@@ -74,72 +69,71 @@ Settings4Screen settings4Screen(screenManager, settingsScreenCommunication, sett
 CalibrationScreen calibrationScreen(screenManager, settings, settingsStorage, displayService, touchScreen);
 
 void setup() {
-  InitializeHardware();
-  InitializeServices();
-  RegisterScreens();
-  SendSettings();
-  InitializeScreen();
-  tickTimer = new Timer(0.1, []() { UpdateTouchScreen(); }, true);
-  timerManager.AddTimer(tickTimer);
+    InitializeHardware();
+    InitializeServices();
+    RegisterScreens();
+    SendSettings();
+    InitializeScreen();
 }
 
 //====================================================================================
 //                                    Loop
 //====================================================================================
 void loop() {
-  timerManager.Update();
-  communication.CheckForMessage();
+    communication.CheckForMessage();
+    UpdateTouchScreen();
+    vTaskDelay(pdMS_TO_TICKS(100));
 }
 
 void UpdateTouchScreen() {
-  const TouchPoint touch = touchScreen.getTouch();
-  const auto activeScreen = screenManager.GetActiveScreen();
-  if (touch.zRaw != 0) {
-    // printTouchToSerial(touch);
-    activeScreen->HandleTouch(touch.x, touch.y);
-  }
-  else {
-    activeScreen->ReleaseButtons();
-  }
-  activeScreen->OnLoop();
+    const TouchPoint touch = touchScreen.getTouch();
+    IScreen *activeScreen = screenManager.GetActiveScreen();
+    if (touch.zRaw != 0) {
+        activeScreen->HandleTouch(touch.x, touch.y);
+        activeScreen = screenManager.GetActiveScreen(); // re-fetch: HandleTouch may have changed screen
+    }
+    else {
+        activeScreen->ReleaseButtons();
+    }
+    activeScreen->OnLoop();
 }
 
 void InitializeHardware() {
-  Serial.begin(SERIAL_BAUD_RATE, SERIAL_8N1);
-  canBus.Setup(SERIAL2_TX_PIN, SERIAL2_RX_PIN, ECanBitRate::B500k);
-  touchScreen.begin();
+    Serial.begin(SERIAL_BAUD_RATE, SERIAL_8N1);
+    canBus.Setup(SERIAL2_TX_PIN, SERIAL2_RX_PIN, ECanBitRate::B500k);
+    communication.SetQueues(canBus.GetRxQueue(), canBus.GetTxQueue());
+    touchScreen.begin();
 }
 
 void InitializeServices() {
-  sdCardService.Begin();
-  displayService.Begin();
-  timerManager.GetInstance();
+    sdCardService.Begin();
+    displayService.Begin();
 }
 
 void RegisterScreens() {
-  screenManager.AddScreen(&mainScreen);
-  screenManager.AddScreen(&settings1Screen);
-  screenManager.AddScreen(&settings2Screen);
-  screenManager.AddScreen(&settings3Screen);
-  screenManager.AddScreen(&settings4Screen);
-  screenManager.AddScreen(&calibrationScreen);
+    screenManager.AddScreen(&mainScreen);
+    screenManager.AddScreen(&settings1Screen);
+    screenManager.AddScreen(&settings2Screen);
+    screenManager.AddScreen(&settings3Screen);
+    screenManager.AddScreen(&settings4Screen);
+    screenManager.AddScreen(&calibrationScreen);
 }
 
 void InitializeScreen() {
-  if (!settings.calibrationSet) {
-    screenManager.RequestScreen(EScreen::CALIBRATION);
-  }
-  else {
-    touchScreen.setCalibration(settings.xmin, settings.xmax, settings.ymin, settings.ymax);
-    screenManager.RequestScreen(EScreen::MAIN);
-  }
+    if (!settings.calibrationSet) {
+        screenManager.RequestScreen(EScreen::CALIBRATION);
+    }
+    else {
+        touchScreen.setCalibration(settings.xmin, settings.xmax, settings.ymin, settings.ymax);
+        screenManager.RequestScreen(EScreen::MAIN);
+    }
 }
 
 void SendSettings() {
-  settingsStorage.ReadSettings(settings);
-  settingsScreenCommunication.SendSettings(settings);
+    settingsStorage.ReadSettings(settings);
+    settingsScreenCommunication.SendSettings(settings);
 }
 
-void printTouchToSerial(TouchPoint p) {
-  LOG_DEBUG("Touch: X=", p.x, ", Y=", p.y, ", ZRaw=", p.zRaw);
+void printTouchToSerial(const TouchPoint &p) {
+    LOG_DEBUG("Touch: X=", p.x, ", Y=", p.y, ", ZRaw=", p.zRaw);
 }

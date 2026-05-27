@@ -4,17 +4,18 @@
 #include <functional>
 #include <vector>
 #include "CanID.h"
-#include "ICanBus.h"
-#include "CanQueue.h"
 #include "LargeCanMessageHandler.h"
+#include "freertos_include.h"
 
 using Callback = std::function<void(const CanId &, const uint8_t *, uint8_t)>;
 
 class Communication {
 public:
-    Communication(ICANBus &canBus, CanQueue &stringQueue, LargeCanMessageHandler &largeCanMessageHandler, ECanNode me);
+    Communication(LargeCanMessageHandler &largeCanMessageHandler, ECanNode me);
 
     ~Communication();
+
+    void SetQueues(QueueHandle_t rxQueue, QueueHandle_t txQueue);
 
     int Subscribe(Callback callback);
 
@@ -43,8 +44,8 @@ private:
 
     std::vector<Subscription> subscribers;
     unsigned int nextId;
-    ICANBus &canBus;
-    CanQueue &canQueue;
+    QueueHandle_t rxQueue;
+    QueueHandle_t txQueue;
     LargeCanMessageHandler &largeCanMessageHandler;
     const ECanNode me;
 };
