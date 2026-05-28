@@ -7,6 +7,7 @@
 #include "PressureSensor.h"
 #include "Solenoid.h"
 #include "MainCommunication.h"
+#include "OTACommunication.h"
 #include "CanBus.h"
 #include <Arduino_FreeRTOS.h>
 
@@ -49,6 +50,7 @@ MainStateMachine mainStateMachine(mainStateMachineData, mainStateMachineCommunic
                                   pressureSensorManager, logHandler, settings);
 
 MainCommunication mainCommunication(communication, settings);
+OTACommunication otaCommunication(communication);
 
 void setup() {
     SetupHardware();
@@ -72,6 +74,7 @@ void MainTask(void *arg) {
         communication.CheckForMessage();
         mainStateMachine.Loop();
         logHandler.SendLog();
+        otaCommunication.Loop();
 
         if (xTaskGetTickCount() - lastSensorWake >= sensorInterval) {
             pressureSensorManager.Update();
@@ -111,4 +114,5 @@ void InitializeServices() {
     pressureSensorManager.Begin();
     mainStateMachine.Begin();
     mainCommunication.Init();
+    otaCommunication.Init();
 }

@@ -7,7 +7,8 @@ enum class EScreen {
     SETTINGS2,
     SETTINGS3,
     SETTINGS4,
-    CALIBRATION
+    CALIBRATION,
+    OTA
 };
 
 #endif //ESCREENS_H

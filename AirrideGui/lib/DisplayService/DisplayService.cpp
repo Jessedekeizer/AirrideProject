@@ -114,6 +114,7 @@ bool DisplayService::DrawImage(const char *path, int x, int y) {
     File testFile = sdCardService.GetFileSystem().open(path);
     if (!testFile || testFile.isDirectory()) {
         LOG_ERROR(String("DisplayService::DrawImage - failed to open image: ") + path);
+        tft.fillScreen(TFT_BLACK);
         return false;
     }
 

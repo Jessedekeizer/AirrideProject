@@ -14,6 +14,8 @@
 #include "Settings3Screen.h"
 #include "Settings4Screen.h"
 #include "CalibrationScreen.h"
+#include "OTACommunication.h"
+#include "OTAScreen.h"
 
 #include "Logger.h"
 #include "SdCardService.h"
@@ -67,6 +69,8 @@ Settings3Screen settings3Screen(screenManager, settingsScreenCommunication, sett
 Settings4Screen settings4Screen(screenManager, settingsScreenCommunication, settings, settingsStorage, displayService);
 
 CalibrationScreen calibrationScreen(screenManager, settings, settingsStorage, displayService, touchScreen);
+OTACommunication otaCommunication(communication);
+OTAScreen otaScreen(screenManager, displayService, otaCommunication);
 
 void setup() {
     InitializeHardware();
@@ -117,6 +121,7 @@ void RegisterScreens() {
     screenManager.AddScreen(&settings3Screen);
     screenManager.AddScreen(&settings4Screen);
     screenManager.AddScreen(&calibrationScreen);
+    screenManager.AddScreen(&otaScreen);
 }
 
 void InitializeScreen() {

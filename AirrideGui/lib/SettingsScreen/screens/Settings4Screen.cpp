@@ -50,6 +50,9 @@ Settings4Screen::Settings4Screen(ScreenManager &screenManager, SettingsScreenCom
     buttons.push_back(new PushButton(SETTINGSBTN_CALIB_X, 112, SETTINGSBTN_ADJ_W, SETTINGSBTN_ADJ_H, CALIBRATION,
                                      [this](Button &button) { HandleCalibration(); }));
 
+    buttons.push_back(new PushButton(SETTINGSBTN_CALIB_X, 168, SETTINGSBTN_ADJ_W, SETTINGSBTN_ADJ_H, OTA,
+                                     [this](Button &button) { HandleOTA(); }));
+
     buttons.push_back(new PushButton(SETTINGSBTN_NAV_LEFT_X, SETTINGSBTN_NAV_BOTTOM_Y, SETTINGSBTN_NAV_SIZE,
                                      SETTINGSBTN_NAV_SIZE, SETTINGS3,
                                      [this](Button &button) { HandleSettings3(); }));
@@ -126,4 +129,8 @@ void Settings4Screen::HandleSettings3() {
 
 void Settings4Screen::HandleCalibration() {
     screenManager.RequestScreen(EScreen::CALIBRATION);
+}
+
+void Settings4Screen::HandleOTA() {
+    screenManager.RequestScreen(EScreen::OTA);
 }

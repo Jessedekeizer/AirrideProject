@@ -37,6 +37,7 @@ enum ESettingsScreenButtons {
     BLUETOOTH_ON,
     BLUETOOTH_OFF,
     CALIBRATION,
+    OTA,
     SETTINGS1,
     SETTINGS2,
     SETTINGS3,

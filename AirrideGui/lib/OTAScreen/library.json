@@ -1,0 +1,8 @@
+{
+  "name": "OTAScreen",
+  "version": "0.0.0",
+  "build": {
+    "srcDir": ".",
+    "includeDir": "include"
+  }
+}

@@ -26,6 +26,7 @@ private:
     void HandleBluetoothOn();
     void HandleBluetoothOff();
     void HandleCalibration();
+    void HandleOTA();
 };
 
 #endif
