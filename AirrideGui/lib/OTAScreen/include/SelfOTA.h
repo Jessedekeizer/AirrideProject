@@ -19,9 +19,12 @@ public:
 private:
     void Notify();
 
+    static constexpr uint32_t AP_HEARTBEAT_MS = 5000;
+
     StatusCallback onStatus;
     bool active = false;
     CANAirRideOTAStatus currentStatus{};
+    uint32_t lastHeartbeatMs = 0;
 };
 
 #endif // SELFOTA_H

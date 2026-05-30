@@ -76,6 +76,9 @@ void OTACommunication::ReceiveCallback(const CanId &canId, const uint8_t *data, 
             LOG_INFO("OTA STOP received");
             updating = false;
             break;
+        default:
+            LOG_ERROR("OTACommunication: unknown command: ", (uint8_t)msg.command);
+            break;
     }
 }
 

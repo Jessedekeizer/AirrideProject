@@ -53,7 +53,16 @@ void OTACommunication::SendStop(ECanNode target) {
 void OTACommunication::ReceiveCallback(const CanId &canId, const uint8_t *data, uint8_t length) {
     if (canId.type != ECanMsgType::CAN_AIRRIDE_OTA_STATUS) return;
     CANAirRideOTAStatus status{};
-    if (decodeCANMessage(data, length, status) && onStatus) {
-        onStatus(canId.src, status);
+    if (!decodeCANMessage(data, length, status)) return;
+    if ((uint8_t)status.type < (uint8_t)EOTAStatusType::first || (uint8_t)status.type > (uint8_t)EOTAStatusType::last) {
+        LOG_ERROR("OTACommunication: unknown status type: ", (uint8_t)status.type);
+        status.type = EOTAStatusType::UNKNOWN;
+        return;
     }
+    if ((uint8_t)status.phase < (uint8_t)EOTAUpdatePhase::first || (uint8_t)status.phase > (uint8_t)EOTAUpdatePhase::last) {
+        LOG_ERROR("OTACommunication: unknown update phase: ", (uint8_t)status.phase);
+        status.phase = EOTAUpdatePhase::UNKNOWN;
+        return;
+    }
+    if (onStatus) onStatus(canId.src, status);
 }

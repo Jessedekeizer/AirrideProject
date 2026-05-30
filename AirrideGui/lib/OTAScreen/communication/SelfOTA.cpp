@@ -50,7 +50,16 @@ void SelfOTA::Stop() {
 }
 
 void SelfOTA::Handle() {
-    if (active) ArduinoOTA.handle();
+    if (!active) return;
+    ArduinoOTA.handle();
+    if (currentStatus.phase == EOTAUpdatePhase::AP_STARTED) {
+        uint32_t now = millis();
+        if (now - lastHeartbeatMs >= AP_HEARTBEAT_MS) {
+            lastHeartbeatMs = now;
+            LOG_DEBUG("Heartbeat: AP started");
+            Notify();
+        }
+    }
 }
 
 void SelfOTA::Notify() {

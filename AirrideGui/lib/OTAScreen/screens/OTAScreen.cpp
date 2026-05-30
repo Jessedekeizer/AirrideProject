@@ -34,6 +34,9 @@ void OTAScreen::OnSetup() {
                 CheckForUpdates(status);
                 break;
             }
+            default:
+                LOG_ERROR("OTAScreen: unknown status type: ", (uint8_t)status.type);
+                break;
         }
     };
     otaCommunication.Init(statusCallback);
@@ -121,6 +124,9 @@ void OTAScreen::TransitionTo(EOTAState newState) {
         case EOTAState::DONE:
             doneTime = millis();
             DrawDoneScreen();
+            break;
+        default:
+            LOG_ERROR("OTAScreen: unknown state: ", (int)state);
             break;
     }
 }

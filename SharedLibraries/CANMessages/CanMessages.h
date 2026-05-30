@@ -51,12 +51,18 @@ struct CANLogAirRide {
 enum class EOTACommand : uint8_t {
     DISCOVER,
     START,
-    STOP
+    STOP,
+    first = DISCOVER,
+    last = STOP,
+    UNKNOWN
 };
 
 enum class EOTAStatusType : uint8_t {
     AVAILABLE,
-    UPDATE
+    UPDATE,
+    first = AVAILABLE,
+    last = UPDATE,
+    UNKNOWN
 };
 
 enum class EOTAUpdatePhase : uint8_t {
@@ -64,7 +70,10 @@ enum class EOTAUpdatePhase : uint8_t {
     AP_STARTED,
     FLASHING,
     COMPLETE,
-    ERROR
+    ERROR,
+    first = IDLE,
+    last = ERROR,
+    UNKNOWN
 };
 
 #pragma pack(push,1)
