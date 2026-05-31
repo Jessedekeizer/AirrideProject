@@ -8,16 +8,10 @@
 #include "OTACommunication.h"
 #include "CanMessages.h"
 #include "CanMessageIds.h"
+#include "EOTAState.h"
 
-enum class EOTAState {
-    SCANNING,
-    SELECT,
-    UPDATING,
-    ERROR,
-    DONE
-};
-
-class OTAScreen : public BaseScreen {
+class OTAScreen : public BaseScreen
+{
 public:
     OTAScreen(ScreenManager &screenManager, DisplayService &displayService, OTACommunication &otaCommunication);
     void OnSetup() override;
@@ -48,7 +42,6 @@ private:
     void ClearScreen();
     void ClearSelectScreen();
 
-
     static const char *NodeName(ECanNode node);
 
     ScreenManager &screenManager;
@@ -64,9 +57,9 @@ private:
     unsigned long doneTime = 0;
     unsigned long lastStatusTime = 0;
     uint8_t drawnProgressSection = 255;
-    static constexpr unsigned long SCAN_TIMEOUT_MS    = 3000;
-    static constexpr unsigned long DONE_RESCAN_MS     = 5000;
-    static constexpr unsigned long UPDATE_TIMEOUT_MS  = 15000;
+    static constexpr unsigned long SCAN_TIMEOUT_MS = 3000;
+    static constexpr unsigned long DONE_RESCAN_MS = 5000;
+    static constexpr unsigned long UPDATE_TIMEOUT_MS = 15000;
 };
 
 #endif

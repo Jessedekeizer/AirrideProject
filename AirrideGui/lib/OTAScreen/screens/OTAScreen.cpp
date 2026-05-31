@@ -141,7 +141,7 @@ void OTAScreen::StartOTA() {
 
 void OTAScreen::StopOTA() {
     if (!discoveredNodes.empty()) {
-        otaCommunication.SendStop(discoveredNodes[selectedIndex]);
+        otaCommunication.SendStop(ECanNode::NODE_BROADCAST);
     }
 }
 
@@ -168,7 +168,8 @@ void OTAScreen::OnBtnStart(Button &) {
 }
 
 void OTAScreen::OnBtnBack(Button &) {
-    if (state == EOTAState::UPDATING) StopOTA();
+    StopOTA();
+
     ExitScreen();
 }
 

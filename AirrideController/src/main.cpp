@@ -3,12 +3,14 @@
 #include "PressureSensorManager.h"
 #include "Settings.h"
 #include "SolenoidManager.h"
-#include "MainStateMachine.h"
+#include "SuspensionStateMachine.h"
 #include "PressureSensor.h"
 #include "Solenoid.h"
 #include "MainCommunication.h"
 #include "OTACommunication.h"
 #include "CanBus.h"
+#include "SuspensionStateCommunication.h"
+#include "MainStateMachine.h"
 #include <Arduino_FreeRTOS.h>
 
 void SetupHardware();
@@ -44,13 +46,23 @@ Communication communication(largeCanMessageHandler, ECanNode::NODE_AIRRIDE_CONTR
 LogHandlerCommunication logHandlerCommunication(communication);
 LogHandler logHandler(logHandlerCommunication, frontPressureSensor, backPressureSensor, tankPressureSensor);
 
-MainStateMachineData mainStateMachineData;
-MainStateMachineCommunication mainStateMachineCommunication(communication, mainStateMachineData);
-MainStateMachine mainStateMachine(mainStateMachineData, mainStateMachineCommunication, solenoidManager,
-                                  pressureSensorManager, logHandler, settings);
+SuspensionStateMachineData suspensionStateMachineData;
+SuspensionStateMachineCommunication suspensionStateMachineCommunication(communication, suspensionStateMachineData);
+SuspensionStateMachine suspensionStateMachine(suspensionStateMachineData, suspensionStateMachineCommunication,
+                                              solenoidManager, pressureSensorManager, logHandler, settings);
 
-MainCommunication mainCommunication(communication, settings);
 OTACommunication otaCommunication(communication);
+MainStateMachineData mainStateMachineData;
+MainCommunication mainCommunication(communication, settings, mainStateMachineData, otaCommunication);
+
+SuspensionStateCommunication suspensionStateCommunication(communication);
+MainStateMachine mainStateMachine(mainStateMachineData,
+                                                      suspensionStateMachine,
+                                                      logHandler,
+                                                      pressureSensorManager,
+                                                      suspensionStateCommunication,
+                                                      solenoidManager,
+                                                      otaCommunication);
 
 void setup() {
     SetupHardware();
@@ -67,24 +79,10 @@ void loop() {}
 
 void MainTask(void *arg) {
     (void) arg;
-    TickType_t lastSensorWake = xTaskGetTickCount();
-    constexpr TickType_t sensorInterval = pdMS_TO_TICKS(200);
 
     for (;;) {
         communication.CheckForMessage();
         mainStateMachine.Loop();
-        logHandler.SendLog();
-        otaCommunication.Loop();
-
-        if (xTaskGetTickCount() - lastSensorWake >= sensorInterval) {
-            pressureSensorManager.Update();
-            mainCommunication.SendPressure(
-                frontPressureSensor.GetRawPressure(),
-                backPressureSensor.GetRawPressure()
-            );
-            lastSensorWake = xTaskGetTickCount();
-        }
-
         vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
@@ -92,7 +90,7 @@ void MainTask(void *arg) {
 void SetupHardware() {
     Serial.begin(9600);
     analogReadResolution(14);
-    canBus.Setup(CAN1TX, CAN1RX, ECanBitRate::B500k);
+    canBus.Setup(CANTX, CANRX, ECanBitRate::B500k);
     communication.SetQueues(canBus.GetRxQueue(), canBus.GetTxQueue());
 }
 
@@ -112,7 +110,6 @@ void RegisterSolenoids() {
 void InitializeServices() {
     solenoidManager.Begin();
     pressureSensorManager.Begin();
-    mainStateMachine.Begin();
     mainCommunication.Init();
-    otaCommunication.Init();
+    mainStateMachine.Begin();
 }

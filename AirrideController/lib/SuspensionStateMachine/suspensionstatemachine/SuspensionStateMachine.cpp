@@ -1,4 +1,4 @@
-#include "MainStateMachine.h"
+#include "SuspensionStateMachine.h"
 #include "BackDownState.h"
 #include "BackUpState.h"
 #include "FrontDownState.h"
@@ -6,40 +6,39 @@
 #include "IdleState.h"
 #include "ParkState.h"
 #include "RideState.h"
-
 #include "Logger.h"
 
-MainStateMachine::MainStateMachine(MainStateMachineData &mainStateMachineData,
-                                   MainStateMachineCommunication &mainStateMachineCommunication,
-                                   SolenoidManager &solenoidManager,
-                                   PressureSensorManager &pressureSensorManager,
-                                   LogHandler &logHandler,
-                                   Settings &settings) : mainStateMachineData(mainStateMachineData),
-                                                         mainStateMachineCommunication(mainStateMachineCommunication),
-                                                         solenoidManager(solenoidManager),
-                                                         pressureSensorManager(pressureSensorManager),
-                                                         logHandler(logHandler),
-                                                         settings(settings) {
-}
+SuspensionStateMachine::SuspensionStateMachine(SuspensionStateMachineData &suspensionStateMachineData,
+                                               SuspensionStateMachineCommunication &suspensionStateMachineCommunication,
+                                               SolenoidManager &solenoidManager,
+                                               PressureSensorManager &pressureSensorManager,
+                                               LogHandler &logHandler,
+                                               Settings &settings)
+    : suspensionStateMachineData(suspensionStateMachineData),
+      suspensionStateMachineCommunication(suspensionStateMachineCommunication),
+      solenoidManager(solenoidManager),
+      pressureSensorManager(pressureSensorManager),
+      logHandler(logHandler),
+      settings(settings) {}
 
-MainStateMachine::~MainStateMachine() {
+SuspensionStateMachine::~SuspensionStateMachine() {
     currentState->Leave();
-    mainStateMachineCommunication.Leave();
+    suspensionStateMachineCommunication.Leave();
     delete currentState;
     currentState = nullptr;
 }
 
-void MainStateMachine::Begin() {
-    mainStateMachineCommunication.Init();
-    mainStateMachineData.newRequestedState = EState::IDLE;
-    ChangeState(mainStateMachineData.newRequestedState);
+void SuspensionStateMachine::Begin() {
+    suspensionStateMachineCommunication.Init();
+    suspensionStateMachineData.newRequestedState = EState::IDLE;
+    ChangeState(suspensionStateMachineData.newRequestedState);
 }
 
-void MainStateMachine::Loop() {
+void SuspensionStateMachine::Loop() {
     if (currentState) {
         EState stateRequestedByState = currentState->Loop();
-        if (currentState->GetEState() != mainStateMachineData.newRequestedState) {
-            ChangeState(mainStateMachineData.newRequestedState);
+        if (currentState->GetEState() != suspensionStateMachineData.newRequestedState) {
+            ChangeState(suspensionStateMachineData.newRequestedState);
             return;
         }
         if (currentState->GetEState() != stateRequestedByState) {
@@ -48,12 +47,16 @@ void MainStateMachine::Loop() {
     }
 }
 
-void MainStateMachine::ChangeState(EState newState) {
+void SuspensionStateMachine::Leave() {
+    suspensionStateMachineCommunication.Leave();
+}
+
+void SuspensionStateMachine::ChangeState(EState newState) {
     if (currentState) {
         currentState->Leave();
         delete currentState;
     }
-    LOG_DEBUG("Changing state to:", static_cast<int>(newState));
+    LOG_DEBUG("Suspension changing state to:", static_cast<int>(newState));
     switch (newState) {
         case EState::IDLE:
             currentState = new IdleState(solenoidManager);
@@ -80,6 +83,6 @@ void MainStateMachine::ChangeState(EState newState) {
                                          pressureSensorManager.GetPressureSensor(EPressureSensor::BACK));
             break;
     }
-    mainStateMachineData.newRequestedState = newState;
+    suspensionStateMachineData.newRequestedState = newState;
     currentState->Enter();
 }

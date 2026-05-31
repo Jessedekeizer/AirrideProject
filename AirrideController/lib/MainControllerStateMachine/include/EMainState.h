@@ -1,0 +1,9 @@
+#ifndef EMAINCONTROLLERSTATE_H
+#define EMAINCONTROLLERSTATE_H
+
+enum class EMainState {
+    SUSPENSION,
+    OTA
+};
+
+#endif //EMAINCONTROLLERSTATE_H
