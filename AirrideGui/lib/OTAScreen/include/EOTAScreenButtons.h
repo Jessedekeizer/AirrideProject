@@ -1,0 +1,11 @@
+#ifndef EOTASCREENBUTTONS_H
+#define EOTASCREENBUTTONS_H
+
+enum EOTAScreenButtons {
+    SCROLL_LEFT,
+    SCROLL_RIGHT,
+    START,
+    EXIT
+};
+
+#endif //EOTASCREENBUTTONS_H

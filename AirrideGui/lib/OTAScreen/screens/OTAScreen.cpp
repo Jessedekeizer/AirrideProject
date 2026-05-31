@@ -1,11 +1,7 @@
 #include "OTAScreen.h"
+#include "EOTAScreenButtons.h"
 #include "OTAScreenGeometry.h"
 #include "Logger.h"
-
-#define BTN_LEFT   0
-#define BTN_RIGHT  1
-#define BTN_START  2
-#define BTN_BACK   3
 
 OTAScreen::OTAScreen(ScreenManager &screenManager, DisplayService &displayService, OTACommunication &otaCommunication)
     : BaseScreen(EScreen::OTA, SCREEN_PATH),
@@ -14,10 +10,10 @@ OTAScreen::OTAScreen(ScreenManager &screenManager, DisplayService &displayServic
       otaCommunication(otaCommunication),
       state(EOTAState::SCANNING),
       discoveredNodes() {
-    buttons.push_back(new PushButton(OTA_BTN_LEFT_X,  OTA_BTN_LEFT_Y,  OTA_BTN_LEFT_W,  OTA_BTN_LEFT_H,  BTN_LEFT,  [this](Button &b) { OnBtnLeft(b);  }));
-    buttons.push_back(new PushButton(OTA_BTN_RIGHT_X, OTA_BTN_RIGHT_Y, OTA_BTN_RIGHT_W, OTA_BTN_RIGHT_H, BTN_RIGHT, [this](Button &b) { OnBtnRight(b); }));
-    buttons.push_back(new PushButton(OTA_BTN_START_X, OTA_BTN_START_Y, OTA_BTN_START_W, OTA_BTN_START_H, BTN_START, [this](Button &b) { OnBtnStart(b); }));
-    buttons.push_back(new PushButton(OTA_BTN_BACK_X,  OTA_BTN_BACK_Y,  OTA_BTN_BACK_W,  OTA_BTN_BACK_H,  BTN_BACK,  [this](Button &b) { OnBtnBack(b);  }));
+    buttons.push_back(new PushButton(OTA_BTN_LEFT_X,  OTA_BTN_LEFT_Y,  OTA_BTN_LEFT_W,  OTA_BTN_LEFT_H,  SCROLL_LEFT,  [this](Button &b) { OnBtnLeft(b);  }));
+    buttons.push_back(new PushButton(OTA_BTN_RIGHT_X, OTA_BTN_RIGHT_Y, OTA_BTN_RIGHT_W, OTA_BTN_RIGHT_H, SCROLL_RIGHT, [this](Button &b) { OnBtnRight(b); }));
+    buttons.push_back(new PushButton(OTA_BTN_START_X, OTA_BTN_START_Y, OTA_BTN_START_W, OTA_BTN_START_H, START, [this](Button &b) { OnBtnStart(b); }));
+    buttons.push_back(new PushButton(OTA_BTN_BACK_X,  OTA_BTN_BACK_Y,  OTA_BTN_BACK_W,  OTA_BTN_BACK_H,  EXIT,  [this](Button &b) { OnBtnBack(b);  }));
 }
 
 void OTAScreen::OnSetup() {
