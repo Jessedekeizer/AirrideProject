@@ -2,12 +2,12 @@
 #define BACKDOWNSTATE_H
 #include "../../include/IState.h"
 #include "LogHandler.h"
-#include "Solenoid.h"
+#include "ISolenoid.h"
 
 
 class BackDownState : public IState {
 public:
-    BackDownState(Solenoid &backUpSolenoid, LogHandler &logHandler);
+    BackDownState(ISolenoid &backDownSolenoid, LogHandler &logHandler);
 
     EState GetEState() override { return state; }
 
@@ -19,7 +19,7 @@ public:
 
 private:
     const EState state = EState::BACK_DOWN;
-    Solenoid &backDownSolenoid;
+    ISolenoid &backDownSolenoid;
     LogHandler &logHandler;
 };
 

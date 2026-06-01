@@ -1,7 +1,7 @@
 #include "PressureSensorManager.h"
 #include <Arduino.h>
 
-PressureSensorManager::PressureSensorManager(Solenoid &frontSolenoid, Solenoid &backSolenoid, Settings &settings)
+PressureSensorManager::PressureSensorManager(ISolenoid &frontSolenoid, ISolenoid &backSolenoid, Settings &settings)
     : frontSolenoid(frontSolenoid), backSolenoid(backSolenoid), settings(settings) {
 }
 
@@ -38,7 +38,7 @@ PressureSensor &PressureSensorManager::GetPressureSensor(EPressureSensor request
     }
 }
 
-void PressureSensorManager::CheckIfPressureIsWithinTolerance(PressureSensor *pressureSensor, Solenoid &solenoid) {
+void PressureSensorManager::CheckIfPressureIsWithinTolerance(PressureSensor *pressureSensor, ISolenoid &solenoid) {
     //Turn off solenoid when max pressure is reached.
     if (pressureSensor->GetAveragePressure() >= settings.frontMax) {
         solenoid.Activate(false);

@@ -1,24 +1,24 @@
 #ifndef SOLENOID_H
 #define SOLENOID_H
-#include "ESolenoid.h"
+#include "ISolenoid.h"
 
-class Solenoid {
+class Solenoid : public ISolenoid {
 public:
     Solenoid(ESolenoid solenoid, int pin, bool active = true) : solenoid(solenoid), pin(pin), active(active) {
     }
 
-    ~Solenoid() {
+    ~Solenoid() override {
     };
 
-    void Begin();
+    void Begin() override;
 
-    void TurnOn();
+    void TurnOn() override;
 
-    void TurnOff();
+    void TurnOff() override;
 
-    ESolenoid GetESolenoid() { return solenoid; }
+    ESolenoid GetESolenoid() override { return solenoid; }
 
-    void Activate(bool active);
+    void Activate(bool active) override;
 
 private:
     ESolenoid solenoid;

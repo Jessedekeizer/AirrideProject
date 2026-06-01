@@ -2,12 +2,12 @@
 #define PARKSTATE_H
 #include "../../include/IState.h"
 #include "LogHandler.h"
-#include "Solenoid.h"
+#include "ISolenoid.h"
 
 
 class ParkState : public IState {
 public:
-    ParkState(Solenoid &frontSolenoid, Solenoid &backSolenoid, LogHandler &logHandler, Settings &settings);
+    ParkState(ISolenoid &frontSolenoid, ISolenoid &backSolenoid, LogHandler &logHandler, Settings &settings);
 
     EState GetEState() override { return state; }
 
@@ -19,8 +19,8 @@ public:
 
 private:
     const EState state = EState::PARK;
-    Solenoid &frontSolenoid;
-    Solenoid &backSolenoid;
+    ISolenoid &frontSolenoid;
+    ISolenoid &backSolenoid;
     LogHandler &logHandler;
     Settings &settings;
     long timePrevious = 0;

@@ -3,11 +3,11 @@
 #include <vector>
 #include "PressureSensor.h"
 #include "Settings.h"
-#include "Solenoid.h"
+#include "ISolenoid.h"
 
 class PressureSensorManager {
 public:
-    PressureSensorManager(Solenoid &frontSolenoid, Solenoid &backSolenoid, Settings &settings);
+    PressureSensorManager(ISolenoid &frontSolenoid, ISolenoid &backSolenoid, Settings &settings);
 
     ~PressureSensorManager();
 
@@ -19,11 +19,11 @@ public:
     void AddPressureSensor(PressureSensor &pressureSensor);
 
 private:
-    void CheckIfPressureIsWithinTolerance(PressureSensor *pressureSensor, Solenoid &solenoid);
+    void CheckIfPressureIsWithinTolerance(PressureSensor *pressureSensor, ISolenoid &solenoid);
 
     std::vector<PressureSensor *> pressureSensors;
-    Solenoid &frontSolenoid;
-    Solenoid &backSolenoid;
+    ISolenoid &frontSolenoid;
+    ISolenoid &backSolenoid;
     Settings &settings;
 };
 
