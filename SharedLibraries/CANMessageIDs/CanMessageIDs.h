@@ -23,10 +23,14 @@ enum class ECanMsgType : uint16_t {
 
     //Logs from 0x7
     CAN_AIRRIDE_LOG = 0x701,
+
+    //OTA from 0x8
+    CAN_AIRRIDE_OTA = 0x801,
+    CAN_AIRRIDE_OTA_STATUS = 0x802,
     //MAX 0x7FFF
 
     first = CAN_AIRRIDE_CONTROL,
-    last = CAN_AIRRIDE_LOG,
+    last = CAN_AIRRIDE_OTA_STATUS,
     UNKNOWN
 };
 

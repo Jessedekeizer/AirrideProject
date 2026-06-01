@@ -21,9 +21,13 @@ void CanBus::Setup(int canTx, int canRx, ECanBitRate bitRate) {
         LOG_ERROR("CAN.begin(...) failed.");
         return;
     }
+
+#if(ARDUINO_MINIMA)
     if (canTx == CAN1TX && canRx == CAN1RX) {
         SetCan1Pins();
     }
+#endif
+
 
     rxQueue = xQueueCreate(CAN_RX_QUEUE_SIZE, sizeof(CanMessage));
     txQueue = xQueueCreate(CAN_TX_QUEUE_SIZE, sizeof(CanMessage));

@@ -2,14 +2,10 @@
 #include "CanMessages.h"
 #include "Logger.h"
 
-MainCommunication::MainCommunication(Communication &communication, Settings &settings)
-    : communication(communication), settings(settings), communicationId(-1) {
-}
-
-void MainCommunication::SendPressure(float front, float back) {
-    CANAirRidePressure canAirRidePressure{front, back};
-    communication.SendCanMessage(ECanNode::NODE_BROADCAST, ECanMsgType::CAN_AIRRIDE_PRESSURE, canAirRidePressure);
-}
+MainCommunication::MainCommunication(Communication &communication, Settings &settings,
+                                     MainStateMachineData &controllerData, OTACommunication &otaCommunication)
+    : communication(communication), settings(settings),
+      controllerData(controllerData), otaCommunication(otaCommunication) {}
 
 void MainCommunication::Init() {
     communicationId = communication.Subscribe([this](const CanId &canId, const uint8_t *data, uint8_t length) {
@@ -22,9 +18,35 @@ void MainCommunication::Leave() {
 }
 
 void MainCommunication::ReceiveCallback(const CanId &canId, const uint8_t *data, uint8_t length) {
-    LOG_DEBUG("Received data", static_cast<int>(canId.type));
     if (canId.type == ECanMsgType::CAN_AIRRIDE_SETTINGS) {
         SaveSettings(data, length);
+    } else if (canId.type == ECanMsgType::CAN_AIRRIDE_OTA) {
+        HandleOTACommand(data, length);
+    }
+}
+
+void MainCommunication::HandleOTACommand(const uint8_t *data, uint8_t length) {
+    CANAirRideOTA msg{};
+    if (!decodeCANMessage(data, length, msg)) {
+        LOG_ERROR("Failed to decode OTA message");
+        return;
+    }
+
+    switch (msg.command) {
+        case EOTACommand::DISCOVER:
+            otaCommunication.OnDiscover();
+            break;
+        case EOTACommand::START:
+            LOG_INFO("OTA START received");
+            controllerData.requestedState = EMainState::OTA;
+            break;
+        case EOTACommand::STOP:
+            LOG_INFO("OTA STOP received");
+            controllerData.requestedState = EMainState::SUSPENSION;
+            break;
+        default:
+            LOG_ERROR("MainCommunication: unknown OTA command: ", (uint8_t)msg.command);
+            break;
     }
 }
 

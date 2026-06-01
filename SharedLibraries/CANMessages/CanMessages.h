@@ -48,6 +48,48 @@ struct CANLogAirRide {
 };
 #pragma pack(pop)
 
+enum class EOTACommand : uint8_t {
+    DISCOVER,
+    START,
+    STOP,
+    first = DISCOVER,
+    last = STOP,
+    UNKNOWN
+};
+
+enum class EOTAStatusType : uint8_t {
+    AVAILABLE,
+    UPDATE,
+    first = AVAILABLE,
+    last = UPDATE,
+    UNKNOWN
+};
+
+enum class EOTAUpdatePhase : uint8_t {
+    IDLE,
+    AP_STARTED,
+    FLASHING,
+    COMPLETE,
+    ERROR,
+    first = IDLE,
+    last = ERROR,
+    UNKNOWN
+};
+
+#pragma pack(push,1)
+struct CANAirRideOTA {
+    EOTACommand command;
+};
+#pragma pack(pop)
+
+#pragma pack(push,1)
+struct CANAirRideOTAStatus {
+    EOTAStatusType type;
+    EOTAUpdatePhase phase;
+    uint8_t progress;
+};
+#pragma pack(pop)
+
 template<typename T>
 bool decodeCANMessage(const uint8_t *data, std::size_t length, T &messageStruct) {
     if (length == sizeof(T)) {
