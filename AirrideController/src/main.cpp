@@ -45,9 +45,13 @@ constexpr float barTankMax = 15.2f;
 constexpr int frontFilterSize = 16;
 constexpr int backFilterSize = 10;
 
-PressureSensor frontPressureSensor(EPressureSensor::FRONT, A0, frontFilterSize, analogMin, analogMax, barMax);
-PressureSensor backPressureSensor(EPressureSensor::BACK, A1, backFilterSize, analogMin, analogMax, barMax);
-PressureSensor tankPressureSensor(EPressureSensor::TANK, A2, backFilterSize, analogMin, analogMax, barTankMax);
+PressureSensorFilterConfig frontSensorFilter = {frontFilterSize, analogMin, analogMax, barMax};
+PressureSensorFilterConfig backSensorFilter = {backFilterSize, analogMin, analogMax, barMax};
+PressureSensorFilterConfig tankSensorFilter = {backFilterSize, analogMin, analogMax, barTankMax};
+
+PressureSensor frontPressureSensor(EPressureSensor::FRONT, A0, frontSensorFilter);
+PressureSensor backPressureSensor(EPressureSensor::BACK, A1, backSensorFilter);
+PressureSensor tankPressureSensor(EPressureSensor::TANK, A2, tankSensorFilter);
 PressureSensorManager pressureSensorManager(frontUpSolenoid, backUpSolenoid, settings);
 
 CanBus canBus;
