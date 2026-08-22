@@ -4,12 +4,18 @@
 
 #include "EPressureSensor.h"
 
+struct PressureSensorFilterConfig {
+    int filterSize;
+    float analogMin;
+    float analogMax;
+    float barMax;
+};
+
 class PressureSensor {
 public:
-    PressureSensor(EPressureSensor pressureSensor, int pin, int filterSize, float analogMin, float analogMax,
-                   float barMax)
-        : pressureSensor(pressureSensor), pin(pin), filterSize(filterSize), analogMin(analogMin), analogMax(analogMax),
-          barMax(barMax) {
+    PressureSensor(EPressureSensor pressureSensor, int pin, PressureSensorFilterConfig config)
+        : pin(pin), pressureSensor(pressureSensor), filterSize(config.filterSize), analogMin(config.analogMin),
+          analogMax(config.analogMax), barMax(config.barMax) {
     }
 
     ~PressureSensor();

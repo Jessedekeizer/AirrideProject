@@ -1,7 +1,7 @@
 #include "FrontUpState.h"
 
-FrontUpState::FrontUpState(Solenoid &frontUpSolenoid, LogHandler &logHandler)
-    : frontUpSolenoid(frontUpSolenoid), logHandler(logHandler) {
+FrontUpState::FrontUpState(ISolenoid &frontUpISolenoid, LogHandler &logHandler)
+    : frontUpSolenoid(frontUpISolenoid), logHandler(logHandler) {
 }
 
 void FrontUpState::Enter() {

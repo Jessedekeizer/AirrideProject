@@ -1,7 +1,7 @@
 #include "BackUpState.h"
 
-BackUpState::BackUpState(Solenoid &backUpSolenoid, LogHandler &logHandler)
-    : backUpSolenoid(backUpSolenoid), logHandler(logHandler) {
+BackUpState::BackUpState(ISolenoid &backUpISolenoid, LogHandler &logHandler)
+    : backUpSolenoid(backUpISolenoid), logHandler(logHandler) {
 }
 
 void BackUpState::Enter() {

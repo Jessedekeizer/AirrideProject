@@ -5,13 +5,17 @@
 #include "SolenoidManager.h"
 #include "SuspensionStateMachine.h"
 #include "PressureSensor.h"
-#include "Solenoid.h"
 #include "MainCommunication.h"
 #include "OTACommunication.h"
 #include "CanBus.h"
 #include "SuspensionStateCommunication.h"
 #include "MainStateMachine.h"
 #include <Arduino_FreeRTOS.h>
+#ifdef TEST_SOLENOIDS
+#include "LedMatrixSolenoid.h"
+#else
+#include "Solenoid.h"
+#endif
 
 void SetupHardware();
 void RegisterSensors();
@@ -21,10 +25,17 @@ void MainTask(void *arg);
 
 Settings settings;
 
+#ifdef TEST_SOLENOIDS
+LedMatrixSolenoid frontDownSolenoid(ESolenoid::FRONT_DOWN, 3);
+LedMatrixSolenoid frontUpSolenoid(ESolenoid::FRONT_UP, 0);
+LedMatrixSolenoid backUpSolenoid(ESolenoid::BACK_UP, 6);
+LedMatrixSolenoid backDownSolenoid(ESolenoid::BACK_DOWN, 9);
+#else
 Solenoid frontDownSolenoid(ESolenoid::FRONT_DOWN, PIN_D4);
 Solenoid frontUpSolenoid(ESolenoid::FRONT_UP, PIN_D5);
 Solenoid backUpSolenoid(ESolenoid::BACK_UP, PIN_D6);
 Solenoid backDownSolenoid(ESolenoid::BACK_DOWN, PIN_D7);
+#endif
 SolenoidManager solenoidManager;
 
 constexpr float analogMin = 1638.4f;
@@ -34,9 +45,13 @@ constexpr float barTankMax = 15.2f;
 constexpr int frontFilterSize = 16;
 constexpr int backFilterSize = 10;
 
-PressureSensor frontPressureSensor(EPressureSensor::FRONT, A0, frontFilterSize, analogMin, analogMax, barMax);
-PressureSensor backPressureSensor(EPressureSensor::BACK, A1, backFilterSize, analogMin, analogMax, barMax);
-PressureSensor tankPressureSensor(EPressureSensor::TANK, A2, backFilterSize, analogMin, analogMax, barTankMax);
+PressureSensorFilterConfig frontSensorFilter = {frontFilterSize, analogMin, analogMax, barMax};
+PressureSensorFilterConfig backSensorFilter = {backFilterSize, analogMin, analogMax, barMax};
+PressureSensorFilterConfig tankSensorFilter = {backFilterSize, analogMin, analogMax, barTankMax};
+
+PressureSensor frontPressureSensor(EPressureSensor::FRONT, A0, frontSensorFilter);
+PressureSensor backPressureSensor(EPressureSensor::BACK, A1, backSensorFilter);
+PressureSensor tankPressureSensor(EPressureSensor::TANK, A2, tankSensorFilter);
 PressureSensorManager pressureSensorManager(frontUpSolenoid, backUpSolenoid, settings);
 
 CanBus canBus;

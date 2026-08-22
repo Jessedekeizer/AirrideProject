@@ -2,7 +2,7 @@
 #define SOLENOIDMANAGER_H
 #include <vector>
 
-#include "Solenoid.h"
+#include "ISolenoid.h"
 
 class SolenoidManager {
 public:
@@ -12,14 +12,14 @@ public:
 
     void Begin();
 
-    void AddSolenoid(Solenoid &solenoid);
+    void AddSolenoid(ISolenoid &solenoid);
 
-    Solenoid &GetSolenoid(ESolenoid requestedSolenoid);
+    ISolenoid &GetSolenoid(ESolenoid requestedSolenoid);
 
     void TurnOffAllSolenoids();
 
 private:
-    std::vector<Solenoid *> solenoids;
+    std::vector<ISolenoid *> solenoids;
 };
 
 #endif //SOLENOIDMANAGER_H

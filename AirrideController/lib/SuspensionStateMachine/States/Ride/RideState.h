@@ -4,7 +4,7 @@
 #include "LogHandler.h"
 #include "PressureSensor.h"
 #include "Settings.h"
-#include "Solenoid.h"
+#include "ISolenoid.h"
 #include "SolenoidManager.h"
 
 class RideState : public IState {
@@ -22,8 +22,8 @@ public:
 
 private:
     const EState state = EState::RIDE;
-    Solenoid *frontSolenoid;
-    Solenoid *backSolenoid;
+    ISolenoid *frontSolenoid;
+    ISolenoid *backSolenoid;
     PressureSensor &frontPressureSensor;
     PressureSensor &backPressureSensor;
     LogHandler &logHandler;

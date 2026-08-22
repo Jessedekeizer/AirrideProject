@@ -1,7 +1,7 @@
 #include "FrontDownState.h"
 
-FrontDownState::FrontDownState(Solenoid &frontDownSolenoid, LogHandler &logHandler)
-    : frontDownSolenoid(frontDownSolenoid), logHandler(logHandler) {
+FrontDownState::FrontDownState(ISolenoid &frontDownISolenoid, LogHandler &logHandler)
+    : frontDownSolenoid(frontDownISolenoid), logHandler(logHandler) {
 }
 
 void FrontDownState::Enter() {

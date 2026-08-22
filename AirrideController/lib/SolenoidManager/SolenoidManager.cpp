@@ -13,13 +13,13 @@ void SolenoidManager::Begin() {
     }
 }
 
-void SolenoidManager::AddSolenoid(Solenoid &solenoid) {
+void SolenoidManager::AddSolenoid(ISolenoid &solenoid) {
     solenoids.push_back(&solenoid);
 }
 
-Solenoid &SolenoidManager::GetSolenoid(ESolenoid requestedSolenoid) {
+ISolenoid &SolenoidManager::GetSolenoid(ESolenoid requestedISolenoid) {
     for (auto solenoid: solenoids) {
-        if (solenoid->GetESolenoid() == requestedSolenoid) {
+        if (solenoid->GetESolenoid() == requestedISolenoid) {
             return *solenoid;
         }
     }

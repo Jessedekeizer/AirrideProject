@@ -1,7 +1,7 @@
 #include "BackDownState.h"
 
-BackDownState::BackDownState(Solenoid &backDownSolenoid, LogHandler &logHandler)
-    : backDownSolenoid(backDownSolenoid), logHandler(logHandler) {
+BackDownState::BackDownState(ISolenoid &backDownISolenoid, LogHandler &logHandler)
+    : backDownSolenoid(backDownISolenoid), logHandler(logHandler) {
 }
 
 void BackDownState::Enter() {

@@ -2,11 +2,11 @@
 #define FRONTDOWNSTATE_H
 #include "../../include/IState.h"
 #include "LogHandler.h"
-#include "Solenoid.h"
+#include "ISolenoid.h"
 
 class FrontDownState : public IState {
 public:
-    FrontDownState(Solenoid &frontDownSolenoid, LogHandler &logHandler);
+    FrontDownState(ISolenoid &frontDownSolenoid, LogHandler &logHandler);
 
     EState GetEState() override { return state; }
 
@@ -18,7 +18,7 @@ public:
 
 private:
     const EState state = EState::FRONT_DOWN;
-    Solenoid &frontDownSolenoid;
+    ISolenoid &frontDownSolenoid;
     LogHandler &logHandler;
 };
 
