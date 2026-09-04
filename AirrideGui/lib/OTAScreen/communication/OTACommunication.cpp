@@ -36,7 +36,7 @@ void OTACommunication::SendStart(ECanNode target) {
         return;
     }
     CANAirRideOTA msg{EOTACommand::START};
-    communication.SendCanMessage(target, ECanMsgType::CAN_AIRRIDE_OTA, msg);
+    communication.SendCanMessage(target, ECanMsgType::CAN_AIRRIDE_OTA, msg, true);
     LOG_DEBUG("OTACommunication: send START to node ", (int)target);
 }
 
@@ -51,6 +51,10 @@ void OTACommunication::SendStop(ECanNode target) {
 }
 
 void OTACommunication::ReceiveCallback(const CanId &canId, const uint8_t *data, uint8_t length) {
+    if (canId.type == ECanMsgType::CAN_AIRRIDE_ACK) {
+        HandleAck(data, length);
+        return;
+    }
     if (canId.type != ECanMsgType::CAN_AIRRIDE_OTA_STATUS) return;
     CANAirRideOTAStatus status{};
     if (!decodeCANMessage(data, length, status)) return;
@@ -65,4 +69,21 @@ void OTACommunication::ReceiveCallback(const CanId &canId, const uint8_t *data, 
         return;
     }
     if (onStatus) onStatus(canId.src, status);
+}
+
+void OTACommunication::HandleAck(const uint8_t *data, uint8_t length) {
+    CanAckPayload ack{};
+    if (!decodeCANMessage(data, length, ack)) return;
+    if (ack.type != ECanMsgType::CAN_AIRRIDE_OTA) return;
+
+    if (ack.status == ECanAckStatus::STATUS_OK) {
+        LOG_INFO("OTACommunication: START acked");
+        return;
+    }
+
+    LOG_ERROR("OTACommunication: START not acked, giving up");
+    if (onStatus) {
+        CANAirRideOTAStatus status{EOTAStatusType::UPDATE, EOTAUpdatePhase::ERROR, 0};
+        onStatus(ECanNode::UNKNOWN, status);
+    }
 }

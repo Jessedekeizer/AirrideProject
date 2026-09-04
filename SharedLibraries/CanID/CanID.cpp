@@ -13,14 +13,14 @@ uint32_t CanId::ToRaw() const {
     return (static_cast<uint32_t>(static_cast<int8_t>(src) & 0x1F) << 24)
            | (static_cast<uint32_t>(static_cast<int8_t>(dst) & 0x1F) << 19)
            | (static_cast<uint32_t>(static_cast<int16_t>(type) & 0x7FFF) << 4)
-           | static_cast<uint32_t>(static_cast<int8_t>(flags) & 0x3FF);
+           | static_cast<uint32_t>(static_cast<int8_t>(flags) & 0x07);
 }
 
 bool CanId::FromRaw(uint32_t raw) {
     src = static_cast<ECanNode>((raw >> 24) & 0x1F);
     dst = static_cast<ECanNode>((raw >> 19) & 0x1F);
     type = static_cast<ECanMsgType>((raw >> 4) & 0x7FFF);
-    flags = static_cast<ECanFlags>(raw & 0x0F);
+    flags = static_cast<ECanFlags>(raw & 0x07);
     return FromRawValid();
 }
 
@@ -28,8 +28,16 @@ bool CanId::IsForNode(ECanNode me) const {
     return dst == me || dst == ECanNode::NODE_BROADCAST;
 }
 
+ECanFlags CanId::FragmentState() const {
+    return static_cast<ECanFlags>(static_cast<uint8_t>(flags) & 0x03);
+}
+
 bool CanId::HasFlag() const {
-    return flags != ECanFlags::FLAG_NONE && flags != ECanFlags::UNKNOWN;
+    return FragmentState() != ECanFlags::FLAG_NONE && flags != ECanFlags::UNKNOWN;
+}
+
+bool CanId::AckRequired() const {
+    return (static_cast<uint8_t>(flags) & static_cast<uint8_t>(ECanFlags::FLAG_ACK_REQUIRED)) != 0;
 }
 
 bool CanId::FromRawValid() {

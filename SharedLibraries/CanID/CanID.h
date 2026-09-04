@@ -21,7 +21,12 @@ public:
 
     bool IsForNode(ECanNode me) const;
 
+    // Large-message fragment state (FLAG_NONE/LARGE_MESSAGE/FIRST/LAST), ack bit masked out.
+    ECanFlags FragmentState() const;
+
     bool HasFlag() const;
+
+    bool AckRequired() const;
 
 private:
     bool FromRawValid();

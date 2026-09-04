@@ -25,6 +25,7 @@ public:
 
 private:
     void ReceiveCallback(const CanId &canId, const uint8_t *data, uint8_t length);
+    void HandleAck(const uint8_t *data, uint8_t length);
 
     Communication &communication;
     StatusCallback onStatus;

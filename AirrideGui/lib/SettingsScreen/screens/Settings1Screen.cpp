@@ -1,8 +1,8 @@
 #include "Settings1Screen.h"
 #include "ESettingsScreenButtons.h"
 
-Settings1Screen::Settings1Screen(ScreenManager &screenManager, SettingsScreenCommunication &settingsScreenCommunication, SettingsDevice &settingsDevice, SettingsStorage &settingsStorage, DisplayService &displayService)
-    : SettingsScreenBase(screenManager, settingsScreenCommunication, settingsDevice, settingsStorage, displayService, EScreen::SETTINGS1, "/Settings1.png") {
+Settings1Screen::Settings1Screen(ScreenManager &screenManager, SettingsDevice &settingsDevice, SettingsStorage &settingsStorage, DisplayService &displayService)
+    : SettingsScreenBase(screenManager, settingsDevice, settingsStorage, displayService, EScreen::SETTINGS1, "/Settings1.png") {
     buttons.push_back(new PushButton(SETTINGSBTN_MAIN_X, SETTINGSBTN_MAIN_Y, SETTINGSBTN_MAIN_W, SETTINGSBTN_MAIN_H, MAIN_SCREEN,
                                      [this](Button &button) { GoToMainScreen(); }));
 

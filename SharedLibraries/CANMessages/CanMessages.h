@@ -3,6 +3,14 @@
 #include <cstdint>
 
 #include "Logger.h"
+#include "CanMessageIds.h"
+
+#pragma pack(push,1)
+struct CanAckPayload {
+    ECanMsgType type;
+    ECanAckStatus status;
+};
+#pragma pack(pop)
 
 #pragma pack(push,1)
 struct CANAirRidePressure {
