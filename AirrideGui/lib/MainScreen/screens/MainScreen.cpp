@@ -37,6 +37,7 @@ MainScreen::MainScreen(MainScreenData &mainScreenData,
 
 void MainScreen::OnSetup() {
     mainScreenCommunication.Init();
+    mainScreenCommunication.SendSettings();
     AddRideTimer();
 }
 

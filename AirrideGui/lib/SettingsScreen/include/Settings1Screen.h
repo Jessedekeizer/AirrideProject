@@ -3,11 +3,10 @@
 
 #include "ScreenManager.h"
 #include "SettingsScreenBase.h"
-#include "SettingsScreenCommunication.h"
 
 class Settings1Screen : public SettingsScreenBase {
 public:
-    Settings1Screen(ScreenManager &screenManager, SettingsScreenCommunication &settingsScreenCommunication, SettingsDevice &settingsDevice, SettingsStorage &settingsStorage, DisplayService &displayService);
+    Settings1Screen(ScreenManager &screenManager, SettingsDevice &settingsDevice, SettingsStorage &settingsStorage, DisplayService &displayService);
 
     void OnLoop() override {
     };

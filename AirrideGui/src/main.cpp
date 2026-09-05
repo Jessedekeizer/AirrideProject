@@ -8,7 +8,6 @@
 #include "MainScreenCommunication.h"
 #include "MainScreen.h"
 
-#include "SettingsScreenCommunication.h"
 #include "Settings1Screen.h"
 #include "Settings2Screen.h"
 #include "Settings3Screen.h"
@@ -41,7 +40,7 @@ void InitializeHardware();
 void InitializeServices();
 void RegisterScreens();
 void InitializeScreen();
-void SendSettings();
+void LoadSettings();
 
 SPIClass spiSD = SPIClass(VSPI);
 
@@ -59,14 +58,13 @@ LargeCanMessageHandler largeCanMessageHandler;
 Communication communication(largeCanMessageHandler, ECanNode::NODE_AIRRIDE_GUI);
 
 MainScreenData mainScreenData;
-MainScreenCommunication mainScreenCommunication(communication, mainScreenData, logStorage);
+MainScreenCommunication mainScreenCommunication(communication, mainScreenData, logStorage, settings);
 MainScreen mainScreen(mainScreenData, mainScreenCommunication, screenManager, settings, displayService);
 
-SettingsScreenCommunication settingsScreenCommunication(communication, settings);
-Settings1Screen settings1Screen(screenManager, settingsScreenCommunication, settings, settingsStorage, displayService);
-Settings2Screen settings2Screen(screenManager, settingsScreenCommunication, settings, settingsStorage, displayService);
-Settings3Screen settings3Screen(screenManager, settingsScreenCommunication, settings, settingsStorage, displayService);
-Settings4Screen settings4Screen(screenManager, settingsScreenCommunication, settings, settingsStorage, displayService);
+Settings1Screen settings1Screen(screenManager, settings, settingsStorage, displayService);
+Settings2Screen settings2Screen(screenManager, settings, settingsStorage, displayService);
+Settings3Screen settings3Screen(screenManager, settings, settingsStorage, displayService);
+Settings4Screen settings4Screen(screenManager, settings, settingsStorage, displayService);
 
 CalibrationScreen calibrationScreen(screenManager, settings, settingsStorage, displayService, touchScreen);
 OTACommunication otaCommunication(communication);
@@ -75,8 +73,8 @@ OTAScreen otaScreen(screenManager, displayService, otaCommunication);
 void setup() {
     InitializeHardware();
     InitializeServices();
+    LoadSettings();
     RegisterScreens();
-    SendSettings();
     InitializeScreen();
 }
 
@@ -134,9 +132,8 @@ void InitializeScreen() {
     }
 }
 
-void SendSettings() {
+void LoadSettings() {
     settingsStorage.ReadSettings(settings);
-    settingsScreenCommunication.SendSettings(settings);
 }
 
 void printTouchToSerial(const TouchPoint &p) {

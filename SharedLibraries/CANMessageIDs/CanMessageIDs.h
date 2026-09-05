@@ -27,21 +27,38 @@ enum class ECanMsgType : uint16_t {
     //OTA from 0x8
     CAN_AIRRIDE_OTA = 0x801,
     CAN_AIRRIDE_OTA_STATUS = 0x802,
+
+    //Ack from 0x9
+    CAN_AIRRIDE_ACK = 0x901,
     //MAX 0x7FFF
 
     first = CAN_AIRRIDE_CONTROL,
-    last = CAN_AIRRIDE_OTA_STATUS,
+    last = CAN_AIRRIDE_ACK,
     UNKNOWN
 };
 
+// Bits 0-1: fragment state of a large message (mutually exclusive).
+// Bit 2: ack-required, OR-able onto any fragment state (set only on the
+// terminal frame of a send - the only frame for a small message, or the
+// FLAG_LAST fragment for a large one - so exactly one ack fires per struct).
 enum class ECanFlags : uint8_t {
     FLAG_NONE = 0,
     FLAG_LARGE_MESSAGE = 1,
     FLAG_FIRST = 2,
     FLAG_LAST = 3,
+    FLAG_ACK_REQUIRED = 4,
 
     first = FLAG_NONE,
-    last = FLAG_LAST,
+    last = FLAG_ACK_REQUIRED,
+    UNKNOWN = 255
+};
+
+enum class ECanAckStatus : uint8_t {
+    STATUS_OK = 0,
+    STATUS_ERROR = 1,
+
+    first = STATUS_OK,
+    last = STATUS_ERROR,
     UNKNOWN
 };
 

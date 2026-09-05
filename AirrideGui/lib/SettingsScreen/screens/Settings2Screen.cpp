@@ -3,8 +3,8 @@
 #include "ESettingsScreenButtons.h"
 #include "Logger.h"
 
-Settings2Screen::Settings2Screen(ScreenManager &screenManager, SettingsScreenCommunication &settingsScreenCommunication, SettingsDevice &settingsDevice, SettingsStorage &settingsStorage, DisplayService &displayService)
-    : SettingsScreenBase(screenManager, settingsScreenCommunication, settingsDevice, settingsStorage, displayService, EScreen::SETTINGS2, "/Settings2.png") {
+Settings2Screen::Settings2Screen(ScreenManager &screenManager, SettingsDevice &settingsDevice, SettingsStorage &settingsStorage, DisplayService &displayService)
+    : SettingsScreenBase(screenManager, settingsDevice, settingsStorage, displayService, EScreen::SETTINGS2, "/Settings2.png") {
     buttons.push_back(new PushButton(SETTINGSBTN_MAIN_X, SETTINGSBTN_MAIN_Y, SETTINGSBTN_MAIN_W, SETTINGSBTN_MAIN_H, MAIN_SCREEN,
                                      [this](Button &button) { GoToMainScreen(); }));
 

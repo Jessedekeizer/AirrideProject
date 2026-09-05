@@ -4,8 +4,9 @@
 #include "Logger.h"
 
 MainScreenCommunication::MainScreenCommunication(Communication &communication, MainScreenData &mainScreenData,
-                                                 LogStorage &logStorage)
-    : communication(communication), mainScreenData(mainScreenData), logStorage(logStorage), communicationId(-1) {
+                                                 LogStorage &logStorage, SettingsDevice &settings)
+    : communication(communication), mainScreenData(mainScreenData), logStorage(logStorage), settings(settings),
+      communicationId(-1) {
 }
 
 void MainScreenCommunication::Init() {
@@ -21,6 +22,40 @@ void MainScreenCommunication::ReceiveCallback(const CanId &canId, const uint8_t 
     if (canId.type == ECanMsgType::CAN_AIRRIDE_LOG) {
         HandleLogMessage(data, length);
     }
+    if (canId.type == ECanMsgType::CAN_AIRRIDE_ACK) {
+        HandleAck(data, length);
+    }
+}
+
+void MainScreenCommunication::HandleAck(const uint8_t *data, uint8_t length) {
+    CanAckPayload ack{};
+    if (!decodeCANMessage(data, length, ack)) {
+        return;
+    }
+    if (ack.type != ECanMsgType::CAN_AIRRIDE_SETTINGS) {
+        return;
+    }
+    if (ack.status == ECanAckStatus::STATUS_OK) {
+        LOG_INFO("Settings ack: controller applied settings");
+    } else {
+        LOG_ERROR("Settings ack: controller reported error applying settings");
+    }
+}
+
+void MainScreenCommunication::SendSettings() {
+    CANSettingsAirRide canSettingsAirRide{
+        settings.frontMax,
+        settings.backMax,
+        settings.rideFront,
+        settings.rideBack,
+        settings.frontUpX,
+        settings.frontDownX,
+        settings.backUpX,
+        settings.backDownX,
+        settings.parkDuration
+    };
+    communication.SendCanMessage(ECanNode::NODE_AIRRIDE_CONTROLLER, ECanMsgType::CAN_AIRRIDE_SETTINGS,
+                                 canSettingsAirRide, true);
 }
 
 void MainScreenCommunication::HandlePressureMessage(const uint8_t *data, uint8_t length) {

@@ -6,7 +6,7 @@
 
 #define MAX_CAN_DATA_LENGTH 8
 
-void LargeCanMessageHandler::SendLargeMessage(CanId &canId, const uint8_t *data, uint8_t length) {
+void LargeCanMessageHandler::SendLargeMessage(CanId &canId, const uint8_t *data, uint8_t length, bool requireAck) {
     if (txQueue == nullptr) return;
 
     int amountOfMessages = (length + MAX_CAN_DATA_LENGTH - 1) / MAX_CAN_DATA_LENGTH;
@@ -18,7 +18,12 @@ void LargeCanMessageHandler::SendLargeMessage(CanId &canId, const uint8_t *data,
             canId.flags = ECanFlags::FLAG_FIRST;
         }
         else if (i == amountOfMessages - 1) {
-            canId.flags = ECanFlags::FLAG_LAST;
+            // Ack bit only goes on the terminal fragment - that's the one
+            // whose arrival completes reassembly, so exactly one ack fires.
+            canId.flags = requireAck
+                ? static_cast<ECanFlags>(static_cast<uint8_t>(ECanFlags::FLAG_LAST)
+                                          | static_cast<uint8_t>(ECanFlags::FLAG_ACK_REQUIRED))
+                : ECanFlags::FLAG_LAST;
 
             int remaining = length % MAX_CAN_DATA_LENGTH;
             dlc = (remaining == 0) ? MAX_CAN_DATA_LENGTH : remaining;
@@ -42,7 +47,7 @@ LargeCanMessage *LargeCanMessageHandler::HandleLargeCanMessage(const CanMessage 
     CanId canId{};
     canId.FromRaw(message.id);
     LargeCanMessage *largeCanMessage = GetLargeCanMessage(canId.src, canId.type);
-    switch (canId.flags) {
+    switch (canId.FragmentState()) {
         case ECanFlags::FLAG_FIRST: {
             if (largeCanMessage) {
                 RemoveLargeMessage(canId.src, canId.type);

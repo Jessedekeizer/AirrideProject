@@ -1,10 +1,10 @@
 #include "Settings4Screen.h"
 #include "ESettingsScreenButtons.h"
 
-Settings4Screen::Settings4Screen(ScreenManager &screenManager, SettingsScreenCommunication &settingsScreenCommunication,
+Settings4Screen::Settings4Screen(ScreenManager &screenManager,
                                  SettingsDevice &settingsDevice, SettingsStorage &settingsStorage,
                                  DisplayService &displayService)
-    : SettingsScreenBase(screenManager, settingsScreenCommunication, settingsDevice, settingsStorage, displayService,
+    : SettingsScreenBase(screenManager, settingsDevice, settingsStorage, displayService,
                          EScreen::SETTINGS4, "/Settings4.png") {
     buttons.push_back(new PushButton(SETTINGSBTN_MAIN_X, SETTINGSBTN_MAIN_Y, SETTINGSBTN_MAIN_W, SETTINGSBTN_MAIN_H,
                                      MAIN_SCREEN,
