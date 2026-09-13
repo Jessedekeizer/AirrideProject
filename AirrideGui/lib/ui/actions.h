@@ -34,6 +34,32 @@ extern void action_top_left_button_pressed(lv_event_t * e);
 extern void action_bottom_right_button_pressed(lv_event_t * e);
 extern void action_calibration_screen_load_started(lv_event_t * e);
 extern void action_leave_calibration_screen(lv_event_t * e);
+extern void action_settings_select_to_main_pressed(lv_event_t * e);
+extern void action_back_max_down(lv_event_t * e);
+extern void action_back_max_up(lv_event_t * e);
+extern void action_front_max_down(lv_event_t * e);
+extern void action_front_max_up(lv_event_t * e);
+extern void action_ride_back_down(lv_event_t * e);
+extern void action_ride_back_up(lv_event_t * e);
+extern void action_ride_front_down(lv_event_t * e);
+extern void action_ride_front_up(lv_event_t * e);
+extern void action_back_down_xdown(lv_event_t * e);
+extern void action_back_down_xup(lv_event_t * e);
+extern void action_back_up_xdown(lv_event_t * e);
+extern void action_back_up_xup(lv_event_t * e);
+extern void action_front_down_xdown(lv_event_t * e);
+extern void action_front_down_xup(lv_event_t * e);
+extern void action_front_up_xdown(lv_event_t * e);
+extern void action_front_up_xup(lv_event_t * e);
+extern void action_auto_park_sec_down(lv_event_t * e);
+extern void action_auto_park_sec_up(lv_event_t * e);
+extern void action_auto_ride_sec_down(lv_event_t * e);
+extern void action_auto_ride_sec_up(lv_event_t * e);
+extern void action_park_duration_sec_down(lv_event_t * e);
+extern void action_park_duration_sec_up(lv_event_t * e);
+extern void action_settings_to_calibration_pressed(lv_event_t * e);
+extern void action_main_screen_load_start(lv_event_t * e);
+extern void action_main_screen_unload_start(lv_event_t * e);
 
 #ifdef __cplusplus
 }

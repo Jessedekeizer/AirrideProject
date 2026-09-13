@@ -10,7 +10,7 @@
       "lvglVersion": "9.5.0",
       "extensions": [],
       "imports": [],
-      "flowSupport": true,
+      "flowSupport": false,
       "displayWidth": 320,
       "displayHeight": 240,
       "displayBorderRadius": 0,
@@ -86,12 +86,12 @@
         {
           "objID": "d05c0814-03ab-4c21-cef9-684513ff2adc",
           "fileName": "ui.h",
-          "template": "#ifndef EEZ_LVGL_UI_GUI_H\n#define EEZ_LVGL_UI_GUI_H\n\n//${eez-studio LVGL_INCLUDE}\n\n//${eez-studio EEZ_FOR_LVGL_CHECK}\n\n#if defined(EEZ_FOR_LVGL)\n#include <eez/flow/lvgl_api.h>\n#endif\n\n#if !defined(EEZ_FOR_LVGL)\n#include \"screens.h\"\n#endif\n\n#ifdef __cplusplus\nextern \"C\" {\n#endif\n\n//${eez-studio GUI_ASSETS_DECL}\n\nvoid ui_init();\nvoid ui_tick();\n\n#if !defined(EEZ_FOR_LVGL)\nvoid loadScreen(enum ScreensEnum screenId);\n#endif\n\n#ifdef __cplusplus\n}\n#endif\n\n#endif // EEZ_LVGL_UI_GUI_H"
+          "template": "#ifndef EEZ_LVGL_UI_GUI_H\n#define EEZ_LVGL_UI_GUI_H\n\n//${eez-studio LVGL_INCLUDE}\n\n//${eez-studio EEZ_FOR_LVGL_CHECK}\n\n#if defined(EEZ_FOR_LVGL)\n#include <eez/flow/lvgl_api.h>\n#endif\n\n#if !defined(EEZ_FOR_LVGL)\n#include \"screens.h\"\n#endif\n\n#ifdef __cplusplus\nextern \"C\" {\n#endif\n\n//${eez-studio GUI_ASSETS_DECL}\n\nvoid ui_init();\nvoid ui_tick();\n\n#if !defined(EEZ_FOR_LVGL)\nvoid loadScreen(enum ScreensEnum screenId);\nvoid loadScreenNoAnim(enum ScreensEnum screenId);\n#endif\n\n#ifdef __cplusplus\n}\n#endif\n\n#endif // EEZ_LVGL_UI_GUI_H"
         },
         {
           "objID": "084926f1-634e-4671-9fc3-cc34c950eba7",
           "fileName": "ui.c",
-          "template": "#if defined(EEZ_FOR_LVGL)\n#include <eez/core/vars.h>\n#endif\n\n#include \"ui.h\"\n#include \"screens.h\"\n#include \"images.h\"\n#include \"actions.h\"\n#include \"vars.h\"\n\n//${eez-studio GUI_ASSETS_DEF}\n\n//${eez-studio LVGL_NATIVE_VARS_TABLE_DEF}\n\n//${eez-studio LVGL_ACTIONS_ARRAY_DEF}\n\n#if defined(EEZ_FOR_LVGL)\n\nvoid ui_init() {\n    eez_flow_init(assets, sizeof(assets), (lv_obj_t **)&objects, sizeof(objects), images, sizeof(images), actions);\n}\n\nvoid ui_tick() {\n    eez_flow_tick();\n    tick_screen(g_currentScreen);\n}\n\n#else\n\nstatic int16_t currentScreen = -1;\n\nstatic lv_obj_t *getLvglObjectFromIndex(int32_t index) {\n    if (index == -1) {\n        return 0;\n    }\n    return ((lv_obj_t **)&objects)[index];\n}\n\nvoid loadScreen(enum ScreensEnum screenId) {\n    currentScreen = screenId - 1;\n    lv_obj_t *screen = getLvglObjectFromIndex(currentScreen);\n    lv_scr_load_anim(screen, LV_SCR_LOAD_ANIM_FADE_IN, 200, 0, false);\n}\n\nvoid ui_init() {\n    create_screens();\n//${eez-studio LVGL_LOAD_FIRST_SCREEN}\n}\n\nvoid ui_tick() {\n    tick_screen(currentScreen);\n}\n\n#endif\n"
+          "template": "#if defined(EEZ_FOR_LVGL)\n#include <eez/core/vars.h>\n#endif\n\n#include \"ui.h\"\n#include \"screens.h\"\n#include \"images.h\"\n#include \"actions.h\"\n#include \"vars.h\"\n\n//${eez-studio GUI_ASSETS_DEF}\n\n//${eez-studio LVGL_NATIVE_VARS_TABLE_DEF}\n\n//${eez-studio LVGL_ACTIONS_ARRAY_DEF}\n\n#if defined(EEZ_FOR_LVGL)\n\nvoid ui_init() {\n    eez_flow_init(assets, sizeof(assets), (lv_obj_t **)&objects, sizeof(objects), images, sizeof(images), actions);\n}\n\nvoid ui_tick() {\n    eez_flow_tick();\n    tick_screen(g_currentScreen);\n}\n\n#else\n\nstatic int16_t currentScreen = -1;\n\nstatic lv_obj_t *getLvglObjectFromIndex(int32_t index) {\n    if (index == -1) {\n        return 0;\n    }\n    return ((lv_obj_t **)&objects)[index];\n}\n\nstatic void setScreen(enum ScreensEnum screenId, lv_scr_load_anim_t anim, uint32_t speed) {\n    currentScreen = screenId - 1;\n    lv_obj_t *screen = getLvglObjectFromIndex(currentScreen);\n    lv_scr_load_anim(screen, anim, speed, 0, false);\n}\n\nvoid loadScreen(enum ScreensEnum screenId) {\n    setScreen(screenId, LV_SCR_LOAD_ANIM_FADE_IN, 200);\n}\n\n// For jumps the code forces rather than the user asking for, where the fade\n// would only get in the way.\nvoid loadScreenNoAnim(enum ScreensEnum screenId) {\n    setScreen(screenId, LV_SCR_LOAD_ANIM_NONE, 0);\n}\n\nvoid ui_init() {\n    create_screens();\n//${eez-studio LVGL_LOAD_FIRST_SCREEN}\n}\n\nvoid ui_tick() {\n    tick_screen(currentScreen);\n}\n\n#endif\n"
         }
       ],
       "destinationFolder": "..\\..\\lib\\ui",
@@ -252,6 +252,110 @@
         "name": "ParkDurationSec",
         "type": "float",
         "defaultValue": "0",
+        "persistent": false,
+        "native": true
+      },
+      {
+        "objID": "3fb9dd3b-1551-4fcd-976f-349212c4ff5e",
+        "name": "BackPressureText",
+        "type": "string",
+        "defaultValue": "\"\"",
+        "persistent": false,
+        "native": true
+      },
+      {
+        "objID": "dca81e81-b3f8-45f0-882b-0f2e215a89fa",
+        "name": "FrontPressureText",
+        "type": "string",
+        "defaultValue": "\"\"",
+        "persistent": false,
+        "native": true
+      },
+      {
+        "objID": "d631e2de-0f2a-4f88-9c6c-a1ead373444f",
+        "name": "FrontMaxText",
+        "type": "string",
+        "defaultValue": "\"\"",
+        "persistent": false,
+        "native": true
+      },
+      {
+        "objID": "1548d231-1337-4b96-8a9d-a99568940d57",
+        "name": "RideFrontText",
+        "type": "string",
+        "defaultValue": "\"\"",
+        "persistent": false,
+        "native": true
+      },
+      {
+        "objID": "a61d7181-7e99-4d4a-8017-e66dcb09807a",
+        "name": "BackMaxText",
+        "type": "string",
+        "defaultValue": "\"\"",
+        "persistent": false,
+        "native": true
+      },
+      {
+        "objID": "7e5178d7-b4b7-4125-972c-a3ac642b2185",
+        "name": "RideBackText",
+        "type": "string",
+        "defaultValue": "\"\"",
+        "persistent": false,
+        "native": true
+      },
+      {
+        "objID": "56b8bffa-f845-4e8c-89bd-b4a776bdc6d1",
+        "name": "BackUpXText",
+        "type": "string",
+        "defaultValue": "\"\"",
+        "persistent": false,
+        "native": true
+      },
+      {
+        "objID": "4019d3b4-07b4-4473-b2b9-460440751813",
+        "name": "FrontUpXText",
+        "type": "string",
+        "defaultValue": "\"\"",
+        "persistent": false,
+        "native": true
+      },
+      {
+        "objID": "b941175e-24bb-4228-b1e3-53677e3c0bd9",
+        "name": "BackDownXText",
+        "type": "string",
+        "defaultValue": "\"\"",
+        "persistent": false,
+        "native": true
+      },
+      {
+        "objID": "dfc89712-13bc-4c3e-b89b-709a7a124606",
+        "name": "FrontDownXText",
+        "type": "string",
+        "defaultValue": "\"\"",
+        "persistent": false,
+        "native": true
+      },
+      {
+        "objID": "79450cd1-09cd-4435-a455-b2d8878092f3",
+        "name": "AutoParkSecText",
+        "type": "string",
+        "defaultValue": "\"\"",
+        "persistent": false,
+        "native": true
+      },
+      {
+        "objID": "a815f9b4-af6e-4a2f-bca3-eb8d38851806",
+        "name": "AutoRideSecText",
+        "type": "string",
+        "defaultValue": "\"\"",
+        "persistent": false,
+        "native": true
+      },
+      {
+        "objID": "d131cb55-7951-4847-bddc-92e57017688d",
+        "name": "ParkDurationSecText",
+        "type": "string",
+        "defaultValue": "\"\"",
         "persistent": false,
         "native": true
       }
@@ -529,6 +633,266 @@
       "userProperties": [],
       "name": "LeaveCalibrationScreen",
       "implementationType": "native"
+    },
+    {
+      "objID": "659251a7-6711-4bbc-b1e4-fadf6073a263",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "SettingsSelectToMainPressed",
+      "implementationType": "native"
+    },
+    {
+      "objID": "f04ec96e-458c-44af-90e2-6e8c930d374b",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "BackMaxDown",
+      "implementationType": "native"
+    },
+    {
+      "objID": "027c575f-3edb-4dbf-8903-b94d4843713f",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "BackMaxUp",
+      "implementationType": "native"
+    },
+    {
+      "objID": "9ca811d6-bb82-4b54-9ab8-8a7298009820",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "FrontMaxDown",
+      "implementationType": "native"
+    },
+    {
+      "objID": "66ca5e10-9f22-4b94-9d9e-8d134f170aac",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "FrontMaxUp",
+      "implementationType": "native"
+    },
+    {
+      "objID": "4e87a081-35d3-4e0f-96d5-50da61c5009c",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "RideBackDown",
+      "implementationType": "native"
+    },
+    {
+      "objID": "b3f06645-ad35-4128-b0cf-ca535cf18250",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "RideBackUp",
+      "implementationType": "native"
+    },
+    {
+      "objID": "b2dd0918-8636-4b9c-b0a8-3b66cbe45bd4",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "RideFrontDown",
+      "implementationType": "native"
+    },
+    {
+      "objID": "e65d1b61-ca83-4e7a-9003-05242e0684f4",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "RideFrontUp",
+      "implementationType": "native"
+    },
+    {
+      "objID": "3e29f277-15b5-454f-86f9-ecc9855fa580",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "BackDownXDown",
+      "implementationType": "native"
+    },
+    {
+      "objID": "7060fac9-0026-4df5-b72a-88884e9becb9",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "BackDownXUp",
+      "implementationType": "native"
+    },
+    {
+      "objID": "374063f6-7a73-46c8-a129-b2e701161ddc",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "BackUpXDown",
+      "implementationType": "native"
+    },
+    {
+      "objID": "10f2e0d7-3030-4537-a97d-43499f9128c7",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "BackUpXUp",
+      "implementationType": "native"
+    },
+    {
+      "objID": "6d1b064e-ba6f-4578-88da-966d20096cfc",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "FrontDownXDown",
+      "implementationType": "native"
+    },
+    {
+      "objID": "ae29d32b-07a2-43bc-a8df-941aa50d6011",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "FrontDownXUp",
+      "implementationType": "native"
+    },
+    {
+      "objID": "4a406332-0a48-4ac4-aeb4-cf0acba61c3d",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "FrontUpXDown",
+      "implementationType": "native"
+    },
+    {
+      "objID": "7bd6b6d1-d2e0-4264-9418-14e668f4dd24",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "FrontUpXUp",
+      "implementationType": "native"
+    },
+    {
+      "objID": "a202b4f1-6f15-49a9-be64-863a0e88fcc7",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "AutoParkSecDown",
+      "implementationType": "native"
+    },
+    {
+      "objID": "881159bb-6abb-41ca-84e3-2f8bb6a8529b",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "AutoParkSecUp",
+      "implementationType": "native"
+    },
+    {
+      "objID": "46f217e1-0fdd-42a2-a648-831a7f11f2dd",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "AutoRideSecDown",
+      "implementationType": "native"
+    },
+    {
+      "objID": "2a5e6928-d80b-449b-b3e0-35c5302e8709",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "AutoRideSecUp",
+      "implementationType": "native"
+    },
+    {
+      "objID": "d78fdd63-f79b-49a4-926d-b003fd479bf7",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "ParkDurationSecDown",
+      "implementationType": "native"
+    },
+    {
+      "objID": "13043578-ef12-46ae-a31a-1c7c72d485bf",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "ParkDurationSecUp",
+      "implementationType": "native"
+    },
+    {
+      "objID": "f779eeec-f448-40be-8a59-74443a734df3",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "SettingsToCalibrationPressed",
+      "implementationType": "native"
+    },
+    {
+      "objID": "c6a890d1-aa69-46fb-8d64-d092e78a3184",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "MainScreenLoadStart",
+      "implementationType": "native"
+    },
+    {
+      "objID": "ae31ceca-8abe-4752-99dd-f168f2cb273a",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "MainScreenUnloadStart",
+      "implementationType": "native"
     }
   ],
   "userPages": [
@@ -557,6 +921,20 @@
               "eventName": "SCREEN_LOADED",
               "handlerType": "action",
               "action": "MainScreenLoaded",
+              "userData": 0
+            },
+            {
+              "objID": "39ab938f-587c-4cba-8888-26b57c0fa6c6",
+              "eventName": "SCREEN_LOAD_START",
+              "handlerType": "action",
+              "action": "MainScreenLoadStart",
+              "userData": 0
+            },
+            {
+              "objID": "6f6cd3db-2820-4a1d-b804-6d01a1c780ac",
+              "eventName": "SCREEN_UNLOAD_START",
+              "handlerType": "action",
+              "action": "MainScreenUnloadStart",
               "userData": 0
             }
           ],
@@ -647,8 +1025,8 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "LVGL.LV_SYMBOL_UP",
-                  "textType": "expression",
+                  "text": "",
+                  "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false,
                   "useStaticText": true
@@ -697,8 +1075,8 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "LVGL.LV_SYMBOL_UP",
-                  "textType": "expression",
+                  "text": "",
+                  "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false,
                   "useStaticText": true
@@ -803,8 +1181,8 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "LVGL.LV_SYMBOL_DOWN",
-                  "textType": "expression",
+                  "text": "",
+                  "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false,
                   "useStaticText": true
@@ -853,8 +1231,8 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "LVGL.LV_SYMBOL_DOWN",
-                  "textType": "expression",
+                  "text": "",
+                  "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false,
                   "useStaticText": true
@@ -959,8 +1337,8 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "LVGL.LV_SYMBOL_UP",
-                  "textType": "expression",
+                  "text": "",
+                  "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false,
                   "useStaticText": true
@@ -1009,8 +1387,8 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "LVGL.LV_SYMBOL_UP",
-                  "textType": "expression",
+                  "text": "",
+                  "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false,
                   "useStaticText": true
@@ -1115,8 +1493,8 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "LVGL.LV_SYMBOL_DOWN",
-                  "textType": "expression",
+                  "text": "",
+                  "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false,
                   "useStaticText": true
@@ -1165,8 +1543,8 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "LVGL.LV_SYMBOL_DOWN",
-                  "textType": "expression",
+                  "text": "",
+                  "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false,
                   "useStaticText": true
@@ -1409,8 +1787,8 @@
                 {
                   "objID": "f675c465-1ab4-4ce4-eb03-b6d019deb134",
                   "eventName": "PRESSED",
-                  "handlerType": "flow",
-                  "action": "FrontUpPressed",
+                  "handlerType": "action",
+                  "action": "MainScreenToSettingsSelectPressed",
                   "userData": 0
                 }
               ],
@@ -1464,8 +1842,8 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "LVGL.LV_SYMBOL_SETTINGS",
-                  "textType": "expression",
+                  "text": "",
+                  "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false,
                   "useStaticText": true
@@ -1607,7 +1985,7 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "String.format(\"%.1f\", BackPressure)",
+                  "text": "BackPressureText",
                   "textType": "expression",
                   "longMode": "WRAP",
                   "recolor": false,
@@ -1702,7 +2080,7 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "String.format(\"%.1f\", FrontPressure)",
+                  "text": "FrontPressureText",
                   "textType": "expression",
                   "longMode": "WRAP",
                   "recolor": false,
@@ -1789,65 +2167,9 @@
             "objID": "24baab71-ddd0-47b6-f152-077706468766"
           },
           "groupIndex": 0
-        },
-        {
-          "objID": "00ea6566-b1fd-45c7-e414-6b64906feb5d",
-          "type": "LVGLActionComponent",
-          "left": 551,
-          "top": 190,
-          "width": 391,
-          "height": 54,
-          "customInputs": [],
-          "customOutputs": [],
-          "actions": [
-            {
-              "objID": "2a84207d-4724-4333-e763-0c5ade66f9e3",
-              "action": "changeScreen",
-              "screen": "SettingsSelectScreen",
-              "screenType": "literal",
-              "fadeMode": "FADE_OUT",
-              "fadeModeType": "literal",
-              "speed": 200,
-              "speedType": "literal",
-              "delay": 0,
-              "delayType": "literal",
-              "useStack": true,
-              "useStackType": "literal"
-            }
-          ]
-        },
-        {
-          "objID": "7016d0dd-eaa2-49ee-dcc0-106878bebdfc",
-          "type": "CallActionActionComponent",
-          "left": 362,
-          "top": 277,
-          "width": 244,
-          "height": 24,
-          "customInputs": [],
-          "customOutputs": [],
-          "action": "MainScreenToSettingsSelectPressed",
-          "userPropertyValues": {
-            "objID": "14a09bcb-a0e8-4571-809d-2072a392d8e8",
-            "values": {}
-          }
         }
       ],
-      "connectionLines": [
-        {
-          "objID": "8d4192ca-915e-4182-a211-d8d58fbd3ebc",
-          "source": "7d53c76d-b437-4f28-ff00-dcb50e6cc85a",
-          "output": "PRESSED",
-          "target": "7016d0dd-eaa2-49ee-dcc0-106878bebdfc",
-          "input": "@seqin"
-        },
-        {
-          "objID": "035b4d1a-fe10-419a-f33f-a6353f55fdf6",
-          "source": "7016d0dd-eaa2-49ee-dcc0-106878bebdfc",
-          "output": "@seqout",
-          "target": "00ea6566-b1fd-45c7-e414-6b64906feb5d",
-          "input": "@seqin"
-        }
-      ],
+      "connectionLines": [],
       "localVariables": [],
       "componentGroups": [],
       "userProperties": [],
@@ -1905,7 +2227,8 @@
                 {
                   "objID": "752d0efe-29c5-4330-903f-785410fd3af2",
                   "eventName": "PRESSED",
-                  "handlerType": "flow",
+                  "handlerType": "action",
+                  "action": "UpdateToUpdateSelectPressed",
                   "userData": 0
                 }
               ],
@@ -1960,8 +2283,8 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "LVGL.LV_SYMBOL_CLOSE",
-                  "textType": "expression",
+                  "text": "",
+                  "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false,
                   "useStaticText": true
@@ -2151,7 +2474,8 @@
                 {
                   "objID": "18135f06-f309-4a7d-8191-6284951e50ee",
                   "eventName": "PRESSED",
-                  "handlerType": "flow",
+                  "handlerType": "action",
+                  "action": "UpdateToUpdateSelectPressed",
                   "userData": 0
                 }
               ],
@@ -2206,8 +2530,8 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "LVGL.LV_SYMBOL_REFRESH",
-                  "textType": "expression",
+                  "text": "",
+                  "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false,
                   "useStaticText": true
@@ -2250,68 +2574,9 @@
             "objID": "3f2a97a3-2adf-46d7-9fbd-f817566d53b0"
           },
           "groupIndex": 0
-        },
-        {
-          "objID": "1d17f306-1a9e-4623-fc10-2c808107cd5a",
-          "type": "LVGLActionComponent",
-          "left": 222,
-          "top": -109,
-          "width": 329,
-          "height": 54,
-          "customInputs": [],
-          "customOutputs": [],
-          "actions": [
-            {
-              "objID": "5d4aedc4-593a-4df3-9d62-ddabfbb3c9f9",
-              "action": "changeToPreviousScreen",
-              "fadeMode": "FADE_IN",
-              "fadeModeType": "literal",
-              "speed": 200,
-              "speedType": "literal",
-              "delay": 0,
-              "delayType": "literal"
-            }
-          ]
-        },
-        {
-          "objID": "f235a363-26fa-4627-e806-a929dbca4057",
-          "type": "CallActionActionComponent",
-          "left": -29,
-          "top": -99,
-          "width": 211,
-          "height": 24,
-          "customInputs": [],
-          "customOutputs": [],
-          "action": "UpdateToUpdateSelectPressed",
-          "userPropertyValues": {
-            "objID": "c41efa32-49a3-4565-844c-aff2a2b0cd89",
-            "values": {}
-          }
         }
       ],
-      "connectionLines": [
-        {
-          "objID": "9581cd11-4e5c-41d1-b85b-9b078d345f71",
-          "source": "af14b27d-fa70-4f7e-d244-388032d27bd2",
-          "output": "PRESSED",
-          "target": "f235a363-26fa-4627-e806-a929dbca4057",
-          "input": "@seqin"
-        },
-        {
-          "objID": "a894fd68-f05e-479d-8962-9a2ba9d4b571",
-          "source": "f235a363-26fa-4627-e806-a929dbca4057",
-          "output": "@seqout",
-          "target": "1d17f306-1a9e-4623-fc10-2c808107cd5a",
-          "input": "@seqin"
-        },
-        {
-          "objID": "280df830-554b-48e2-8aad-adeb4e72f23a",
-          "source": "d7628993-d85f-4d0b-f404-d216ece16649",
-          "output": "PRESSED",
-          "target": "f235a363-26fa-4627-e806-a929dbca4057",
-          "input": "@seqin"
-        }
-      ],
+      "connectionLines": [],
       "localVariables": [],
       "componentGroups": [],
       "userProperties": [],
@@ -2346,7 +2611,7 @@
           "eventHandlers": [
             {
               "objID": "dc35f396-d39c-42dc-9df7-8fdaceb50436",
-              "eventName": "SCREEN_LOAD_START",
+              "eventName": "SCREEN_LOADED",
               "handlerType": "action",
               "action": "UpdateSelectScreenLoaded",
               "userData": 0
@@ -2378,8 +2643,8 @@
                 {
                   "objID": "1f43dfd7-52ab-458e-833d-a3e75beb9d67",
                   "eventName": "PRESSED",
-                  "handlerType": "flow",
-                  "action": "FrontUpPressed",
+                  "handlerType": "action",
+                  "action": "UpdateSelectToMainPressed",
                   "userData": 0
                 }
               ],
@@ -2435,8 +2700,8 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "LVGL.LV_SYMBOL_HOME",
-                  "textType": "expression",
+                  "text": "",
+                  "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false,
                   "useStaticText": true
@@ -2544,8 +2809,8 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "LVGL.LV_SYMBOL_LEFT",
-                  "textType": "expression",
+                  "text": "",
+                  "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false,
                   "useStaticText": true
@@ -2646,8 +2911,8 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "LVGL.LV_SYMBOL_RIGHT",
-                  "textType": "expression",
+                  "text": "",
+                  "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false,
                   "useStaticText": true
@@ -2992,65 +3257,9 @@
             "objID": "8e075abf-1e27-43dc-c343-9f9afae0e7c4"
           },
           "groupIndex": 0
-        },
-        {
-          "objID": "d55fc64c-b33f-4963-d0b7-b24e0b9dd300",
-          "type": "LVGLActionComponent",
-          "left": 287,
-          "top": -123,
-          "width": 323,
-          "height": 54,
-          "customInputs": [],
-          "customOutputs": [],
-          "actions": [
-            {
-              "objID": "c478cb18-06bb-4da6-8c21-f558f2d8359d",
-              "action": "changeScreen",
-              "screen": "MainScreen",
-              "screenType": "literal",
-              "fadeMode": "FADE_IN",
-              "fadeModeType": "literal",
-              "speed": 200,
-              "speedType": "literal",
-              "delay": 0,
-              "delayType": "literal",
-              "useStack": true,
-              "useStackType": "literal"
-            }
-          ]
-        },
-        {
-          "objID": "34e648e3-3aa3-4743-c76f-c7d9ce5269e6",
-          "type": "CallActionActionComponent",
-          "left": 0,
-          "top": -108,
-          "width": 199,
-          "height": 24,
-          "customInputs": [],
-          "customOutputs": [],
-          "action": "UpdateSelectToMainPressed",
-          "userPropertyValues": {
-            "objID": "b02bab58-13ef-4be3-c642-7ce433fec2a5",
-            "values": {}
-          }
         }
       ],
-      "connectionLines": [
-        {
-          "objID": "371187a0-3a5d-4ad5-81ed-253724fdeb0e",
-          "source": "ade8cf96-0456-46e7-bd98-937283d19941",
-          "output": "PRESSED",
-          "target": "34e648e3-3aa3-4743-c76f-c7d9ce5269e6",
-          "input": "@seqin"
-        },
-        {
-          "objID": "5f61c716-79e2-448f-ae42-3e9445c2fdf9",
-          "source": "34e648e3-3aa3-4743-c76f-c7d9ce5269e6",
-          "output": "@seqout",
-          "target": "d55fc64c-b33f-4963-d0b7-b24e0b9dd300",
-          "input": "@seqin"
-        }
-      ],
+      "connectionLines": [],
       "localVariables": [],
       "componentGroups": [],
       "userProperties": [],
@@ -3179,8 +3388,8 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "LVGL.LV_SYMBOL_CLOSE",
-                  "textType": "expression",
+                  "text": "",
+                  "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false,
                   "useStaticText": true
@@ -3294,8 +3503,8 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "LVGL.LV_SYMBOL_CLOSE",
-                  "textType": "expression",
+                  "text": "",
+                  "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false,
                   "useStaticText": true
@@ -3398,8 +3607,8 @@
                 {
                   "objID": "45c7715c-d627-41f3-9864-c894c9a3ec41",
                   "eventName": "PRESSED",
-                  "handlerType": "flow",
-                  "action": "FrontUpPressed",
+                  "handlerType": "action",
+                  "action": "LeaveCalibrationScreen",
                   "userData": 0
                 }
               ],
@@ -3453,8 +3662,8 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "LVGL.LV_SYMBOL_HOME",
-                  "textType": "expression",
+                  "text": "",
+                  "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false,
                   "useStaticText": true
@@ -3496,65 +3705,9 @@
             }
           },
           "groupIndex": 0
-        },
-        {
-          "objID": "512e10e8-1941-415a-f364-31d64bb4b371",
-          "type": "LVGLActionComponent",
-          "left": 489,
-          "top": -117,
-          "width": 323,
-          "height": 54,
-          "customInputs": [],
-          "customOutputs": [],
-          "actions": [
-            {
-              "objID": "bb5b7bc4-dc65-4366-be20-c19735028280",
-              "action": "changeScreen",
-              "screen": "MainScreen",
-              "screenType": "literal",
-              "fadeMode": "FADE_IN",
-              "fadeModeType": "literal",
-              "speed": 200,
-              "speedType": "literal",
-              "delay": 0,
-              "delayType": "literal",
-              "useStack": true,
-              "useStackType": "literal"
-            }
-          ]
-        },
-        {
-          "objID": "99af587b-e500-4ff1-8f55-477663e17bb7",
-          "type": "CallActionActionComponent",
-          "left": 270,
-          "top": -102,
-          "width": 168,
-          "height": 24,
-          "customInputs": [],
-          "customOutputs": [],
-          "action": "LeaveCalibrationScreen",
-          "userPropertyValues": {
-            "objID": "0e9efbb4-d205-4c23-9fc3-6900316ac66a",
-            "values": {}
-          }
         }
       ],
-      "connectionLines": [
-        {
-          "objID": "f002444d-45a9-4f77-d69c-194d42c52349",
-          "source": "59ce3c10-432a-4df9-e530-83a1ae287e3c",
-          "output": "PRESSED",
-          "target": "99af587b-e500-4ff1-8f55-477663e17bb7",
-          "input": "@seqin"
-        },
-        {
-          "objID": "b0444958-e5d8-421a-8503-9aecc6eacfd7",
-          "source": "99af587b-e500-4ff1-8f55-477663e17bb7",
-          "output": "@seqout",
-          "target": "512e10e8-1941-415a-f364-31d64bb4b371",
-          "input": "@seqin"
-        }
-      ],
+      "connectionLines": [],
       "localVariables": [],
       "componentGroups": [],
       "userProperties": [],
@@ -3620,8 +3773,8 @@
                 {
                   "objID": "b8e17912-4fa2-4cad-8b99-cf675afbb09d",
                   "eventName": "PRESSED",
-                  "handlerType": "flow",
-                  "action": "FrontUpPressed",
+                  "handlerType": "action",
+                  "action": "SettingsSelectToMainPressed",
                   "userData": 0
                 }
               ],
@@ -3677,8 +3830,8 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "LVGL.LV_SYMBOL_HOME",
-                  "textType": "expression",
+                  "text": "",
+                  "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false,
                   "useStaticText": true
@@ -3721,8 +3874,8 @@
                 {
                   "objID": "7ef5285c-b4aa-4fb5-ade3-924e4df9c304",
                   "eventName": "PRESSED",
-                  "handlerType": "flow",
-                  "action": "FrontUpPressed",
+                  "handlerType": "action",
+                  "action": "SaveSettingsPressed",
                   "userData": 0
                 }
               ],
@@ -3776,8 +3929,8 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "LVGL.LV_SYMBOL_SAVE",
-                  "textType": "expression",
+                  "text": "",
+                  "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false,
                   "useStaticText": true
@@ -4183,98 +4336,9 @@
             "objID": "379924f1-9124-4c6b-abf9-f0e9cfc57102"
           },
           "groupIndex": 0
-        },
-        {
-          "objID": "03041cc3-a63e-480a-948b-8022ecbd1d05",
-          "type": "LVGLActionComponent",
-          "left": 67,
-          "top": -160,
-          "width": 323,
-          "height": 54,
-          "customInputs": [],
-          "customOutputs": [],
-          "actions": [
-            {
-              "objID": "6820c573-2600-410d-ffd1-5d8032cabed8",
-              "action": "changeScreen",
-              "screen": "MainScreen",
-              "screenType": "literal",
-              "fadeMode": "FADE_IN",
-              "fadeModeType": "literal",
-              "speed": 200,
-              "speedType": "literal",
-              "delay": 0,
-              "delayType": "literal",
-              "useStack": true,
-              "useStackType": "literal"
-            }
-          ]
-        },
-        {
-          "objID": "cb410533-079e-43ff-970a-2a42d1f26853",
-          "type": "CallActionActionComponent",
-          "left": 430,
-          "top": -130,
-          "width": 154,
-          "height": 24,
-          "customInputs": [],
-          "customOutputs": [],
-          "action": "SaveSettingsPressed",
-          "userPropertyValues": {
-            "objID": "6fa61a21-45e7-45e5-ddd9-8d96f8947aea",
-            "values": {}
-          }
-        },
-        {
-          "objID": "892e8372-830b-4b89-d0b4-ec259e03ca26",
-          "type": "LVGLActionComponent",
-          "left": 597,
-          "top": -196,
-          "width": 323,
-          "height": 54,
-          "customInputs": [],
-          "customOutputs": [],
-          "actions": [
-            {
-              "objID": "e8929dcb-50ba-4acb-870c-13e8935f9245",
-              "action": "changeScreen",
-              "screen": "MainScreen",
-              "screenType": "literal",
-              "fadeMode": "FADE_IN",
-              "fadeModeType": "literal",
-              "speed": 200,
-              "speedType": "literal",
-              "delay": 0,
-              "delayType": "literal",
-              "useStack": true,
-              "useStackType": "literal"
-            }
-          ]
         }
       ],
-      "connectionLines": [
-        {
-          "objID": "af646d30-2ad2-4689-90b6-be0618587b13",
-          "source": "ffdd9d31-70f0-4d76-e9f0-65725f06fbac",
-          "output": "PRESSED",
-          "target": "03041cc3-a63e-480a-948b-8022ecbd1d05",
-          "input": "@seqin"
-        },
-        {
-          "objID": "7526a90e-7159-4fba-cfbe-b97f5171f00f",
-          "source": "42b2ebc8-2d30-45cb-914f-0c1fa8d937bb",
-          "output": "PRESSED",
-          "target": "cb410533-079e-43ff-970a-2a42d1f26853",
-          "input": "@seqin"
-        },
-        {
-          "objID": "e76bf965-71c5-4d72-8085-78b798d29f5c",
-          "source": "cb410533-079e-43ff-970a-2a42d1f26853",
-          "output": "@seqout",
-          "target": "892e8372-830b-4b89-d0b4-ec259e03ca26",
-          "input": "@seqin"
-        }
-      ],
+      "connectionLines": [],
       "localVariables": [],
       "componentGroups": [],
       "userProperties": [],
@@ -4312,7 +4376,8 @@
             {
               "objID": "3eb0ff84-cc0a-4401-c3da-ec306b353193",
               "eventName": "PRESSED",
-              "handlerType": "flow",
+              "handlerType": "action",
+              "action": "UpdateItemUpdatePressed",
               "userData": 0
             }
           ],
@@ -4442,65 +4507,9 @@
           "longMode": "WRAP",
           "recolor": false,
           "useStaticText": true
-        },
-        {
-          "objID": "387266a4-9d50-4598-a121-52ccac3b5f3e",
-          "type": "LVGLActionComponent",
-          "left": 430,
-          "top": 276,
-          "width": 336,
-          "height": 54,
-          "customInputs": [],
-          "customOutputs": [],
-          "actions": [
-            {
-              "objID": "9e0d844a-beed-461e-82b1-5e3826efe6b4",
-              "action": "changeScreen",
-              "screen": "UpdateScreen",
-              "screenType": "literal",
-              "fadeMode": "FADE_IN",
-              "fadeModeType": "literal",
-              "speed": 200,
-              "speedType": "literal",
-              "delay": 0,
-              "delayType": "literal",
-              "useStack": true,
-              "useStackType": "literal"
-            }
-          ]
-        },
-        {
-          "objID": "2f3a2db3-ffab-4ec5-a049-715c7d55f9a8",
-          "type": "CallActionActionComponent",
-          "left": 154,
-          "top": 318,
-          "width": 187,
-          "height": 24,
-          "customInputs": [],
-          "customOutputs": [],
-          "action": "UpdateItemUpdatePressed",
-          "userPropertyValues": {
-            "objID": "67ae7f82-b879-4a84-8b67-6f2c0cd8fba5",
-            "values": {}
-          }
         }
       ],
-      "connectionLines": [
-        {
-          "objID": "930b8732-de59-4409-862a-b83796e7d89f",
-          "source": "5b1e7d11-106c-487c-b716-795bd5a56586",
-          "output": "PRESSED",
-          "target": "2f3a2db3-ffab-4ec5-a049-715c7d55f9a8",
-          "input": "@seqin"
-        },
-        {
-          "objID": "7e2d5260-5496-49b1-ffba-b94c471fa827",
-          "source": "2f3a2db3-ffab-4ec5-a049-715c7d55f9a8",
-          "output": "@seqout",
-          "target": "387266a4-9d50-4598-a121-52ccac3b5f3e",
-          "input": "@seqin"
-        }
-      ],
+      "connectionLines": [],
       "localVariables": [],
       "componentGroups": [],
       "userProperties": [],
@@ -4582,7 +4591,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "String.format(\"%.1f\", FrontMax)",
+              "text": "FrontMaxText",
               "textType": "expression",
               "longMode": "WRAP",
               "recolor": false,
@@ -4673,7 +4682,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "String.format(\"%.1f\", RideFront)",
+              "text": "RideFrontText",
               "textType": "expression",
               "longMode": "WRAP",
               "recolor": false,
@@ -4764,7 +4773,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "String.format(\"%.1f\", BackMax)",
+              "text": "BackMaxText",
               "textType": "expression",
               "longMode": "WRAP",
               "recolor": false,
@@ -4855,7 +4864,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "String.format(\"%.1f\", RideBack)",
+              "text": "RideBackText",
               "textType": "expression",
               "longMode": "WRAP",
               "recolor": false,
@@ -4900,15 +4909,15 @@
             {
               "objID": "c3266a7a-ac0e-418a-d08b-e9c299e6c763",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "BackMaxDown",
               "userData": 0
             },
             {
               "objID": "cb047d61-5de6-4863-8d72-66bd01cb63cc",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "BackMaxDown",
               "userData": 0
             }
           ],
@@ -4961,8 +4970,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_DOWN",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -5005,15 +5014,15 @@
             {
               "objID": "53d49348-ca6f-4ea4-a0b9-04579e4ef3d0",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "BackMaxUp",
               "userData": 0
             },
             {
               "objID": "6f4ba589-419f-4f77-fe20-49306141999c",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "BackMaxUp",
               "userData": 0
             }
           ],
@@ -5066,8 +5075,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_UP",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -5110,15 +5119,15 @@
             {
               "objID": "6b1852f8-20a7-45d1-996f-e7d87fadbcf8",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "FrontMaxDown",
               "userData": 0
             },
             {
               "objID": "79eec705-b4e5-4287-85ff-48a8e1d1a28f",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "FrontMaxDown",
               "userData": 0
             }
           ],
@@ -5171,8 +5180,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_DOWN",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -5215,15 +5224,15 @@
             {
               "objID": "120a6461-357d-4ea6-c792-f6cb6827c50c",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "FrontMaxUp",
               "userData": 0
             },
             {
               "objID": "6a4c9839-08fb-43e7-c250-5e837e4b93b5",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "FrontMaxUp",
               "userData": 0
             }
           ],
@@ -5276,8 +5285,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_UP",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -5320,15 +5329,15 @@
             {
               "objID": "2635ff55-ca66-4f17-9a05-ea3edc9a5326",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "RideBackDown",
               "userData": 0
             },
             {
               "objID": "a1813de5-1178-4288-b6f4-44e7f7d762a2",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "RideBackDown",
               "userData": 0
             }
           ],
@@ -5381,8 +5390,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_DOWN",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -5425,15 +5434,15 @@
             {
               "objID": "35d89f89-3f22-4475-f3a2-4e5f25e18bc4",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "RideBackUp",
               "userData": 0
             },
             {
               "objID": "69baf3aa-b64e-4b8e-9378-b5fbea4e1731",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "RideBackUp",
               "userData": 0
             }
           ],
@@ -5486,8 +5495,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_UP",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -5530,15 +5539,15 @@
             {
               "objID": "4c7ba6bd-47c3-49e5-9a4e-97255a60cabd",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "RideFrontDown",
               "userData": 0
             },
             {
               "objID": "b57c1b99-0ab6-44c1-8375-a041387f8cca",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "RideFrontDown",
               "userData": 0
             }
           ],
@@ -5591,8 +5600,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_DOWN",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -5635,15 +5644,15 @@
             {
               "objID": "58d9c183-878e-40ae-a03c-9c7eb231616f",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "RideFrontUp",
               "userData": 0
             },
             {
               "objID": "c2b92d70-86a7-4e44-94f7-8249552097b2",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "RideFrontUp",
               "userData": 0
             }
           ],
@@ -5696,8 +5705,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_UP",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -6021,142 +6030,6 @@
           "useStaticText": true
         },
         {
-          "objID": "dc766b1c-df21-43fb-cf7f-ab5f57dcc2ca",
-          "type": "SetVariableActionComponent",
-          "left": 432,
-          "top": -59,
-          "width": 361,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "ff9706cb-00b0-4f1f-a5a3-1f3019d43f6f",
-              "variable": "RideFront",
-              "value": "RideFront < 0.1 ? 0.0 : RideFront - 0.1"
-            }
-          ]
-        },
-        {
-          "objID": "b937a978-a36a-4fc6-b526-55374cc395b0",
-          "type": "SetVariableActionComponent",
-          "left": 432,
-          "top": -120,
-          "width": 214,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "d2996488-2490-4b08-a541-2ac6604a494d",
-              "variable": "RideFront",
-              "value": "RideFront + 0.1"
-            }
-          ]
-        },
-        {
-          "objID": "60f04477-1b59-42d7-841e-1da70732b4f3",
-          "type": "SetVariableActionComponent",
-          "left": 432,
-          "top": 75,
-          "width": 343,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "94674eec-a55d-4f86-b940-a8d682c3d7fb",
-              "variable": "RideBack",
-              "value": "RideBack < 0.1 ? 0.0 : RideBack - 0.1"
-            }
-          ]
-        },
-        {
-          "objID": "f7c45e3e-ecbc-4d47-bd06-9f8e774562c7",
-          "type": "SetVariableActionComponent",
-          "left": 432,
-          "top": 14,
-          "width": 202,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "aa4af09e-868c-4738-9c9d-0dbe45b0d5f5",
-              "variable": "RideBack",
-              "value": "RideBack + 0.1"
-            }
-          ]
-        },
-        {
-          "objID": "3f25cec0-4956-4456-b6f4-5dbe0cd6c31a",
-          "type": "SetVariableActionComponent",
-          "left": 432,
-          "top": 155,
-          "width": 202,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "e978a940-5f20-4aa7-f8be-a76df702b8a9",
-              "variable": "FrontMax",
-              "value": "FrontMax + 0.1"
-            }
-          ]
-        },
-        {
-          "objID": "7d72c2a3-49f5-41ce-d5fd-d62cdb0b2f72",
-          "type": "SetVariableActionComponent",
-          "left": 432,
-          "top": 282,
-          "width": 189,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "cbe050d0-d760-4ca5-e098-bfb3ec8d50aa",
-              "variable": "BackMax",
-              "value": "BackMax + 0.1"
-            }
-          ]
-        },
-        {
-          "objID": "8f10be02-c2cb-4b6c-aa4d-8d17404a5842",
-          "type": "SetVariableActionComponent",
-          "left": 432,
-          "top": 212,
-          "width": 343,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "ea2013a5-845a-4def-dcab-da2a222d1d3d",
-              "variable": "FrontMax",
-              "value": "FrontMax < 0.1 ? 0.0 : FrontMax - 0.1"
-            }
-          ]
-        },
-        {
-          "objID": "75dfd298-6d96-4242-c3c1-8d67a37e92e6",
-          "type": "SetVariableActionComponent",
-          "left": 432,
-          "top": 339,
-          "width": 325,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "14e9c4f9-d155-4b25-a702-79086f48a1c5",
-              "variable": "BackMax",
-              "value": "BackMax < 0.1 ? 0.0 : BackMax - 0.1"
-            }
-          ]
-        },
-        {
           "objID": "14fd730e-5072-440a-a8cb-451f8d049f71",
           "type": "LVGLButtonWidget",
           "left": 266,
@@ -6232,8 +6105,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_RIGHT",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -6257,120 +6130,7 @@
           "groupIndex": 0
         }
       ],
-      "connectionLines": [
-        {
-          "objID": "c23c9bae-38f9-4a62-c8d3-7ddf4a78f8da",
-          "source": "25d44f5e-9fc1-4617-b85d-90dbc82cc7fd",
-          "output": "PRESSED",
-          "target": "b937a978-a36a-4fc6-b526-55374cc395b0",
-          "input": "@seqin"
-        },
-        {
-          "objID": "17f5f60a-53d1-4160-b3f3-c1db4617637a",
-          "source": "25d44f5e-9fc1-4617-b85d-90dbc82cc7fd",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "b937a978-a36a-4fc6-b526-55374cc395b0",
-          "input": "@seqin"
-        },
-        {
-          "objID": "48fd7886-cef6-4138-eb55-386f18a7cad4",
-          "source": "dcc45590-28db-4805-b89f-9da77caff7de",
-          "output": "PRESSED",
-          "target": "dc766b1c-df21-43fb-cf7f-ab5f57dcc2ca",
-          "input": "@seqin"
-        },
-        {
-          "objID": "3a374931-8dc2-41c2-b729-e8048964cf65",
-          "source": "dcc45590-28db-4805-b89f-9da77caff7de",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "dc766b1c-df21-43fb-cf7f-ab5f57dcc2ca",
-          "input": "@seqin"
-        },
-        {
-          "objID": "1579ed09-5358-43a4-d6c7-6b7c45e3226b",
-          "source": "375b6cbc-bdfc-444b-a4ae-5951110ab4f2",
-          "output": "PRESSED",
-          "target": "f7c45e3e-ecbc-4d47-bd06-9f8e774562c7",
-          "input": "@seqin"
-        },
-        {
-          "objID": "0bba2e80-e493-4469-c31f-bc129409dfb9",
-          "source": "375b6cbc-bdfc-444b-a4ae-5951110ab4f2",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "f7c45e3e-ecbc-4d47-bd06-9f8e774562c7",
-          "input": "@seqin"
-        },
-        {
-          "objID": "1ef81675-489b-4fae-b19f-f476c307771a",
-          "source": "25890621-3a8d-4427-ef72-7324a494af6e",
-          "output": "PRESSED",
-          "target": "60f04477-1b59-42d7-841e-1da70732b4f3",
-          "input": "@seqin"
-        },
-        {
-          "objID": "dbf0485d-7462-4b2b-9c4f-d078ec9a7f79",
-          "source": "25890621-3a8d-4427-ef72-7324a494af6e",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "60f04477-1b59-42d7-841e-1da70732b4f3",
-          "input": "@seqin"
-        },
-        {
-          "objID": "c42c318b-18a7-4cd1-c541-8526a0ba77e3",
-          "source": "b89745a0-5460-4890-f62a-fae763ac90fe",
-          "output": "PRESSED",
-          "target": "3f25cec0-4956-4456-b6f4-5dbe0cd6c31a",
-          "input": "@seqin"
-        },
-        {
-          "objID": "8ec14962-50f0-479b-88a8-621d03e628bd",
-          "source": "b89745a0-5460-4890-f62a-fae763ac90fe",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "3f25cec0-4956-4456-b6f4-5dbe0cd6c31a",
-          "input": "@seqin"
-        },
-        {
-          "objID": "65756f86-c3d0-4359-d81d-490c2e02e865",
-          "source": "7294dac4-90bb-415b-c9d7-02b63f55fabd",
-          "output": "PRESSED",
-          "target": "8f10be02-c2cb-4b6c-aa4d-8d17404a5842",
-          "input": "@seqin"
-        },
-        {
-          "objID": "3af4099b-8aa1-4c3d-d22a-2dc76027a250",
-          "source": "7294dac4-90bb-415b-c9d7-02b63f55fabd",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "8f10be02-c2cb-4b6c-aa4d-8d17404a5842",
-          "input": "@seqin"
-        },
-        {
-          "objID": "b4215f54-ba4c-4c61-a098-eb7056f0243a",
-          "source": "7d2e9705-b29f-4444-a98e-32c4fe844eb7",
-          "output": "PRESSED",
-          "target": "7d72c2a3-49f5-41ce-d5fd-d62cdb0b2f72",
-          "input": "@seqin"
-        },
-        {
-          "objID": "7b7392fa-79b6-4a88-bd8e-e3fffe785b32",
-          "source": "7d2e9705-b29f-4444-a98e-32c4fe844eb7",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "7d72c2a3-49f5-41ce-d5fd-d62cdb0b2f72",
-          "input": "@seqin"
-        },
-        {
-          "objID": "da0cde98-08f0-459a-8db5-3f8f1b892f23",
-          "source": "e4ca9a85-182c-4829-fe1e-4736729f9fb3",
-          "output": "PRESSED",
-          "target": "75dfd298-6d96-4242-c3c1-8d67a37e92e6",
-          "input": "@seqin"
-        },
-        {
-          "objID": "46fb9b96-b40a-43ef-ff24-49b5632ba4ec",
-          "source": "e4ca9a85-182c-4829-fe1e-4736729f9fb3",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "75dfd298-6d96-4242-c3c1-8d67a37e92e6",
-          "input": "@seqin"
-        }
-      ],
+      "connectionLines": [],
       "localVariables": [],
       "componentGroups": [],
       "userProperties": [],
@@ -6452,7 +6212,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "String.format(\"%.1f\", BackUpX)",
+              "text": "BackUpXText",
               "textType": "expression",
               "longMode": "WRAP",
               "recolor": false,
@@ -6543,7 +6303,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "String.format(\"%.1f\", FrontUpX)",
+              "text": "FrontUpXText",
               "textType": "expression",
               "longMode": "WRAP",
               "recolor": false,
@@ -6634,7 +6394,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "String.format(\"%.1f\", BackDownX)",
+              "text": "BackDownXText",
               "textType": "expression",
               "longMode": "WRAP",
               "recolor": false,
@@ -6725,7 +6485,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "String.format(\"%.1f\", FrontDownX)",
+              "text": "FrontDownXText",
               "textType": "expression",
               "longMode": "WRAP",
               "recolor": false,
@@ -6770,15 +6530,15 @@
             {
               "objID": "6a459d46-3390-45a9-8e86-f62af4cb835c",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "BackDownXDown",
               "userData": 0
             },
             {
               "objID": "6328e17c-1136-45e8-a6fa-441f036bc75e",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "BackDownXDown",
               "userData": 0
             }
           ],
@@ -6831,8 +6591,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_DOWN",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -6875,15 +6635,15 @@
             {
               "objID": "cab0d23a-2937-4a9c-df8c-58a942b48004",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "BackDownXUp",
               "userData": 0
             },
             {
               "objID": "8b78cadd-8c28-40f2-94ee-177e196abd5d",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "BackDownXUp",
               "userData": 0
             }
           ],
@@ -6936,8 +6696,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_UP",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -6980,15 +6740,15 @@
             {
               "objID": "b692a874-4bbb-4e80-dd67-0dca07082030",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "BackUpXDown",
               "userData": 0
             },
             {
               "objID": "3783ad9e-2425-45b0-ea2d-2496f7ad58c8",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "BackUpXDown",
               "userData": 0
             }
           ],
@@ -7041,8 +6801,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_DOWN",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -7085,15 +6845,15 @@
             {
               "objID": "f9358d67-d125-42f7-e0f1-cf78bd8e5218",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "BackUpXUp",
               "userData": 0
             },
             {
               "objID": "e4a90389-850e-4359-b3f9-f327cb42a675",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "BackUpXUp",
               "userData": 0
             }
           ],
@@ -7146,8 +6906,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_UP",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -7190,15 +6950,15 @@
             {
               "objID": "421184a9-76d1-41e6-d220-915b3d65e8db",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "FrontDownXDown",
               "userData": 0
             },
             {
               "objID": "fd600fbf-b87d-472c-a5fd-221d88e78b74",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "FrontDownXDown",
               "userData": 0
             }
           ],
@@ -7251,8 +7011,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_DOWN",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -7295,15 +7055,15 @@
             {
               "objID": "bbe0b7ab-e488-44fb-a250-a117dca67bc8",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "FrontDownXUp",
               "userData": 0
             },
             {
               "objID": "cb062821-34a6-48ad-de97-a09dbed8b102",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "FrontDownXUp",
               "userData": 0
             }
           ],
@@ -7356,8 +7116,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_UP",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -7400,15 +7160,15 @@
             {
               "objID": "352110f9-0414-4841-a7be-63100ecce649",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "FrontUpXDown",
               "userData": 0
             },
             {
               "objID": "1fcf6f66-1449-4cc9-9708-0c9d9e26614e",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "FrontUpXDown",
               "userData": 0
             }
           ],
@@ -7461,8 +7221,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_DOWN",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -7505,15 +7265,15 @@
             {
               "objID": "11cabc60-eab9-492b-eccc-6d45e7856c6a",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "FrontUpXUp",
               "userData": 0
             },
             {
               "objID": "eae6e009-e3ff-40b4-d892-b00c6d853167",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "FrontUpXUp",
               "userData": 0
             }
           ],
@@ -7566,8 +7326,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_UP",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -7891,142 +7651,6 @@
           "useStaticText": true
         },
         {
-          "objID": "df0f50e9-9456-46fa-f5d9-fef2a979aa33",
-          "type": "SetVariableActionComponent",
-          "left": 450,
-          "top": -81,
-          "width": 202,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "b306d375-2ae0-4bcd-b135-c2ce8edd7de7",
-              "variable": "FrontUpX",
-              "value": "FrontUpX + 0.1"
-            }
-          ]
-        },
-        {
-          "objID": "711cff3f-55b1-4e7d-f262-7f53599102d3",
-          "type": "SetVariableActionComponent",
-          "left": 450,
-          "top": -24,
-          "width": 343,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "3994bfbb-f6c4-4af7-f4d0-80bdce410922",
-              "variable": "FrontUpX",
-              "value": "FrontUpX < 0.1 ? 0.0 : FrontUpX - 0.1"
-            }
-          ]
-        },
-        {
-          "objID": "400b22e2-92f9-40f6-8e6c-efae656427c4",
-          "type": "SetVariableActionComponent",
-          "left": 450,
-          "top": 45,
-          "width": 226,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "c6a7dc18-e3fa-48bd-82f7-023aa9f9ec1a",
-              "variable": "FrontDownX",
-              "value": "FrontDownX + 0.1"
-            }
-          ]
-        },
-        {
-          "objID": "8c0f8fde-5f14-41d4-db6b-07d0b9d7e225",
-          "type": "SetVariableActionComponent",
-          "left": 450,
-          "top": 102,
-          "width": 380,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "0a22a778-1ef7-4a31-9694-6828647a9500",
-              "variable": "FrontDownX",
-              "value": "FrontDownX < 0.1 ? 0.0 : FrontDownX - 0.1"
-            }
-          ]
-        },
-        {
-          "objID": "88b8521c-1365-44c0-eab9-6e7579ffc4ed",
-          "type": "SetVariableActionComponent",
-          "left": 450,
-          "top": 179,
-          "width": 189,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "c6bbc194-f151-4df4-99b0-4f6d9336f615",
-              "variable": "BackUpX",
-              "value": "BackUpX + 0.1"
-            }
-          ]
-        },
-        {
-          "objID": "a295b9b0-de67-4ad2-a65f-e60957fd6e77",
-          "type": "SetVariableActionComponent",
-          "left": 450,
-          "top": 236,
-          "width": 325,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "35dc0ff0-c8b8-40e1-f6f2-19691c359d49",
-              "variable": "BackUpX",
-              "value": "BackUpX < 0.1 ? 0.0 : BackUpX - 0.1"
-            }
-          ]
-        },
-        {
-          "objID": "99d90a56-2507-4094-8d90-10dbe06ef773",
-          "type": "SetVariableActionComponent",
-          "left": 450,
-          "top": 303,
-          "width": 214,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "5a6369b6-e050-4cbf-dd62-d2f23bd6b365",
-              "variable": "BackDownX",
-              "value": "BackDownX + 0.1"
-            }
-          ]
-        },
-        {
-          "objID": "0bbc2106-55fc-4033-ce07-13b8fc52a4ed",
-          "type": "SetVariableActionComponent",
-          "left": 450,
-          "top": 360,
-          "width": 361,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "baa5d3cf-f726-47e0-e0ab-3512e62e6bb5",
-              "variable": "BackDownX",
-              "value": "BackDownX < 0.1 ? 0.0 : BackDownX - 0.1"
-            }
-          ]
-        },
-        {
           "objID": "2e28cf4b-10ef-4eee-a00f-d3454acec4af",
           "type": "LVGLButtonWidget",
           "left": 266,
@@ -8102,8 +7726,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_RIGHT",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -8202,8 +7826,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_LEFT",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -8227,120 +7851,7 @@
           "groupIndex": 0
         }
       ],
-      "connectionLines": [
-        {
-          "objID": "393d2853-b5e7-4d24-8b12-ce5b04dccb2b",
-          "source": "09e4b42c-5b16-479c-a85a-a2bb3b11e892",
-          "output": "PRESSED",
-          "target": "df0f50e9-9456-46fa-f5d9-fef2a979aa33",
-          "input": "@seqin"
-        },
-        {
-          "objID": "b3c19349-cb50-40b5-8623-c46ee12190e7",
-          "source": "09e4b42c-5b16-479c-a85a-a2bb3b11e892",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "df0f50e9-9456-46fa-f5d9-fef2a979aa33",
-          "input": "@seqin"
-        },
-        {
-          "objID": "4218697d-39ce-4f92-d6c9-77269db2c18f",
-          "source": "51fc3329-a1df-400e-b3d3-de580ea7b9eb",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "400b22e2-92f9-40f6-8e6c-efae656427c4",
-          "input": "@seqin"
-        },
-        {
-          "objID": "e2b5d90c-ec22-4664-be0d-2cc4b940f7d3",
-          "source": "51fc3329-a1df-400e-b3d3-de580ea7b9eb",
-          "output": "PRESSED",
-          "target": "400b22e2-92f9-40f6-8e6c-efae656427c4",
-          "input": "@seqin"
-        },
-        {
-          "objID": "0bcc7268-f5b4-41c0-aa09-e42a9df175d3",
-          "source": "573fb2e1-b550-402d-f3fe-1b0834ffe261",
-          "output": "PRESSED",
-          "target": "88b8521c-1365-44c0-eab9-6e7579ffc4ed",
-          "input": "@seqin"
-        },
-        {
-          "objID": "f39dde7e-ddd0-40bc-f2cc-4e8a83c20891",
-          "source": "573fb2e1-b550-402d-f3fe-1b0834ffe261",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "88b8521c-1365-44c0-eab9-6e7579ffc4ed",
-          "input": "@seqin"
-        },
-        {
-          "objID": "af748113-cd1d-4282-bd51-c2a9b32f8fe1",
-          "source": "c4a12800-185d-40ac-9205-71bdd312a0b5",
-          "output": "PRESSED",
-          "target": "99d90a56-2507-4094-8d90-10dbe06ef773",
-          "input": "@seqin"
-        },
-        {
-          "objID": "5ce76bb8-638e-4cdb-9ee3-f701c5146108",
-          "source": "c4a12800-185d-40ac-9205-71bdd312a0b5",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "99d90a56-2507-4094-8d90-10dbe06ef773",
-          "input": "@seqin"
-        },
-        {
-          "objID": "69a67692-5de1-435d-d613-3ad645bf787e",
-          "source": "9cc63598-4392-4ff2-bc26-862a97d391fc",
-          "output": "PRESSED",
-          "target": "711cff3f-55b1-4e7d-f262-7f53599102d3",
-          "input": "@seqin"
-        },
-        {
-          "objID": "e9860f7d-a9ea-4164-cbc5-61ae193e4e84",
-          "source": "9cc63598-4392-4ff2-bc26-862a97d391fc",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "711cff3f-55b1-4e7d-f262-7f53599102d3",
-          "input": "@seqin"
-        },
-        {
-          "objID": "ef88949e-4cd3-4696-b0ee-baa8078180a2",
-          "source": "f0be7bf8-89df-46c9-9b87-f5d0dc80591a",
-          "output": "PRESSED",
-          "target": "8c0f8fde-5f14-41d4-db6b-07d0b9d7e225",
-          "input": "@seqin"
-        },
-        {
-          "objID": "a2dfa220-2227-4a69-bea3-f2424e0d2674",
-          "source": "f0be7bf8-89df-46c9-9b87-f5d0dc80591a",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "8c0f8fde-5f14-41d4-db6b-07d0b9d7e225",
-          "input": "@seqin"
-        },
-        {
-          "objID": "204d7c56-c3d2-4583-9041-e8a87f95812c",
-          "source": "ae63af73-41c6-4e49-ae33-28ce805b1874",
-          "output": "PRESSED",
-          "target": "a295b9b0-de67-4ad2-a65f-e60957fd6e77",
-          "input": "@seqin"
-        },
-        {
-          "objID": "921595ce-e023-4918-da8a-4862d0e678c6",
-          "source": "ae63af73-41c6-4e49-ae33-28ce805b1874",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "a295b9b0-de67-4ad2-a65f-e60957fd6e77",
-          "input": "@seqin"
-        },
-        {
-          "objID": "2ec4e63c-ca57-41c0-b9e2-601c9c506f0e",
-          "source": "1265eaa2-80b6-47a4-e833-deb2993c35b4",
-          "output": "PRESSED",
-          "target": "0bbc2106-55fc-4033-ce07-13b8fc52a4ed",
-          "input": "@seqin"
-        },
-        {
-          "objID": "243d7204-089f-45c8-dc1e-c5f26d16166a",
-          "source": "1265eaa2-80b6-47a4-e833-deb2993c35b4",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "0bbc2106-55fc-4033-ce07-13b8fc52a4ed",
-          "input": "@seqin"
-        }
-      ],
+      "connectionLines": [],
       "localVariables": [],
       "componentGroups": [],
       "userProperties": [],
@@ -8422,7 +7933,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "String.format(\"%.1f\", AutoParkSec)",
+              "text": "AutoParkSecText",
               "textType": "expression",
               "longMode": "WRAP",
               "recolor": false,
@@ -8513,7 +8024,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "String.format(\"%.1f\", AutoRideSec)",
+              "text": "AutoRideSecText",
               "textType": "expression",
               "longMode": "WRAP",
               "recolor": false,
@@ -8558,15 +8069,15 @@
             {
               "objID": "cc88e080-34b4-4959-e6f0-ab8dcd67f8f9",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "AutoParkSecDown",
               "userData": 0
             },
             {
               "objID": "60bccc3f-0288-4bb2-aeb5-abcfec41259a",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "AutoParkSecDown",
               "userData": 0
             }
           ],
@@ -8619,8 +8130,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_DOWN",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -8663,15 +8174,15 @@
             {
               "objID": "2f24b9c8-639e-406a-ef30-c053f17be55a",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "AutoParkSecUp",
               "userData": 0
             },
             {
               "objID": "8719a7e3-0ae8-4508-d678-636387777479",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "AutoParkSecUp",
               "userData": 0
             }
           ],
@@ -8724,8 +8235,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_UP",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -8768,15 +8279,15 @@
             {
               "objID": "115bd784-897e-4ec8-d568-3e214937239d",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "AutoRideSecDown",
               "userData": 0
             },
             {
               "objID": "86d52d95-24e6-46ea-d977-dcc137002359",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "AutoRideSecDown",
               "userData": 0
             }
           ],
@@ -8829,8 +8340,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_DOWN",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -8873,15 +8384,15 @@
             {
               "objID": "d59c3ff3-3fab-4922-ed5f-f5829a111cee",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "AutoRideSecUp",
               "userData": 0
             },
             {
               "objID": "a0ebff63-9f5c-412d-e274-df5a14a84004",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "AutoRideSecUp",
               "userData": 0
             }
           ],
@@ -8934,8 +8445,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_UP",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -9174,22 +8685,7 @@
             "childStyles": []
           },
           "timeline": [],
-          "eventHandlers": [
-            {
-              "objID": "0d31c178-5446-4972-c14b-76c755e0358d",
-              "eventName": "CHECKED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
-              "userData": 0
-            },
-            {
-              "objID": "d951bfa1-5065-485e-f286-74cacf6b0e8b",
-              "eventName": "UNCHECKED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
-              "userData": 0
-            }
-          ],
+          "eventHandlers": [],
           "leftUnit": "px",
           "topUnit": "px",
           "widthUnit": "px",
@@ -9229,22 +8725,7 @@
             "childStyles": []
           },
           "timeline": [],
-          "eventHandlers": [
-            {
-              "objID": "51c102e8-cc13-4767-e148-3042dabe0ede",
-              "eventName": "CHECKED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
-              "userData": 0
-            },
-            {
-              "objID": "6ee92644-2af5-4010-c127-1acde5148f37",
-              "eventName": "UNCHECKED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
-              "userData": 0
-            }
-          ],
+          "eventHandlers": [],
           "leftUnit": "px",
           "topUnit": "px",
           "widthUnit": "px",
@@ -9267,142 +8748,6 @@
           },
           "group": "",
           "groupIndex": 0
-        },
-        {
-          "objID": "e4254fa5-3c05-4a26-8712-4eec89eaee45",
-          "type": "SetVariableActionComponent",
-          "left": 408,
-          "top": 162,
-          "width": 239,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "2806cfa4-f9f6-4055-8b68-946c315bf4c7",
-              "variable": "AutoParkSec",
-              "value": "AutoParkSec + 0.1"
-            }
-          ]
-        },
-        {
-          "objID": "bc99c702-8a10-48dc-8142-44ac39949c55",
-          "type": "SetVariableActionComponent",
-          "left": 408,
-          "top": 219,
-          "width": 398,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "f92b21d9-1064-4ba1-c51b-aca9bcb7222e",
-              "variable": "AutoParkSec",
-              "value": "AutoParkSec < 0.1 ? 0.0 : AutoParkSec - 0.1"
-            }
-          ]
-        },
-        {
-          "objID": "acadc080-31de-4f20-ae71-c4efe3366911",
-          "type": "SetVariableActionComponent",
-          "left": 406,
-          "top": -83,
-          "width": 239,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "280d1c8d-b035-4ec6-b558-a87f8a13727b",
-              "variable": "AutoRideSec",
-              "value": "AutoRideSec + 0.1"
-            }
-          ]
-        },
-        {
-          "objID": "b94be6af-01fc-4b4f-d512-d7852b29154c",
-          "type": "SetVariableActionComponent",
-          "left": 406,
-          "top": -26,
-          "width": 398,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "52879f59-6e52-434f-d1b5-0f209d69c6f0",
-              "variable": "AutoRideSec",
-              "value": "AutoRideSec < 0.1 ? 0.0 : AutoRideSec - 0.1"
-            }
-          ]
-        },
-        {
-          "objID": "8bd8fcee-dd30-46f7-e895-5ad645a250ae",
-          "type": "SetVariableActionComponent",
-          "left": 408,
-          "top": 40,
-          "width": 140,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "4a3f4495-e7df-48a6-8822-80bd85cece3e",
-              "variable": "AutoRide",
-              "value": "true"
-            }
-          ]
-        },
-        {
-          "objID": "f5994442-1c70-4920-aa34-32f4f141425f",
-          "type": "SetVariableActionComponent",
-          "left": 408,
-          "top": 97,
-          "width": 146,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "b3ea5fc1-1dc4-478f-afb4-5620c413e6ce",
-              "variable": "AutoRide",
-              "value": "false"
-            }
-          ]
-        },
-        {
-          "objID": "4d4ab10a-01fa-4fc1-b8e2-558ecb6cae33",
-          "type": "SetVariableActionComponent",
-          "left": 406,
-          "top": 284,
-          "width": 140,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "78708505-f421-47d7-823e-839b1de5187a",
-              "variable": "AutoPark",
-              "value": "true"
-            }
-          ]
-        },
-        {
-          "objID": "6ef1f61f-f6bb-4389-e0af-f3db16f2c3ad",
-          "type": "SetVariableActionComponent",
-          "left": 406,
-          "top": 341,
-          "width": 146,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "c5820b3c-e913-4d1e-b1a7-3bf35720640f",
-              "variable": "AutoPark",
-              "value": "false"
-            }
-          ]
         },
         {
           "objID": "03a2bf4d-ffba-45a7-b9a8-90f35926980b",
@@ -9480,8 +8825,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_RIGHT",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -9580,8 +8925,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_LEFT",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -9605,92 +8950,7 @@
           "groupIndex": 0
         }
       ],
-      "connectionLines": [
-        {
-          "objID": "df44452d-6a1d-4a15-c9a2-5abb3df18b60",
-          "source": "25a09bb2-4337-40ab-f6ad-81e2844b6d6f",
-          "output": "PRESSED",
-          "target": "acadc080-31de-4f20-ae71-c4efe3366911",
-          "input": "@seqin"
-        },
-        {
-          "objID": "9f1a0357-32b0-4cb8-b17e-69f04ce98f69",
-          "source": "25a09bb2-4337-40ab-f6ad-81e2844b6d6f",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "acadc080-31de-4f20-ae71-c4efe3366911",
-          "input": "@seqin"
-        },
-        {
-          "objID": "3e46000a-69ca-4057-9ab9-5f15e65ea290",
-          "source": "b68d4e68-69c2-4f0c-8efb-8c3ed04b4d85",
-          "output": "PRESSED",
-          "target": "b94be6af-01fc-4b4f-d512-d7852b29154c",
-          "input": "@seqin"
-        },
-        {
-          "objID": "7d8c633b-5aea-4251-925f-0ed2b2ab973a",
-          "source": "b68d4e68-69c2-4f0c-8efb-8c3ed04b4d85",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "b94be6af-01fc-4b4f-d512-d7852b29154c",
-          "input": "@seqin"
-        },
-        {
-          "objID": "fc6c70cb-38c2-476c-a617-898acf695c46",
-          "source": "a33ad4dc-1040-40d1-a0fb-0f60680fe170",
-          "output": "PRESSED",
-          "target": "e4254fa5-3c05-4a26-8712-4eec89eaee45",
-          "input": "@seqin"
-        },
-        {
-          "objID": "fe237f0c-30e3-493d-c927-e7c4ab5915d1",
-          "source": "a33ad4dc-1040-40d1-a0fb-0f60680fe170",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "e4254fa5-3c05-4a26-8712-4eec89eaee45",
-          "input": "@seqin"
-        },
-        {
-          "objID": "6db79daf-d1a8-4d71-e375-912a077351bd",
-          "source": "44f48fce-bfe9-44e2-9529-3a885257b779",
-          "output": "PRESSED",
-          "target": "bc99c702-8a10-48dc-8142-44ac39949c55",
-          "input": "@seqin"
-        },
-        {
-          "objID": "10d035ec-266d-4b82-98db-7e46be480145",
-          "source": "44f48fce-bfe9-44e2-9529-3a885257b779",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "bc99c702-8a10-48dc-8142-44ac39949c55",
-          "input": "@seqin"
-        },
-        {
-          "objID": "95c17f98-94c2-4265-a4c2-eff1dfb88e7b",
-          "source": "8c54dad6-9258-428f-ad7f-cf177261f1a9",
-          "output": "CHECKED",
-          "target": "8bd8fcee-dd30-46f7-e895-5ad645a250ae",
-          "input": "@seqin"
-        },
-        {
-          "objID": "198cbc7a-c3ea-4aa6-90d3-3f2254055895",
-          "source": "8c54dad6-9258-428f-ad7f-cf177261f1a9",
-          "output": "UNCHECKED",
-          "target": "f5994442-1c70-4920-aa34-32f4f141425f",
-          "input": "@seqin"
-        },
-        {
-          "objID": "28dcb671-0c8a-4322-c068-6a9307ffaa49",
-          "source": "cb02b78b-f093-44d9-91e0-f2ee7c90dfcd",
-          "output": "CHECKED",
-          "target": "4d4ab10a-01fa-4fc1-b8e2-558ecb6cae33",
-          "input": "@seqin"
-        },
-        {
-          "objID": "179c4191-55fb-494b-f067-93280b44054b",
-          "source": "cb02b78b-f093-44d9-91e0-f2ee7c90dfcd",
-          "output": "UNCHECKED",
-          "target": "6ef1f61f-f6bb-4389-e0af-f3db16f2c3ad",
-          "input": "@seqin"
-        }
-      ],
+      "connectionLines": [],
       "localVariables": [],
       "componentGroups": [],
       "userProperties": [],
@@ -9772,7 +9032,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "String.format(\"%.1f\", ParkDurationSec)",
+              "text": "ParkDurationSecText",
               "textType": "expression",
               "longMode": "WRAP",
               "recolor": false,
@@ -9817,15 +9077,15 @@
             {
               "objID": "befc4966-08a5-4ffe-ee29-0651f2991091",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "ParkDurationSecDown",
               "userData": 0
             },
             {
               "objID": "379504a3-82cf-4daf-ac40-f4b1964e53c0",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "ParkDurationSecDown",
               "userData": 0
             }
           ],
@@ -9878,8 +9138,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_DOWN",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -9922,15 +9182,15 @@
             {
               "objID": "9b6fb0f5-4729-4b24-de6d-be38e0a8d647",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "ParkDurationSecUp",
               "userData": 0
             },
             {
               "objID": "bbdc5d79-e3d3-4004-945b-e9ca97bd45db",
               "eventName": "LONG_PRESSED_REPEAT",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "ParkDurationSecUp",
               "userData": 0
             }
           ],
@@ -9983,8 +9243,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_UP",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -10223,22 +9483,7 @@
             "childStyles": []
           },
           "timeline": [],
-          "eventHandlers": [
-            {
-              "objID": "9af22a7f-607e-4dc0-e489-7f963d448b1e",
-              "eventName": "CHECKED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
-              "userData": 0
-            },
-            {
-              "objID": "f417e43d-ba70-446a-f313-69feb9b4e32f",
-              "eventName": "UNCHECKED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
-              "userData": 0
-            }
-          ],
+          "eventHandlers": [],
           "leftUnit": "px",
           "topUnit": "px",
           "widthUnit": "px",
@@ -10278,22 +9523,7 @@
             "childStyles": []
           },
           "timeline": [],
-          "eventHandlers": [
-            {
-              "objID": "6bbf6357-828f-424d-d719-9dcd43504dc2",
-              "eventName": "CHECKED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
-              "userData": 0
-            },
-            {
-              "objID": "4c18fb42-a4bd-4569-e27a-1b0f27c877e3",
-              "eventName": "UNCHECKED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
-              "userData": 0
-            }
-          ],
+          "eventHandlers": [],
           "leftUnit": "px",
           "topUnit": "px",
           "widthUnit": "px",
@@ -10333,22 +9563,7 @@
             "childStyles": []
           },
           "timeline": [],
-          "eventHandlers": [
-            {
-              "objID": "bc2519c3-a186-4a84-e817-90c677817788",
-              "eventName": "CHECKED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
-              "userData": 0
-            },
-            {
-              "objID": "05cfaaad-30c5-47fc-88b4-12df87459414",
-              "eventName": "UNCHECKED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
-              "userData": 0
-            }
-          ],
+          "eventHandlers": [],
           "leftUnit": "px",
           "topUnit": "px",
           "widthUnit": "px",
@@ -10392,8 +9607,8 @@
             {
               "objID": "8852c42e-c7fc-4b1e-ff61-c497b5ff3204",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "SettingsToCalibrationPressed",
               "userData": 0
             }
           ],
@@ -10447,8 +9662,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_GPS",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -10491,8 +9706,8 @@
             {
               "objID": "96aaf24d-dc19-4708-da1d-6fbc3f24b9e3",
               "eventName": "PRESSED",
-              "handlerType": "flow",
-              "action": "FrontUpPressed",
+              "handlerType": "action",
+              "action": "SettingsToUpdatePressed",
               "userData": 0
             }
           ],
@@ -10546,8 +9761,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_DOWNLOAD",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -10637,8 +9852,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_BLUETOOTH",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -10941,183 +10156,6 @@
           "useStaticText": true
         },
         {
-          "objID": "dc71aaa0-d665-4765-dfcb-5cefd2bf1820",
-          "type": "SetVariableActionComponent",
-          "left": 373,
-          "top": -61,
-          "width": 288,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "c71990b3-d7ab-4e27-c48d-46ab8c89a816",
-              "variable": "ParkDurationSec",
-              "value": "ParkDurationSec + 0.1"
-            }
-          ]
-        },
-        {
-          "objID": "cdfd2abc-eecd-4764-8d76-203ee786aef3",
-          "type": "SetVariableActionComponent",
-          "left": 368,
-          "top": 11,
-          "width": 546,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "880d6902-4e21-414f-fb87-a516f319ffe2",
-              "variable": "ParkDurationSec",
-              "value": "ParkDurationSec < 0.1 ? ParkDurationSec : ParkDurationSec - 0.1"
-            }
-          ]
-        },
-        {
-          "objID": "97d58e24-4151-4b29-b518-050926daa1dd",
-          "type": "CallActionActionComponent",
-          "left": 436,
-          "top": 151,
-          "width": 182,
-          "height": 24,
-          "customInputs": [],
-          "customOutputs": [],
-          "action": "SettingsToUpdatePressed",
-          "userPropertyValues": {
-            "objID": "10ad461b-7cae-4cbd-916b-1ff13824429f",
-            "values": {}
-          }
-        },
-        {
-          "objID": "7a312dbf-499c-448e-8167-10af95e46dbb",
-          "type": "LVGLActionComponent",
-          "left": 717,
-          "top": 151,
-          "width": 373,
-          "height": 54,
-          "customInputs": [],
-          "customOutputs": [],
-          "actions": [
-            {
-              "objID": "5659d8e7-291f-4003-8fe0-6c20a31e36f5",
-              "action": "changeScreen",
-              "screen": "UpdateSelectScreen",
-              "screenType": "literal",
-              "fadeMode": "FADE_IN",
-              "fadeModeType": "literal",
-              "speed": 200,
-              "speedType": "literal",
-              "delay": 0,
-              "delayType": "literal",
-              "useStack": true,
-              "useStackType": "literal"
-            }
-          ]
-        },
-        {
-          "objID": "3ecd5785-ab19-445f-969a-1eee48ba0668",
-          "type": "SetVariableActionComponent",
-          "left": 725,
-          "top": 218,
-          "width": 146,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "584dac68-6ed9-4756-a82f-bfe407c21572",
-              "variable": "Bluetooth",
-              "value": "true"
-            }
-          ]
-        },
-        {
-          "objID": "33163c16-473b-4fc3-d996-8e8114972569",
-          "type": "SetVariableActionComponent",
-          "left": 725,
-          "top": 275,
-          "width": 152,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "d74183c7-a7c1-48d1-d3df-345ed3cd3717",
-              "variable": "Bluetooth",
-              "value": "false"
-            }
-          ]
-        },
-        {
-          "objID": "c938cf41-5c7f-4be6-fd8f-8b2975f11dc7",
-          "type": "SetVariableActionComponent",
-          "left": 228,
-          "top": 218,
-          "width": 134,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "57a9b01b-6e8c-4064-d0c7-8ecedf953666",
-              "variable": "Logging",
-              "value": "true"
-            }
-          ]
-        },
-        {
-          "objID": "0f5a6314-32a5-40ea-bb2b-04a06deacca8",
-          "type": "SetVariableActionComponent",
-          "left": 228,
-          "top": 275,
-          "width": 140,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "cc22adb5-8020-473f-d255-b8f451a35b54",
-              "variable": "Logging",
-              "value": "false"
-            }
-          ]
-        },
-        {
-          "objID": "b34420ac-af46-4599-f6e9-955a9b707510",
-          "type": "SetVariableActionComponent",
-          "left": 469,
-          "top": 218,
-          "width": 183,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "a8b8f68a-984c-4d02-c860-5e58f4203d33",
-              "variable": "MachineLearning",
-              "value": "true"
-            }
-          ]
-        },
-        {
-          "objID": "c03c868e-ee0b-42c2-dcb3-469b159ad7c9",
-          "type": "SetVariableActionComponent",
-          "left": 469,
-          "top": 275,
-          "width": 189,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "4dcd02f1-79d7-4246-b92f-19302af59803",
-              "variable": "MachineLearning",
-              "value": "false"
-            }
-          ]
-        },
-        {
           "objID": "d8bfeda4-9dce-4cf7-8eec-e7efad6cadb2",
           "type": "LVGLButtonWidget",
           "left": 5,
@@ -11193,8 +10231,8 @@
               },
               "group": "",
               "groupIndex": 0,
-              "text": "LVGL.LV_SYMBOL_LEFT",
-              "textType": "expression",
+              "text": "",
+              "textType": "literal",
               "longMode": "WRAP",
               "recolor": false,
               "useStaticText": true
@@ -11216,127 +10254,9 @@
           },
           "group": "",
           "groupIndex": 0
-        },
-        {
-          "objID": "57c6732b-ca38-4b5c-a8ee-84221635dfcf",
-          "type": "LVGLActionComponent",
-          "left": 472,
-          "top": 74,
-          "width": 366,
-          "height": 54,
-          "customInputs": [],
-          "customOutputs": [],
-          "actions": [
-            {
-              "objID": "1c5709d2-64b3-4fbb-8193-8a87055722cf",
-              "action": "changeScreen",
-              "screen": "CalibrationScreen",
-              "screenType": "literal",
-              "fadeMode": "FADE_IN",
-              "fadeModeType": "literal",
-              "speed": 200,
-              "speedType": "literal",
-              "delay": 0,
-              "delayType": "literal",
-              "useStack": true,
-              "useStackType": "literal"
-            }
-          ]
         }
       ],
-      "connectionLines": [
-        {
-          "objID": "7727a3d6-5b97-4d3a-fa38-189ba12aa3e1",
-          "source": "b7c5ccdb-f24c-4fcd-c6f0-100aadb2156b",
-          "output": "PRESSED",
-          "target": "dc71aaa0-d665-4765-dfcb-5cefd2bf1820",
-          "input": "@seqin"
-        },
-        {
-          "objID": "1c460482-dc20-4a78-ac65-4021e6ef4329",
-          "source": "83185151-f49d-416c-eff9-eef9bc26f5ed",
-          "output": "PRESSED",
-          "target": "cdfd2abc-eecd-4764-8d76-203ee786aef3",
-          "input": "@seqin"
-        },
-        {
-          "objID": "18412cbc-1655-4c86-9c56-1ff8e0d26b10",
-          "source": "83185151-f49d-416c-eff9-eef9bc26f5ed",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "cdfd2abc-eecd-4764-8d76-203ee786aef3",
-          "input": "@seqin"
-        },
-        {
-          "objID": "bbc21044-5bab-4984-ccf1-2263a5d5e933",
-          "source": "b7c5ccdb-f24c-4fcd-c6f0-100aadb2156b",
-          "output": "LONG_PRESSED_REPEAT",
-          "target": "dc71aaa0-d665-4765-dfcb-5cefd2bf1820",
-          "input": "@seqin"
-        },
-        {
-          "objID": "5e8f53d8-a2d4-4974-bbbf-126d8c0606f7",
-          "source": "05b10744-fc6c-4047-bc2e-13b4c908d7c8",
-          "output": "PRESSED",
-          "target": "97d58e24-4151-4b29-b518-050926daa1dd",
-          "input": "@seqin"
-        },
-        {
-          "objID": "fa26de43-cfae-4de4-e36a-40fc06d37b16",
-          "source": "97d58e24-4151-4b29-b518-050926daa1dd",
-          "output": "@seqout",
-          "target": "7a312dbf-499c-448e-8167-10af95e46dbb",
-          "input": "@seqin"
-        },
-        {
-          "objID": "10fb803e-3cfa-48f6-8fae-bf88444b04a2",
-          "source": "affb374d-d008-4887-9802-40cab283dc63",
-          "output": "CHECKED",
-          "target": "c938cf41-5c7f-4be6-fd8f-8b2975f11dc7",
-          "input": "@seqin"
-        },
-        {
-          "objID": "bdf05baf-f091-4ef6-e2d6-8a010ffea333",
-          "source": "affb374d-d008-4887-9802-40cab283dc63",
-          "output": "UNCHECKED",
-          "target": "0f5a6314-32a5-40ea-bb2b-04a06deacca8",
-          "input": "@seqin"
-        },
-        {
-          "objID": "34368f66-16fd-4247-b6f5-6ea1f944a003",
-          "source": "919bce59-400a-4b74-82ff-52b3e791794f",
-          "output": "CHECKED",
-          "target": "b34420ac-af46-4599-f6e9-955a9b707510",
-          "input": "@seqin"
-        },
-        {
-          "objID": "c74abc9e-057e-4964-a01a-249341fab463",
-          "source": "919bce59-400a-4b74-82ff-52b3e791794f",
-          "output": "UNCHECKED",
-          "target": "c03c868e-ee0b-42c2-dcb3-469b159ad7c9",
-          "input": "@seqin"
-        },
-        {
-          "objID": "416610b9-3078-4ee6-edb9-a15c30a8107b",
-          "source": "14a2cacc-e0a9-41b7-eb79-93ea29917c21",
-          "output": "CHECKED",
-          "target": "3ecd5785-ab19-445f-969a-1eee48ba0668",
-          "input": "@seqin"
-        },
-        {
-          "objID": "acdf3491-f55d-4be2-886b-605e91a62c18",
-          "source": "14a2cacc-e0a9-41b7-eb79-93ea29917c21",
-          "output": "UNCHECKED",
-          "target": "33163c16-473b-4fc3-d996-8e8114972569",
-          "input": "@seqin"
-        },
-        {
-          "objID": "102a541d-5463-4c01-caac-d8b1f83534d6",
-          "source": "1e193638-f9b4-40af-db0b-fe19cdceef2a",
-          "output": "PRESSED",
-          "target": "57c6732b-ca38-4b5c-a8ee-84221635dfcf",
-          "input": "@seqin"
-        }
-      ],
+      "connectionLines": [],
       "localVariables": [],
       "componentGroups": [],
       "userProperties": [],

@@ -15,21 +15,41 @@ OTACommunication::OTACommunication(Communication &communication)
 }
 
 /**
- * @brief Subscribe and route status messages to onStatus.
+ * @brief Route status messages to onStatus.
  * @param callback Receives every status, local access point or remote node.
+ * @note Call once from setup(). SelfOTA is pumped every loop whatever screen
+ *       is up, so it is wired here and stays wired; only the bus half comes
+ *       and goes with the update screens.
  */
 void OTACommunication::Init(StatusCallback callback) {
     onStatus = callback;
     selfOta.Init(callback);
+}
 
+/**
+ * @brief Start listening to the bus. Safe to call when already subscribed.
+ */
+void OTACommunication::Subscribe() {
     if (subscriptionId >= 0) {
-        LOG_DEBUG("OTACommunication already subscribed", subscriptionId);
         return;
     }
     subscriptionId = communication.Subscribe(
         [this](const CanId &id, const uint8_t *data, uint8_t len) {
             ReceiveCallback(id, data, len);
         });
+    LOG_DEBUG("OTACommunication subscribed", subscriptionId);
+}
+
+/**
+ * @brief Stop listening. Safe to call when not subscribed.
+ */
+void OTACommunication::Unsubscribe() {
+    if (subscriptionId < 0) {
+        return;
+    }
+    LOG_DEBUG("OTACommunication unsubscribing", subscriptionId);
+    communication.Unsubscribe(subscriptionId);
+    subscriptionId = -1;
 }
 
 /**

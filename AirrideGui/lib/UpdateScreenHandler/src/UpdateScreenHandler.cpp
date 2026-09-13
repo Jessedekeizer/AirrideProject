@@ -36,7 +36,7 @@ UpdateScreenHandler *UpdateScreenHandler::Active() {
 }
 
 /**
- * @brief Subscribe to OTA status messages.
+ * @brief Route OTA status messages here.
  * @warning Call from setup(), not the constructor: static init order
  *          against Communication is not defined.
  */
@@ -53,6 +53,10 @@ void UpdateScreenHandler::Begin() {
 void UpdateScreenHandler::OnUpdateSelectScreenLoaded(lv_event_t *e) {
     (void) e;
     LOG_INFO("Update select screen loaded, scanning for devices");
+
+    // Covers the update screen too: it is only ever reached from here, and
+    // the subscription is held until the exit button gives it back.
+    _ota.Subscribe();
 
     PrepareContainer();
 
@@ -137,6 +141,13 @@ void UpdateScreenHandler::OnReturnToUpdateSelect(lv_event_t *e) {
 void UpdateScreenHandler::OnUpdateSelectToMain(lv_event_t *e) {
     (void) e;
     LOG_INFO("Leaving update select for the main screen");
+
+    // The only way out of the two update screens, so the only place the
+    // subscription has to be given back. A self update keeps it: SelfOTA is
+    // mid flight and its status still has to land somewhere.
+    if (!_ota.IsLocalActive()) {
+        _ota.Unsubscribe();
+    }
 
     if (_scanTimer != nullptr) {
         lv_timer_delete(_scanTimer);
@@ -318,7 +329,7 @@ void UpdateScreenHandler::DoneRescanCb(lv_timer_t *timer) {
     self->_selectedId = -1;
     self->_selectedIndex = -1;
 
-    eez_flow_set_screen(SCREEN_ID_UPDATE_SELECT_SCREEN, LV_SCR_LOAD_ANIM_NONE, 0, 0);
+    loadScreenNoAnim(SCREEN_ID_UPDATE_SELECT_SCREEN);
 }
 
 /**
@@ -768,6 +779,7 @@ extern "C" void action_update_item_update_pressed(lv_event_t *e) {
     if (handler != nullptr) {
         handler->OnUpdateItemPressed(e);
     }
+    loadScreen(SCREEN_ID_UPDATE_SCREEN);
 }
 
 /**
@@ -779,6 +791,7 @@ extern "C" void action_update_to_update_select_pressed(lv_event_t *e) {
     if (handler != nullptr) {
         handler->OnReturnToUpdateSelect(e);
     }
+    loadScreen(SCREEN_ID_UPDATE_SELECT_SCREEN);
 }
 
 /**
@@ -790,4 +803,5 @@ extern "C" void action_update_select_to_main_pressed(lv_event_t *e) {
     if (handler != nullptr) {
         handler->OnUpdateSelectToMain(e);
     }
+    loadScreen(SCREEN_ID_MAIN_SCREEN);
 }

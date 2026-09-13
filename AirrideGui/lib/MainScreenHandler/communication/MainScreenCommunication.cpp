@@ -13,18 +13,32 @@ MainScreenCommunication::MainScreenCommunication(Communication &communication, M
 }
 
 /**
- * @brief Subscribe to the bus. Call once, after the queues are set.
- * @note Never unsubscribes: screens here are created once and only shown or
- *       hidden, so the readings stay current whichever screen is up.
+ * @brief Start listening to the bus. Safe to call when already subscribed.
+ * @note Bound to the main screen being up, so nothing is decoded while the
+ *       screen that shows it is not there.
  */
-void MainScreenCommunication::Init() {
+void MainScreenCommunication::Subscribe() {
     if (communicationId != -1) {
-        LOG_DEBUG("MainScreenCommunication already subscribed", communicationId);
         return;
     }
     communicationId = communication.Subscribe([this](const CanId &canId, const uint8_t *data, uint8_t length) {
         ReceiveCallback(canId, data, length);
     });
+    LOG_DEBUG("MainScreenCommunication subscribed", communicationId);
+}
+
+/**
+ * @brief Stop listening. Safe to call when not subscribed.
+ * @note Frames still queue up in Communication; they are simply dropped
+ *       undecoded when the queue is next drained.
+ */
+void MainScreenCommunication::Unsubscribe() {
+    if (communicationId == -1) {
+        return;
+    }
+    LOG_DEBUG("MainScreenCommunication unsubscribing", communicationId);
+    communication.Unsubscribe(communicationId);
+    communicationId = -1;
 }
 
 /**

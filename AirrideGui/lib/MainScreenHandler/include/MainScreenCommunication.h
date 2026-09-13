@@ -12,7 +12,9 @@ public:
     MainScreenCommunication(Communication &communication, MainScreenData &mainScreenData,
                             LogStorage &logStorage, SettingsDevice &settings);
 
-    void Init();
+    void Subscribe();
+
+    void Unsubscribe();
 
     void SendMessageButtonPress(EMainScreenButtons button, bool state);
 

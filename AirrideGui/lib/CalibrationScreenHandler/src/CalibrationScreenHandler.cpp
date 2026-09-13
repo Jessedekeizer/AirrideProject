@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include "Logger.h"
 #include "actions.h"
-#include "eez-flow.h"
 #include "screens.h"
+#include "ui.h"
 
 CalibrationScreenHandler *CalibrationScreenHandler::_active = nullptr;
 
@@ -233,7 +233,7 @@ void CalibrationScreenHandler::SaveAndEnterExitCountdown() {
 void CalibrationScreenHandler::LeaveToMainScreen() {
     SetState(ECalibrationState::Idle);
     StopTimer();
-    eez_flow_set_screen(SCREEN_ID_MAIN_SCREEN, LV_SCR_LOAD_ANIM_NONE, 0, 0);
+    loadScreenNoAnim(SCREEN_ID_MAIN_SCREEN);
 }
 
 /**
@@ -395,10 +395,10 @@ extern "C" void action_calibration_screen_load_started(lv_event_t *e) {
  */
 extern "C" void action_leave_calibration_screen(lv_event_t *e) {
     CalibrationScreenHandler *handler = CalibrationScreenHandler::Active();
-    if (handler == nullptr) {
-        return;
+    if (handler != nullptr) {
+        handler->OnLeaveCalibrationScreen(e);
     }
-    handler->OnLeaveCalibrationScreen(e);
+    loadScreen(SCREEN_ID_MAIN_SCREEN);
 }
 
 /**

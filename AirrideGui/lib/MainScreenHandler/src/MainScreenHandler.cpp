@@ -1,15 +1,14 @@
-/**
- * @file MainScreenHandler.cpp
- * @brief The main screen: four momentary controls, two pushes, two readings.
- */
-
 #include "MainScreenHandler.h"
 
-#include <math.h>
+#include <stdio.h>
 
 #include "Logger.h"
 #include "actions.h"
+#include "screens.h"
 #include "vars.h"
+
+/** Room for "%.1f" of a reading, plus a sign and a terminator. */
+static constexpr size_t BAR_TEXT_WIDTH = 12;
 
 MainScreenHandler *MainScreenHandler::_active = nullptr;
 
@@ -38,6 +37,30 @@ MainScreenHandler::~MainScreenHandler() {
  */
 MainScreenHandler *MainScreenHandler::Active() {
     return _active;
+}
+
+/**
+ * @brief Start listening as the main screen comes up.
+ * @param e Unused.
+ * @note On load start rather than on loaded, so the readings are already
+ *       arriving by the time the screen finishes fading in.
+ */
+void MainScreenHandler::OnMainScreenLoadStart(lv_event_t *e) {
+    (void) e;
+    _communication.Subscribe();
+}
+
+/**
+ * @brief Stop listening as the main screen goes away.
+ * @param e Unused.
+ * @note The pending automatic lift goes with it - it would otherwise fire
+ *       against readings that stopped arriving the moment this ran. Coming
+ *       back to the screen arms it again.
+ */
+void MainScreenHandler::OnMainScreenUnloadStart(lv_event_t *e) {
+    (void) e;
+    StopAutoRideTimer();
+    _communication.Unsubscribe();
 }
 
 /**
@@ -197,6 +220,15 @@ void MainScreenHandler::ArmAutoRideTimer() {
  */
 void MainScreenHandler::CancelAutoRide() {
     _abortAutoRide = true;
+    StopAutoRideTimer();
+}
+
+/**
+ * @brief Drop a pending automatic lift, leaving a later one free to arm.
+ * @note What leaving the screen wants. CancelAutoRide() is the user saying
+ *       no, and that sticks for the rest of the run.
+ */
+void MainScreenHandler::StopAutoRideTimer() {
     if (_autoRideTimer != nullptr) {
         lv_timer_delete(_autoRideTimer);
         _autoRideTimer = nullptr;
@@ -231,56 +263,57 @@ void MainScreenHandler::AutoStartRide() {
 }
 
 /**
- * @brief Hand in fresh sensor readings. Safe to call at any rate.
- * @param front Front reading, or NaN to leave it alone.
- * @param back  Back reading, or NaN to leave it alone.
+ * @brief Render one pressure the way the main screen labels want it.
+ * @param buffer Per-variable store, kept alive for LVGL to copy from.
+ * @param value The reading to render.
+ * @return The buffer.
+ * @note The labels take text, so the tenths formatting the flow engine used
+ *       to do lives here now.
  */
-void MainScreenHandler::UpdatePressures(float front, float back) {
-    if (!isnan(front)) {
-        _data.front = front;
-    }
-    if (!isnan(back)) {
-        _data.back = back;
-    }
+static const char *FormatBar(char *buffer, size_t size, float value) {
+    snprintf(buffer, size, "%.1f", value);
+    return buffer;
 }
 
 /**
- * @brief Read front pressure for the flow engine.
- * @return The current value.
+ * @brief Read front pressure as the label text.
+ * @return The reading, to one decimal.
  */
-extern "C" float get_var_front_pressure() {
+extern "C" const char *get_var_front_pressure_text() {
+    static char buffer[BAR_TEXT_WIDTH];
     MainScreenHandler *handler = MainScreenHandler::Active();
-    return handler != nullptr ? handler->FrontPressure() : 0.0f;
+    return FormatBar(buffer, sizeof(buffer), handler != nullptr ? handler->FrontPressure() : 0.0f);
 }
 
 /**
- * @brief Write front pressure from the flow engine.
- * @param value New value.
+ * @brief Read back pressure as the label text.
+ * @return The reading, to one decimal.
  */
-extern "C" void set_var_front_pressure(float value) {
+extern "C" const char *get_var_back_pressure_text() {
+    static char buffer[BAR_TEXT_WIDTH];
     MainScreenHandler *handler = MainScreenHandler::Active();
-    if (handler != nullptr) {
-        handler->UpdatePressures(value, NAN);
-    }
+    return FormatBar(buffer, sizeof(buffer), handler != nullptr ? handler->BackPressure() : 0.0f);
 }
 
 /**
- * @brief Read back pressure for the flow engine.
- * @return The current value.
+ * @brief Shim for the generated action of the same name.
+ * @param e LVGL event.
  */
-extern "C" float get_var_back_pressure() {
-    MainScreenHandler *handler = MainScreenHandler::Active();
-    return handler != nullptr ? handler->BackPressure() : 0.0f;
-}
-
-/**
- * @brief Write back pressure from the flow engine.
- * @param value New value.
- */
-extern "C" void set_var_back_pressure(float value) {
+extern "C" void action_main_screen_load_start(lv_event_t *e) {
     MainScreenHandler *handler = MainScreenHandler::Active();
     if (handler != nullptr) {
-        handler->UpdatePressures(NAN, value);
+        handler->OnMainScreenLoadStart(e);
+    }
+}
+
+/**
+ * @brief Shim for the generated action of the same name.
+ * @param e LVGL event.
+ */
+extern "C" void action_main_screen_unload_start(lv_event_t *e) {
+    MainScreenHandler *handler = MainScreenHandler::Active();
+    if (handler != nullptr) {
+        handler->OnMainScreenUnloadStart(e);
     }
 }
 

@@ -14,13 +14,9 @@ public:
 
     static SettingsScreenHandler *Active();
 
-    void OnMainScreenToSettingsSelectPressed(lv_event_t *e);
-
     void OnSettingsSelectLoadStart(lv_event_t *e);
 
     void OnSaveSettingsPressed(lv_event_t *e);
-
-    void OnSettingsToUpdatePressed(lv_event_t *e);
 
     void OnSettingsLeftPressed(lv_event_t *e);
 

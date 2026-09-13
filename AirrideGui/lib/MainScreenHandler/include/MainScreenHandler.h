@@ -16,7 +16,11 @@ public:
 
     static MainScreenHandler *Active();
 
+    void OnMainScreenLoadStart(lv_event_t *e);
+
     void OnMainScreenLoaded(lv_event_t *e);
+
+    void OnMainScreenUnloadStart(lv_event_t *e);
 
     void OnFrontUpPressed(lv_event_t *e);
 
@@ -42,8 +46,6 @@ public:
 
     float BackPressure() const { return _data.back; }
 
-    void UpdatePressures(float front, float back);
-
 private:
     MainScreenHandler(const MainScreenHandler &) = delete;
     MainScreenHandler &operator=(const MainScreenHandler &) = delete;
@@ -55,6 +57,8 @@ private:
     void ArmAutoRideTimer();
 
     void CancelAutoRide();
+
+    void StopAutoRideTimer();
 
     void AutoStartRide();
 

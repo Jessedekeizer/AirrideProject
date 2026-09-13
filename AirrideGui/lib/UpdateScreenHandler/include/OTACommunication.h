@@ -16,6 +16,10 @@ public:
 
     void Init(StatusCallback onStatus);
 
+    void Subscribe();
+
+    void Unsubscribe();
+
     void SetPrepareLocalCallback(std::function<void()> callback) { prepareLocal = callback; }
 
     void Handle();

@@ -4,6 +4,7 @@
 #include "Logger.h"
 #include "actions.h"
 #include "screens.h"
+#include "ui.h"
 #include "vars.h"
 
 SettingsScreenHandler *SettingsScreenHandler::_active = nullptr;
@@ -250,24 +251,6 @@ void SettingsScreenHandler::OnSettingsSelectLoadStart(lv_event_t *e) {
 }
 
 /**
- * @brief On the way to the settings screen.
- * @param e Unused.
- */
-void SettingsScreenHandler::OnMainScreenToSettingsSelectPressed(lv_event_t *e) {
-    (void) e;
-    LOG_DEBUG("Main screen to settings pressed");
-}
-
-/**
- * @brief On the way to the update screens.
- * @param e Unused.
- */
-void SettingsScreenHandler::OnSettingsToUpdatePressed(lv_event_t *e) {
-    (void) e;
-    LOG_DEBUG("Settings to update pressed");
-}
-
-/**
  * @brief Read the card into the settings.
  */
 void SettingsScreenHandler::Load() {
@@ -283,10 +266,12 @@ void SettingsScreenHandler::Save() {
 }
 
 /**
- * @brief The struct the variable shims read and write.
- * @return The settings, or null when no handler exists yet.
+ * @brief The settings every page reads and writes.
+ * @return The shared struct, or null before a handler exists.
+ * @note The per-page shims in Settings1Vars.cpp through Settings4Vars.cpp all
+ *       come through here, so they share one struct rather than a copy each.
  */
-static SettingsDevice *ActiveSettings() {
+SettingsDevice *ActiveSettings() {
     SettingsScreenHandler *handler = SettingsScreenHandler::Active();
     if (handler == nullptr) {
         LOG_WARN("Settings var touched with no handler");
@@ -296,378 +281,42 @@ static SettingsDevice *ActiveSettings() {
 }
 
 /**
- * @brief Read front max for the flow engine.
- * @return The current value.
- */
-extern "C" float get_var_front_max() {
-    SettingsDevice *s = ActiveSettings();
-    return s != nullptr ? s->frontMax : 0.0f;
-}
-
-/**
- * @brief Write front max from the flow engine.
- * @param value New value.
- */
-extern "C" void set_var_front_max(float value) {
-    SettingsDevice *s = ActiveSettings();
-    if (s != nullptr) {
-        s->frontMax = value;
-        SettingsScreenHandler::MarkDirty();
-    }
-}
-
-/**
- * @brief Read back max for the flow engine.
- * @return The current value.
- */
-extern "C" float get_var_back_max() {
-    SettingsDevice *s = ActiveSettings();
-    return s != nullptr ? s->backMax : 0.0f;
-}
-
-/**
- * @brief Write back max from the flow engine.
- * @param value New value.
- */
-extern "C" void set_var_back_max(float value) {
-    SettingsDevice *s = ActiveSettings();
-    if (s != nullptr) {
-        s->backMax = value;
-        SettingsScreenHandler::MarkDirty();
-    }
-}
-
-/**
- * @brief Read ride front for the flow engine.
- * @return The current value.
- */
-extern "C" float get_var_ride_front() {
-    SettingsDevice *s = ActiveSettings();
-    return s != nullptr ? s->rideFront : 0.0f;
-}
-
-/**
- * @brief Write ride front from the flow engine.
- * @param value New value.
- */
-extern "C" void set_var_ride_front(float value) {
-    SettingsDevice *s = ActiveSettings();
-    if (s != nullptr) {
-        s->rideFront = value;
-        SettingsScreenHandler::MarkDirty();
-    }
-}
-
-/**
- * @brief Read ride back for the flow engine.
- * @return The current value.
- */
-extern "C" float get_var_ride_back() {
-    SettingsDevice *s = ActiveSettings();
-    return s != nullptr ? s->rideBack : 0.0f;
-}
-
-/**
- * @brief Write ride back from the flow engine.
- * @param value New value.
- */
-extern "C" void set_var_ride_back(float value) {
-    SettingsDevice *s = ActiveSettings();
-    if (s != nullptr) {
-        s->rideBack = value;
-        SettingsScreenHandler::MarkDirty();
-    }
-}
-
-/**
- * @brief Read front up x for the flow engine.
- * @return The current value.
- */
-extern "C" float get_var_front_up_x() {
-    SettingsDevice *s = ActiveSettings();
-    return s != nullptr ? s->frontUpX : 0.0f;
-}
-
-/**
- * @brief Write front up x from the flow engine.
- * @param value New value.
- */
-extern "C" void set_var_front_up_x(float value) {
-    SettingsDevice *s = ActiveSettings();
-    if (s != nullptr) {
-        s->frontUpX = value;
-        SettingsScreenHandler::MarkDirty();
-    }
-}
-
-/**
- * @brief Read front down x for the flow engine.
- * @return The current value.
- */
-extern "C" float get_var_front_down_x() {
-    SettingsDevice *s = ActiveSettings();
-    return s != nullptr ? s->frontDownX : 0.0f;
-}
-
-/**
- * @brief Write front down x from the flow engine.
- * @param value New value.
- */
-extern "C" void set_var_front_down_x(float value) {
-    SettingsDevice *s = ActiveSettings();
-    if (s != nullptr) {
-        s->frontDownX = value;
-        SettingsScreenHandler::MarkDirty();
-    }
-}
-
-/**
- * @brief Read back up x for the flow engine.
- * @return The current value.
- */
-extern "C" float get_var_back_up_x() {
-    SettingsDevice *s = ActiveSettings();
-    return s != nullptr ? s->backUpX : 0.0f;
-}
-
-/**
- * @brief Write back up x from the flow engine.
- * @param value New value.
- */
-extern "C" void set_var_back_up_x(float value) {
-    SettingsDevice *s = ActiveSettings();
-    if (s != nullptr) {
-        s->backUpX = value;
-        SettingsScreenHandler::MarkDirty();
-    }
-}
-
-/**
- * @brief Read back down x for the flow engine.
- * @return The current value.
- */
-extern "C" float get_var_back_down_x() {
-    SettingsDevice *s = ActiveSettings();
-    return s != nullptr ? s->backDownX : 0.0f;
-}
-
-/**
- * @brief Write back down x from the flow engine.
- * @param value New value.
- */
-extern "C" void set_var_back_down_x(float value) {
-    SettingsDevice *s = ActiveSettings();
-    if (s != nullptr) {
-        s->backDownX = value;
-        SettingsScreenHandler::MarkDirty();
-    }
-}
-
-/**
- * @brief Read auto ride for the flow engine.
- * @return The current value.
- */
-extern "C" bool get_var_auto_ride() {
-    SettingsDevice *s = ActiveSettings();
-    return s != nullptr ? s->autoRide : false;
-}
-
-/**
- * @brief Write auto ride from the flow engine.
- * @param value New value.
- */
-extern "C" void set_var_auto_ride(bool value) {
-    SettingsDevice *s = ActiveSettings();
-    if (s != nullptr) {
-        s->autoRide = value;
-        SettingsScreenHandler::MarkDirty();
-    }
-}
-
-/**
- * @brief Read auto park for the flow engine.
- * @return The current value.
- */
-extern "C" bool get_var_auto_park() {
-    SettingsDevice *s = ActiveSettings();
-    return s != nullptr ? s->autoPark : false;
-}
-
-/**
- * @brief Write auto park from the flow engine.
- * @param value New value.
- */
-extern "C" void set_var_auto_park(bool value) {
-    SettingsDevice *s = ActiveSettings();
-    if (s != nullptr) {
-        s->autoPark = value;
-        SettingsScreenHandler::MarkDirty();
-    }
-}
-
-/**
- * @brief Read auto ride sec for the flow engine.
- * @return The current value.
- */
-extern "C" float get_var_auto_ride_sec() {
-    SettingsDevice *s = ActiveSettings();
-    return s != nullptr ? s->autoRideSec : 0.0f;
-}
-
-/**
- * @brief Write auto ride sec from the flow engine.
- * @param value New value.
- */
-extern "C" void set_var_auto_ride_sec(float value) {
-    SettingsDevice *s = ActiveSettings();
-    if (s != nullptr) {
-        s->autoRideSec = value;
-        SettingsScreenHandler::MarkDirty();
-    }
-}
-
-/**
- * @brief Read auto park sec for the flow engine.
- * @return The current value.
- */
-extern "C" float get_var_auto_park_sec() {
-    SettingsDevice *s = ActiveSettings();
-    return s != nullptr ? s->autoParkSec : 0.0f;
-}
-
-/**
- * @brief Write auto park sec from the flow engine.
- * @param value New value.
- */
-extern "C" void set_var_auto_park_sec(float value) {
-    SettingsDevice *s = ActiveSettings();
-    if (s != nullptr) {
-        s->autoParkSec = value;
-        SettingsScreenHandler::MarkDirty();
-    }
-}
-
-/**
- * @brief Read logging for the flow engine.
- * @return The current value.
- */
-extern "C" bool get_var_logging() {
-    SettingsDevice *s = ActiveSettings();
-    return s != nullptr ? s->logging : false;
-}
-
-/**
- * @brief Write logging from the flow engine.
- * @param value New value.
- */
-extern "C" void set_var_logging(bool value) {
-    SettingsDevice *s = ActiveSettings();
-    if (s != nullptr) {
-        s->logging = value;
-        SettingsScreenHandler::MarkDirty();
-    }
-}
-
-/**
- * @brief Read machine learning for the flow engine.
- * @return The current value.
- */
-extern "C" bool get_var_machine_learning() {
-    SettingsDevice *s = ActiveSettings();
-    return s != nullptr ? s->machineLearning : false;
-}
-
-/**
- * @brief Write machine learning from the flow engine.
- * @param value New value.
- */
-extern "C" void set_var_machine_learning(bool value) {
-    SettingsDevice *s = ActiveSettings();
-    if (s != nullptr) {
-        s->machineLearning = value;
-        SettingsScreenHandler::MarkDirty();
-    }
-}
-
-/**
- * @brief Read bluetooth for the flow engine.
- * @return The current value.
- */
-extern "C" bool get_var_bluetooth() {
-    SettingsDevice *s = ActiveSettings();
-    return s != nullptr ? s->bluetooth : false;
-}
-
-/**
- * @brief Write bluetooth from the flow engine.
- * @param value New value.
- */
-extern "C" void set_var_bluetooth(bool value) {
-    SettingsDevice *s = ActiveSettings();
-    if (s != nullptr) {
-        s->bluetooth = value;
-        SettingsScreenHandler::MarkDirty();
-    }
-}
-
-/**
- * @brief Read park duration sec for the flow engine.
- * @return The current value.
- */
-extern "C" float get_var_park_duration_sec() {
-    SettingsDevice *s = ActiveSettings();
-    return s != nullptr ? s->parkDuration : 0.0f;
-}
-
-/**
- * @brief Write park duration sec from the flow engine.
- * @param value New value.
- */
-extern "C" void set_var_park_duration_sec(float value) {
-    SettingsDevice *s = ActiveSettings();
-    if (s != nullptr) {
-        s->parkDuration = value;
-        SettingsScreenHandler::MarkDirty();
-    }
-}
-
-/**
  * @brief Shim for the generated action of the same name.
  * @param e LVGL event.
+ * @note The screen change used to hang off the flow chart after this action,
+ *       and it ran whether or not the action did anything, so it still does.
  */
 extern "C" void action_save_settings_pressed(lv_event_t *e) {
     SettingsScreenHandler *handler = SettingsScreenHandler::Active();
     if (handler == nullptr) {
         LOG_WARN("Save settings pressed with no handler");
-        return;
+    } else {
+        handler->OnSaveSettingsPressed(e);
     }
-    handler->OnSaveSettingsPressed(e);
+    loadScreen(SCREEN_ID_MAIN_SCREEN);
 }
 
 /**
- * @brief Shim for the generated action of the same name.
- * @param e LVGL event.
+ * @brief Leave the settings screens for the update screens.
+ * @param e Unused.
+ * @note The update screen sets itself up on load, so this only navigates.
  */
 extern "C" void action_settings_to_update_pressed(lv_event_t *e) {
-    SettingsScreenHandler *handler = SettingsScreenHandler::Active();
-    if (handler == nullptr) {
-        LOG_WARN("Settings to update pressed with no handler");
-        return;
-    }
-    handler->OnSettingsToUpdatePressed(e);
+    (void) e;
+    LOG_DEBUG("Settings to update pressed");
+    loadScreen(SCREEN_ID_UPDATE_SELECT_SCREEN);
 }
 
 /**
- * @brief Shim for the generated action of the same name.
- * @param e LVGL event.
+ * @brief Enter the settings screens from the main screen.
+ * @param e Unused.
+ * @note OnSettingsSelectLoadStart reloads from the card once the screen is
+ *       up, so this only navigates.
  */
 extern "C" void action_main_screen_to_settings_select_pressed(lv_event_t *e) {
-    SettingsScreenHandler *handler = SettingsScreenHandler::Active();
-    if (handler == nullptr) {
-        LOG_WARN("Main screen to settings pressed with no handler");
-        return;
-    }
-    handler->OnMainScreenToSettingsSelectPressed(e);
+    (void) e;
+    LOG_DEBUG("Main screen to settings pressed");
+    loadScreen(SCREEN_ID_SETTINGS_SELECT_SCREEN);
 }
 
 /**
@@ -707,4 +356,27 @@ extern "C" void action_settings_select_load_start(lv_event_t *e) {
         return;
     }
     handler->OnSettingsSelectLoadStart(e);
+}
+
+/**
+ * @brief Leave the settings screens for the main screen.
+ * @param e Unused.
+ * @note The flow chart changed screen here without calling anything, so this
+ *       exists only to give the button a native action to name.
+ */
+extern "C" void action_settings_select_to_main_pressed(lv_event_t *e) {
+    (void) e;
+    LOG_DEBUG("Settings select to main pressed");
+    loadScreen(SCREEN_ID_MAIN_SCREEN);
+}
+
+/**
+ * @brief Leave the settings screens for the calibration screen.
+ * @param e Unused.
+ * @note As above - the flow chart changed screen here on its own.
+ */
+extern "C" void action_settings_to_calibration_pressed(lv_event_t *e) {
+    (void) e;
+    LOG_DEBUG("Settings to calibration pressed");
+    loadScreen(SCREEN_ID_CALIBRATION_SCREEN);
 }

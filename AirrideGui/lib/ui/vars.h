@@ -54,6 +54,32 @@ extern bool get_var_bluetooth();
 extern void set_var_bluetooth(bool value);
 extern float get_var_park_duration_sec();
 extern void set_var_park_duration_sec(float value);
+extern const char *get_var_back_pressure_text();
+extern void set_var_back_pressure_text(const char *value);
+extern const char *get_var_front_pressure_text();
+extern void set_var_front_pressure_text(const char *value);
+extern const char *get_var_front_max_text();
+extern void set_var_front_max_text(const char *value);
+extern const char *get_var_ride_front_text();
+extern void set_var_ride_front_text(const char *value);
+extern const char *get_var_back_max_text();
+extern void set_var_back_max_text(const char *value);
+extern const char *get_var_ride_back_text();
+extern void set_var_ride_back_text(const char *value);
+extern const char *get_var_back_up_xtext();
+extern void set_var_back_up_xtext(const char *value);
+extern const char *get_var_front_up_xtext();
+extern void set_var_front_up_xtext(const char *value);
+extern const char *get_var_back_down_xtext();
+extern void set_var_back_down_xtext(const char *value);
+extern const char *get_var_front_down_xtext();
+extern void set_var_front_down_xtext(const char *value);
+extern const char *get_var_auto_park_sec_text();
+extern void set_var_auto_park_sec_text(const char *value);
+extern const char *get_var_auto_ride_sec_text();
+extern void set_var_auto_ride_sec_text(const char *value);
+extern const char *get_var_park_duration_sec_text();
+extern void set_var_park_duration_sec_text(const char *value);
 
 #ifdef __cplusplus
 }

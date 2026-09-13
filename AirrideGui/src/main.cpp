@@ -311,13 +311,15 @@ static void InitializeStorage()
  * @brief Start CAN and connect the screen handlers to it.
  * @warning Must run after InitializeStorage(): the main screen sends the
  *          settings to the controller as soon as it loads.
+ * @note Nothing subscribes here. Each screen takes its subscription on its
+ *       load start event and gives it back on unload start, so a screen
+ *       that is not up decodes nothing.
  */
 static void InitializeBus()
 {
     canBus.Setup(CAN_TX_PIN, CAN_RX_PIN, ECanBitRate::B500k);
     communication.SetQueues(canBus.GetRxQueue(), canBus.GetTxQueue());
 
-    mainScreenCommunication.Init();
     updateScreenHandler.Begin();
 
     otaCommunication.SetPrepareLocalCallback(FreeMemoryForSelfOta);
@@ -333,7 +335,7 @@ static void InitializeScreens()
     if (calibrationScreenHandler.CalibrationRequired())
     {
         Serial.println("No stored calibration, starting on the calibration screen");
-        eez_flow_set_screen(SCREEN_ID_CALIBRATION_SCREEN, LV_SCR_LOAD_ANIM_NONE, 0, 0);
+        loadScreenNoAnim(SCREEN_ID_CALIBRATION_SCREEN);
     }
 }
 
