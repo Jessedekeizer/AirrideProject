@@ -1,9 +1,6 @@
-/**
- * @file Settings1Vars.cpp
- * @brief Settings page 1 - the pressure ceilings and the ride heights.
- * @note One group per value: the label that shows it, and the two buttons
- *       that step it. See SettingsVars.h for the macros.
- */
+// Settings page 1 - the pressure ceilings and the ride heights. One group
+// per value: the label that shows it, and the two buttons that step it.
+// See SettingsVars.h for the macros.
 
 #include "SettingsVars.h"
 

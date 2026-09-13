@@ -1,10 +1,7 @@
-/**
- * @file Settings4Vars.cpp
- * @brief Settings page 4 - how long a park runs, and the three feature switches.
- * @note This page also carries the buttons into calibration and the update
- *       screens, but those only change screen, so they live with the rest of
- *       the navigation in SettingsScreenHandler.cpp.
- */
+// Settings page 4 - how long a park runs, and the three feature switches.
+// This page also carries the buttons into calibration and the update
+// screens, but those only change screen, so they live with the rest of the
+// navigation in SettingsScreenHandler.cpp.
 
 #include "SettingsVars.h"
 

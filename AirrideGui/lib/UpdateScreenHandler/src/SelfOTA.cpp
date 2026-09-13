@@ -1,8 +1,3 @@
-/**
- * @file SelfOTA.cpp
- * @brief Updating this display itself, over its own WiFi access point.
- */
-
 #include "SelfOTA.h"
 
 #include <ArduinoOTA.h>

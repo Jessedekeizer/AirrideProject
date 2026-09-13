@@ -1,10 +1,7 @@
-/**
- * @file Settings3Vars.cpp
- * @brief Settings page 3 - auto ride and auto park, and how long each waits.
- * @note The two switches have no label or buttons of their own. The generated
- *       tick reads the getter to set the switch, and the switch calls the
- *       setter when it is toggled. See SettingsVars.h for the macros.
- */
+// Settings page 3 - auto ride and auto park, and how long each waits. The
+// two switches have no label or buttons of their own: the generated tick
+// reads the getter to set the switch, and the switch calls the setter when
+// it is toggled. See SettingsVars.h for the macros.
 
 #include "SettingsVars.h"
 

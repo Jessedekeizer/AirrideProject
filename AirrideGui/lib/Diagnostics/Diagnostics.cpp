@@ -1,8 +1,3 @@
-/**
- * @file Diagnostics.cpp
- * @brief Heap reporting, compiled in only when DIAG_HEAP is set.
- */
-
 #include "Diagnostics.h"
 
 #if DIAG_HEAP

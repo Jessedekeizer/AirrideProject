@@ -1,8 +1,3 @@
-/**
- * @file OTACommunication.cpp
- * @brief The OTA half of the bus: who can be updated, and how it is going.
- */
-
 #include "OTACommunication.h"
 
 #include "Logger.h"
