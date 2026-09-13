@@ -68,7 +68,21 @@ void UpdateScreenHandler::OnOtaStatus(ECanNode node, const CANAirRideOTAStatus &
 }
 
 /**
- * @brief Empty the list, show the spinner and start a scan.
+ * @brief Empty the list and show the spinner before the screen paints.
+ * @param e Unused.
+ * @note Has to run here rather than on load: the fade in only ends once the
+ *       screen is up, so anything the last scan left would be on show for the
+ *       length of it.
+ */
+void UpdateScreenHandler::OnUpdateSelectScreenLoadStart(lv_event_t *e) {
+    (void) e;
+
+    _list.Prepare();
+    _list.BeginScan();
+}
+
+/**
+ * @brief Start a scan once the screen is up.
  * @param e Unused.
  */
 void UpdateScreenHandler::OnUpdateSelectScreenLoaded(lv_event_t *e) {
@@ -182,6 +196,17 @@ void UpdateScreenHandler::OnUpdateSelectToMain(lv_event_t *e) {
     _list.AbortScan();
     _runner.CancelDoneRescan();
     _list.ClearSelection();
+}
+
+/**
+ * @brief Shim for the generated action of the same name.
+ * @param e LVGL event.
+ */
+extern "C" void action_update_select_screen_load_start(lv_event_t *e) {
+    UpdateScreenHandler *handler = UpdateScreenHandler::Active();
+    if (handler != nullptr) {
+        handler->OnUpdateSelectScreenLoadStart(e);
+    }
 }
 
 /**

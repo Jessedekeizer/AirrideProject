@@ -60,6 +60,7 @@ extern void action_park_duration_sec_up(lv_event_t * e);
 extern void action_settings_to_calibration_pressed(lv_event_t * e);
 extern void action_main_screen_load_start(lv_event_t * e);
 extern void action_main_screen_unload_start(lv_event_t * e);
+extern void action_update_select_screen_load_start(lv_event_t * e);
 
 #ifdef __cplusplus
 }

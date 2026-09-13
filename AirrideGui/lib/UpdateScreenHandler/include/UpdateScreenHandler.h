@@ -26,6 +26,8 @@ public:
 
     void Begin();
 
+    void OnUpdateSelectScreenLoadStart(lv_event_t *e);
+
     void OnUpdateSelectScreenLoaded(lv_event_t *e);
 
     void OnNextUpdateItem(lv_event_t *e);

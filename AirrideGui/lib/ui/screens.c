@@ -442,6 +442,7 @@ void create_screen_update_select_screen() {
     lv_obj_set_pos(obj, 0, 0);
     lv_obj_set_size(obj, 320, 240);
     lv_obj_add_event_cb(obj, action_update_select_screen_loaded, LV_EVENT_SCREEN_LOADED, (void *)0);
+    lv_obj_add_event_cb(obj, action_update_select_screen_load_start, LV_EVENT_SCREEN_LOAD_START, (void *)0);
     {
         lv_obj_t *parent_obj = obj;
         {

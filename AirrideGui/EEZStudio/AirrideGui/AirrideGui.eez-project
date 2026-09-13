@@ -893,6 +893,15 @@
       "userProperties": [],
       "name": "MainScreenUnloadStart",
       "implementationType": "native"
+    },
+    {
+      "objID": "477b8b64-5843-480f-fb62-d063e5ae2379",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "UpdateSelectScreenLoadStart"
     }
   ],
   "userPages": [
@@ -2614,6 +2623,13 @@
               "eventName": "SCREEN_LOADED",
               "handlerType": "action",
               "action": "UpdateSelectScreenLoaded",
+              "userData": 0
+            },
+            {
+              "objID": "c4b68acb-38d4-4f38-b00a-263449bbf6a6",
+              "eventName": "SCREEN_LOAD_START",
+              "handlerType": "action",
+              "action": "UpdateSelectScreenLoadStart",
               "userData": 0
             }
           ],
