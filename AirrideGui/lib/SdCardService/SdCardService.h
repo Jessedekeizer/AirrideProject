@@ -34,4 +34,4 @@ private:
     bool ready;
 };
 
-#endif //SDCARDSERVICE_H
+#endif

@@ -31,7 +31,12 @@ void OTAState::OnOTAStart() {
     LOG_INFO("OTA update starting");
     if (!otaStateInstance) return;
     otaStateInstance->internalState = EOTAState::FLASHING;
-    otaStateInstance->otaCommunication.SendStatus(EOTAStatusType::UPDATE, EOTAUpdatePhase::FLASHING, PROGRESS_MAX_VALUE);
+    // Nothing has been written yet, so this is the start of the bar, not the
+    // end of it. It also has to be reset here rather than left at whatever the
+    // last update finished on: the counter only ever climbs, so a second update
+    // in one power cycle would otherwise report 100% from its first frame.
+    otaStateInstance->progress = PROGRESS_MIN_VALUE;
+    otaStateInstance->otaCommunication.SendStatus(EOTAStatusType::UPDATE, EOTAUpdatePhase::FLASHING, PROGRESS_MIN_VALUE);
     if (otaStateInstance->progressTimer)
         xTimerStart(otaStateInstance->progressTimer, 0);
 }

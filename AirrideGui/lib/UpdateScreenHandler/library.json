@@ -1,0 +1,16 @@
+{
+  "name": "UpdateScreenHandler",
+  "version": "0.0.0",
+  "dependencies": {
+    "CanId": "*",
+    "CanMessageIds": "*",
+    "CanMessages": "*",
+    "Communication": "*",
+    "Logger": "*",
+    "ui": "*"
+  },
+  "build": {
+    "srcDir": ".",
+    "includeDir": "include"
+  }
+}

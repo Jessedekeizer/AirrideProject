@@ -1,9 +1,17 @@
 #include "LogStorage.h"
 #include "Logger.h"
+/**
+ * @brief Bind to the card.
+ */
 LogStorage::LogStorage(SdCardService &sdCardService) : sdCardService(sdCardService)
 {
 }
 
+/**
+ * @brief Append one line to the log file, if the card is ready.
+ * @param log The line to write.
+ * @warning Blocking; costs a frame when called from the UI thread.
+ */
 void LogStorage::WriteLog(String log)
 {
     if (!sdCardService.IsReady())
@@ -15,7 +23,6 @@ void LogStorage::WriteLog(String log)
         LOG_DEBUG("Writing log to file:", log);
         file.println(log);
 
-        // Close the file
         file.close();
     }
 }

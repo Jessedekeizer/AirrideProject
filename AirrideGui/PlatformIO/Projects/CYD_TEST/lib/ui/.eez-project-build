@@ -1,0 +1,19 @@
+{
+  "files": [
+    "actions.h",
+    "eez-flow.cpp",
+    "eez-flow.h",
+    "fonts.h",
+    "images.c",
+    "images.h",
+    "images/ui_image_scirocco.c",
+    "screens.c",
+    "screens.h",
+    "structs.h",
+    "styles.c",
+    "styles.h",
+    "ui.c",
+    "ui.h",
+    "vars.h"
+  ]
+}

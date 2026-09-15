@@ -12,4 +12,4 @@ private:
     SdCardService &sdCardService;
 };
 
-#endif //LOGSTORAGE_H
+#endif

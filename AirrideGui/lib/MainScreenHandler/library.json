@@ -1,0 +1,19 @@
+{
+  "name": "MainScreenHandler",
+  "version": "0.0.0",
+  "dependencies": {
+    "CanId": "*",
+    "CanMessageIds": "*",
+    "CanMessages": "*",
+    "Communication": "*",
+    "Logger": "*",
+    "SdCardService": "*",
+    "SdStorage": "*",
+    "SettingsStruct": "*",
+    "ui": "*"
+  },
+  "build": {
+    "srcDir": ".",
+    "includeDir": "include"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "CalibrationScreenHandler",
+  "version": "0.0.0",
+  "dependencies": {
+    "Logger": "*",
+    "SdCardService": "*",
+    "SdStorage": "*",
+    "SettingsStruct": "*",
+    "ui": "*",
+    "XPT2046_Bitbang_Slim": "*"
+  },
+  "build": {
+    "srcDir": ".",
+    "includeDir": "include"
+  }
+}
