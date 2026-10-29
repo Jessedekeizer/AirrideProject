@@ -99,7 +99,7 @@
       "imageExportMode": "source",
       "fontExportMode": "source",
       "fileSystemPath": "",
-      "lvglInclude": "Lvgl.h",
+      "lvglInclude": "lvgl.h",
       "screensLifetimeSupport": true,
       "useDockerDesktop": false,
       "generateSourceCodeForEezFramework": true,
