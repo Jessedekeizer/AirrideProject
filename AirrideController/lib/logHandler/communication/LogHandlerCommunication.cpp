@@ -1,5 +1,5 @@
 #include "LogHandlerCommunication.h"
-#include "CANMessages.h"
+#include "CanMessages.h"
 
 LogHandlerCommunication::LogHandlerCommunication(Communication &communication) : communication(communication) {
 }

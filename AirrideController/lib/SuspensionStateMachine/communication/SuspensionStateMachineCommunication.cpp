@@ -1,5 +1,5 @@
 #include "SuspensionStateMachineCommunication.h"
-#include "CANMessages.h"
+#include "CanMessages.h"
 #include "EState.h"
 #include "Logger.h"
 
